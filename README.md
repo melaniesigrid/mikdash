@@ -1,11 +1,11 @@
 # מִקְדָּשׁ · MIKDASH
 
 **An explorable 3D Beit HaMikdash — the prophetic floor plan of Yechezkel 40–48
-rendered in the grandeur of Herod's white-stone expansion, with sixteen hidden
+rendered in the grandeur of a monumental white-stone precinct, with sixteen hidden
 wonders drawn from Tanach, Talmud, and archaeology.**
 
-> "מי שלא ראה בנין הורדוס לא ראה בנין נאה מימיו" — Bava Batra 4a
-> "One who has not seen Herod's building has never seen a beautiful building in his life."
+> "מִצִּיּוֹן מִכְלַל יֹפִי אֱלֹהִים הוֹפִיעַ" — Tehillim 50:2
+> "Out of Zion, the perfection of beauty, God shone forth."
 
 This README is the working design document. It documents everything a
 contributor (human or AI) needs to continue building: the coordinate system,
@@ -26,7 +26,7 @@ and fire are GLSL shaders).
 | System | Status | Notes |
 |---|---|---|
 | Yechezkel floor plan (1 unit = 1 amah) | ✅ | 500×500 court, 3 gates, no west gate, sealed east gate |
-| Herodian styling | ✅ | Drafted-margin ashlar, Royal Stoa, Hulda-style stairs, pilastered retaining walls, gold-plated Ulam facade, sea-wave marble, kalya orev spikes |
+| Monumental styling | ✅ | Drafted-margin ashlar, Royal Stoa, Hulda-style stairs, pilastered retaining walls, gold-plated Ulam facade, sea-wave marble, kalya orev spikes |
 | GLSL sky (day ⇄ night timelapse) | ✅ | Sun/moon arcs, hashed twinkling stars, milky band, dithering |
 | GLSL fire (altar) | ✅ | fbm-noise vertex displacement + scrolling body turbulence, additive particles, smoke sprites, decay-2 point light |
 | First-person walk mode | ✅ | WASD/arrows + drag-look, Shift to run, mobile dual-thumb controls, AABB collision, terrain height function |

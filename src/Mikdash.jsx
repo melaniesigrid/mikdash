@@ -6,7 +6,7 @@ import * as THREE from "three";
    בֵּית הַמִּקְדָּשׁ — MIKDASH: an explorable Temple
    v3.1 — "The Sound of the Courts"
 
-   · Yechezkel 40–48 floor plan at 1 unit = 1 amah, in Herodian white stone
+   · Yechezkel 40–48 floor plan at 1 unit = 1 amah, in monumental white stone
    · GLSL sky (day ⇄ night timelapse), GLSL noise-displaced altar fire
    · First-person walk mode with collision + ground-height terrain
    · Kohanim walking the inner court, Levites swaying on the fifteen steps
@@ -30,8 +30,8 @@ const DISCOVERIES = [
   { kind: "rimon", title: "קנה המדה — The Measuring Reed", text: "The vision arrives as a blueprint: a man 'whose appearance was like bronze' measures every wall with a reed of six long cubits (40:5). The Vilna Gaon wrote treatises reconstructing the plan — and the Midrash promises: one who studies the Temple's design, it is as if he built it.", hint: "Among the northern columns, something measures you back." },
   { kind: "rimon", title: "שכינה במערב — No Western Gate", text: "Gates open east, north, and south — never west. 'The Shechinah is in the west' (Bava Batra 25a): the wall behind the Holy of Holies stays unbroken. Nothing passes behind the Presence.", hint: "Along the one wall where no gate dares open." },
   { kind: "rimon", title: "אש מן השמים — Built by Fire or by Hands?", text: "Rambam (Hilchot Melachim 11) rules that Mashiach builds the final Temple. Rashi and Midrash Tanchuma teach it descends whole, built of fire, from Heaven. The chassidic masters reconcile them: we build from below, and Heaven completes what our hands begin.", hint: "The highest gold guards the smallest silver." },
-  { kind: "rimon", title: "בית תפילה לכל העמים — A House for All Nations", text: "These courts span 500×500 amot — far beyond even Herod's platform, itself the largest sacred precinct of the ancient world. Yeshayahu 56:7: 'My House shall be called a house of prayer for all nations.' The enlarged floor plan is that promise drawn in stone.", hint: "A kitchen court in the far southwest keeps a secret." },
-  { kind: "rimon", title: "גלי הים — Marble Like the Waves of the Sea", text: "Bava Batra 4a: Herod built the Temple of stones of blue-green and white marble. He wished to plate it all in gold — the Sages told him: leave it, it is more beautiful as it is, for it looks like the waves of the sea. And Sukkah 51b: 'One who has not seen it has never seen a magnificent building.'", hint: "Within the royal porch of a hundred columns." },
+  { kind: "rimon", title: "בית תפילה לכל העמים — A House for All Nations", text: "These courts span 500×500 amot — far beyond the largest sacred precinct the ancient world ever raised. Yeshayahu 56:7: 'My House shall be called a house of prayer for all nations.' The enlarged floor plan is that promise drawn in stone.", hint: "A kitchen court in the far southwest keeps a secret." },
+  { kind: "rimon", title: "גלי הים — Marble Like the Waves of the Sea", text: "Bava Batra 4a: the Temple was built of stones of blue-green and white marble. Its builder wished to plate it all in gold — the Sages told him: leave it, it is more beautiful as it is, for it looks like the waves of the sea. And Sukkah 51b: 'One who has not seen it has never seen a magnificent building.'", hint: "Within the royal porch of a hundred columns." },
   { kind: "wonder", title: "השועל של רבי עקיבא — Rabbi Akiva's Fox", text: "Makkot 24b: the sages saw a fox slip out of the ruined Holy of Holies and wept — but Rabbi Akiva laughed. 'Just as Uriah's prophecy of ruin came true, so will Zechariah's: elders will yet sit in the streets of Jerusalem.' They answered: 'Akiva, you have comforted us.' Here the fox walks outside the walls — the ruin behind him, the promise standing before him.", hint: "Something small and russet waits below the southern stairs." },
   { kind: "wonder", title: "כינור של לויים — The Harp of the Levites", text: "On the fifteen steps between the courts the Levites stood with harps, lyres and cymbals — one step for each Shir HaMa'alot. David's kinor, say Chazal, hung above his bed and played by itself when the north wind moved through it at midnight (Berachot 3b). Touch it and it remembers its song.", hint: "An instrument rests where the singers stand — it still remembers." },
   { kind: "wonder", title: "שופר גדול — The Great Shofar", text: "“And it shall be on that day: a great shofar will be sounded, and the lost shall come from Assyria and the outcasts from Egypt, and they will bow to Hashem on the holy mountain in Jerusalem” (Yeshayahu 27:13). This is the shofar of ingathering — the sound before the silence of the Kodesh.", hint: "A ram's horn waits on marble near the southern gate. Dare to sound it." },
@@ -1915,7 +1915,7 @@ export default function Mikdash() {
           בֵּית הַמִּקְדָּשׁ
         </div>
         <div style={{ fontSize: "clamp(11px, 1.5vw, 15px)", fontStyle: "italic", color: night ? "#c9bd98" : "#6b5c3d", letterSpacing: ".24em", textTransform: "uppercase", marginTop: 2, textShadow: night ? "0 1px 10px rgba(0,0,0,.6)" : "none" }}>
-          The Vision of Yechezkel · In the Grandeur of Herod's Stone
+          The Vision of Yechezkel · In the Grandeur of White Stone and Gold
         </div>
       </div>
 
@@ -1985,7 +1985,7 @@ export default function Mikdash() {
         <div className="panel" style={{ position: "absolute", bottom: 56, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, rgba(45,35,14,.95), rgba(76,58,20,.95))", border: "1px solid #d4a437", borderRadius: 16, padding: "18px 28px", color: "#ffe9ad", textAlign: "center", maxWidth: 500, boxShadow: "0 12px 44px rgba(0,0,0,.45)" }}>
           <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21, fontWeight: 700 }}>כל הכבוד — all sixteen wonders found.</div>
           <div style={{ fontSize: 15.5, marginTop: 6, fontStyle: "italic", lineHeight: 1.5 }}>
-            “One who has not seen Herod's building has never seen a beautiful building” (Bava Batra 4a) · “Greater shall be the glory of this latter House than the former, and in this place I will grant peace” (Chaggai 2:9)
+            “Out of Zion, the perfection of beauty, God shone forth” (Tehillim 50:2) · “Greater shall be the glory of this latter House than the former, and in this place I will grant peace” (Chaggai 2:9)
           </div>
         </div>
       )}

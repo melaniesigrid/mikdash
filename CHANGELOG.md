@@ -16,6 +16,6 @@
 
 ## v3 — "The Living Courts" (0.3.0)
 
-- Yechezkel 40–48 floor plan in Herodian white stone, GLSL sky and altar fire,
+- Yechezkel 40–48 floor plan in monumental white stone, GLSL sky and altar fire,
   first-person walk mode, animated kohanim and Levites, sixteen hidden wonders
   as a sequential quest, persistent progress, four WebAudio event sounds.
