@@ -4,7 +4,7 @@ import * as THREE from "three";
 /*
   ═══════════════════════════════════════════════════════════════════════════
    בֵּית הַמִּקְדָּשׁ — MIKDASH: an explorable Temple
-   v3 — "The Living Courts"
+   v3.1 — "The Sound of the Courts"
 
    · Yechezkel 40–48 floor plan at 1 unit = 1 amah, in Herodian white stone
    · GLSL sky (day ⇄ night timelapse), GLSL noise-displaced altar fire
@@ -12,6 +12,8 @@ import * as THREE from "three";
    · Kohanim walking the inner court, Levites swaying on the fifteen steps
    · Sixteen hidden wonders (8 silver rimonim + 8 living wonders) that
      unlock IN SEQUENCE as a quest — with free-explore toggle
+   · A synthesized ambient bed — wind over the mountain, the fire of the
+     ma'aracha, the Levites' ascent — mixed by where the eye stands
    · Progress persists across sessions via window.storage
 
    See README.md in this repository for the full design document.
@@ -274,12 +276,14 @@ export default function Mikdash() {
   const [found, setFound] = useState([]);
   const [fact, setFact] = useState(null);
   const [night, setNight] = useState(false);
+  const [sound, setSound] = useState(true);
   const [hints, setHints] = useState(false);
   const [questMode, setQuestMode] = useState(true);
   const [walkMode, setWalkMode] = useState(false);
   const [toast, setToast] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [storageReady, setStorageReady] = useState(false);
+  const [noWebGL, setNoWebGL] = useState(false);
 
   const foundRef = useRef(found); foundRef.current = found;
   const questRef = useRef(questMode); questRef.current = questMode;
@@ -309,6 +313,7 @@ export default function Mikdash() {
             const data = JSON.parse(r.value);
             if (Array.isArray(data.found)) setFound(data.found.filter((n) => n >= 0 && n < DISCOVERIES.length));
             if (typeof data.night === "boolean") setNight(data.night);
+            if (typeof data.sound === "boolean") setSound(data.sound);
           }
         }
       } catch (err) { /* first visit — nothing saved yet */ }
@@ -317,14 +322,22 @@ export default function Mikdash() {
   }, []);
   useEffect(() => {
     if (!storageReady || !window.storage) return;
-    window.storage.set(STORE_KEY, JSON.stringify({ found, night })).catch(() => {});
-  }, [found, night, storageReady]);
+    window.storage.set(STORE_KEY, JSON.stringify({ found, night, sound })).catch(() => {});
+  }, [found, night, sound, storageReady]);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+    } catch (err) {
+      // No WebGL: an old device, a disabled setting, a headless browser. The
+      // House cannot be drawn — say so rather than leaving a white page.
+      setNoWebGL(true);
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.shadowMap.enabled = true;
@@ -1194,7 +1207,14 @@ export default function Mikdash() {
       if (audioCtx.state === "suspended") audioCtx.resume();
       return audioCtx;
     };
+    // The ambient bed and every event sound answer to one switch.
+    const amb = {
+      on: true, built: false, buf: null,
+      master: null, wind: null, windF: null, fire: null, fireGain: null,
+      songBus: null, song: null, songAt: 0, crackAt: 0,
+    };
     const playShofar = () => {
+      if (!amb.on) return;
       const ctx = ensureAudio(); const t0 = ctx.currentTime;
       const osc = ctx.createOscillator(), osc2 = ctx.createOscillator();
       const gain = ctx.createGain(), filt = ctx.createBiquadFilter();
@@ -1214,6 +1234,7 @@ export default function Mikdash() {
       osc.start(t0); osc2.start(t0); osc.stop(t0 + 2.2); osc2.stop(t0 + 2.2);
     };
     const playHarp = () => {
+      if (!amb.on) return;
       const ctx = ensureAudio();
       const notes = [293.66, 311.13, 369.99, 392.0, 440.0, 587.33, 440.0, 369.99, 293.66];
       notes.forEach((f, i) => {
@@ -1233,6 +1254,7 @@ export default function Mikdash() {
       });
     };
     const playTrumpet = () => {
+      if (!amb.on) return;
       const ctx = ensureAudio();
       [[392, 0, 0.5], [523.25, 0.45, 0.9], [392, 1.3, 0.35], [523.25, 1.6, 1.3]].forEach(([f, dt, dur]) => {
         const t0 = ctx.currentTime + dt;
@@ -1248,6 +1270,7 @@ export default function Mikdash() {
       });
     };
     const playChime = () => {
+      if (!amb.on) return;
       const ctx = ensureAudio();
       [660, 990, 1320].forEach((f, i) => {
         const t0 = ctx.currentTime + i * 0.12;
@@ -1258,6 +1281,127 @@ export default function Mikdash() {
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2);
         o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 2.1);
       });
+    };
+
+    // ═══════════ Ambient bed: wind, the ma'aracha, the Levites' song ═══════════
+    // Three synthesized voices mixed every frame by where the eye stands: wind
+    // over the mountain (everywhere, stronger high up and at night), the fire
+    // of the ma'aracha (near the altar), and the ascent of the Levites carried
+    // across the courts (near the fifteen steps). Built lazily — a browser
+    // holds an AudioContext suspended until the first gesture, so the House is
+    // silent until the visitor touches it.
+    const ALTAR_POS = new THREE.Vector3(AX, TOP + 20, 0);
+    const STEPS_POS = new THREE.Vector3(IC_E + 18, IC_H, 0);
+
+    // Brown noise — integrated white noise. Wind and fire share this spectrum;
+    // filtering alone separates the mountain air from the hearth.
+    const noiseBuf = (ctx, secs) => {
+      const b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * secs), ctx.sampleRate);
+      const d = b.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < d.length; i++) {
+        last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+        d[i] = last * 3.4;
+      }
+      return b;
+    };
+    const buildAmbience = () => {
+      if (amb.built) return;
+      const ctx = ensureAudio();
+      amb.built = true;
+      amb.buf = noiseBuf(ctx, 6);
+      amb.master = ctx.createGain();
+      amb.master.gain.value = amb.on ? 1 : 0;
+      amb.master.connect(ctx.destination);
+
+      const loop = (dest) => {
+        const s = ctx.createBufferSource();
+        s.buffer = amb.buf; s.loop = true; s.connect(dest); s.start();
+        return s;
+      };
+
+      // wind: lowpassed noise whose cutoff breathes with the gusts
+      amb.windF = ctx.createBiquadFilter();
+      amb.windF.type = "lowpass"; amb.windF.frequency.value = 420; amb.windF.Q.value = 0.9;
+      amb.wind = ctx.createGain(); amb.wind.gain.value = 0;
+      amb.windF.connect(amb.wind); amb.wind.connect(amb.master);
+      loop(amb.windF);
+
+      // fire: the same noise band-limited to the roar of a hearth
+      const fireF = ctx.createBiquadFilter();
+      fireF.type = "bandpass"; fireF.frequency.value = 320; fireF.Q.value = 0.55;
+      amb.fireGain = ctx.createGain(); amb.fireGain.gain.value = 0;
+      fireF.connect(amb.fireGain); amb.fireGain.connect(amb.master);
+      loop(fireF);
+
+      // song: softened and set back — a short feedback delay reads as the
+      // distance of stone courts between the singer and the ear
+      amb.songBus = ctx.createBiquadFilter();
+      amb.songBus.type = "lowpass"; amb.songBus.frequency.value = 1100;
+      amb.song = ctx.createGain(); amb.song.gain.value = 0;
+      const dl = ctx.createDelay(1), fb = ctx.createGain();
+      dl.delayTime.value = 0.34; fb.gain.value = 0.3;
+      dl.connect(fb); fb.connect(dl);
+      amb.songBus.connect(amb.song); amb.songBus.connect(dl); dl.connect(amb.song);
+      amb.song.connect(amb.master);
+    };
+
+    // Freygish (Ahava Raba) on D, two octaves — the mode the harp already
+    // sings in. Phrases only ever ascend: fifteen steps, Shir HaMa'alot.
+    const SONG_SCALE = [146.83, 155.56, 185.0, 196.0, 220.0, 233.08, 261.63, 293.66, 311.13, 369.99, 392.0];
+    const singPhrase = (ctx) => {
+      const start = ctx.currentTime + 0.05;
+      const n = 5 + Math.floor(Math.random() * 3);
+      const root = Math.floor(Math.random() * 3);
+      for (let i = 0; i < n; i++) {
+        const step = Math.min(SONG_SCALE.length - 1, root + i + (i === n - 1 ? 1 : 0));
+        const t0 = start + i * 0.62;
+        // two slightly detuned voices plus an octave — a choir, not a synth
+        [[1, "triangle", 0.075], [1.006, "triangle", 0.06], [2, "sine", 0.026]].forEach(([mul, type, peak]) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = type; o.frequency.value = SONG_SCALE[step] * mul;
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(peak, t0 + 0.22);
+          g.gain.setValueAtTime(peak, t0 + 0.4);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.95);
+          o.connect(g); g.connect(amb.songBus); o.start(t0); o.stop(t0 + 1);
+        });
+      }
+    };
+
+    const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const glide = (node, target, dt) => { node.gain.value += (target - node.gain.value) * Math.min(1, dt * 2.2); };
+    // t = seconds since load, nightAmt = the eased day⇄night scalar
+    const mixAmbience = (t, dt, nightAmt) => {
+      if (!amb.built || !amb.on) return;
+      const ctx = audioCtx;
+      const p = camera.position;
+
+      const gust = 0.55 + 0.45 * Math.sin(t * 0.11) * Math.sin(t * 0.043 + 1.7);
+      const alt = clamp01((p.y - 10) / 240);
+      amb.windF.frequency.value = 250 + gust * 400;
+      glide(amb.wind, (0.05 + alt * 0.09) * (0.75 + 0.45 * nightAmt) * gust, dt);
+
+      const fireAmt = clamp01(1 - (p.distanceTo(ALTAR_POS) - 24) / 130);
+      glide(amb.fireGain, 0.19 * fireAmt, dt);
+      if (fireAmt > 0.05 && t > amb.crackAt) {
+        amb.crackAt = t + 0.06 + Math.random() * (0.45 / fireAmt);
+        const t0 = ctx.currentTime;
+        const s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+        s.buffer = amb.buf; s.playbackRate.value = 2 + Math.random() * 2.5;
+        f.type = "bandpass"; f.frequency.value = 900 + Math.random() * 2600; f.Q.value = 5;
+        g.gain.setValueAtTime(0.5 * fireAmt, t0);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+        s.connect(f); f.connect(g); g.connect(amb.master);
+        s.start(t0, Math.random() * 5, 0.12); s.stop(t0 + 0.13);
+      }
+
+      const songAmt = clamp01(1 - (p.distanceTo(STEPS_POS) - 30) / 200);
+      glide(amb.song, songAmt, dt);
+      if (songAmt > 0.07 && t > amb.songAt) {
+        amb.songAt = t + 7 + Math.random() * 9;
+        singPhrase(ctx);
+      }
     };
 
     // ═══════════ Terrain height + collision for walk mode ═══════════
@@ -1339,6 +1483,7 @@ export default function Mikdash() {
     const pxOf = (e) => (e.touches ? e.touches[0] : e.changedTouches ? e.changedTouches[0] : e);
 
     const onKey = (e, down) => {
+      if (down && amb.on) buildAmbience();
       player.keys[e.code] = down;
       if (down && ["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
     };
@@ -1347,6 +1492,7 @@ export default function Mikdash() {
     window.addEventListener("keyup", ku);
 
     const onDown = (e) => {
+      if (amb.on) buildAmbience();
       const p = pxOf(e);
       moved = 0;
       if (walkRef.current && e.touches) {
@@ -1459,6 +1605,11 @@ export default function Mikdash() {
     // ═══════════ Environment cycle ═══════════
     const env = { cur: 0, target: 0 };
     apiRef.current.setNight = (n) => { env.target = n ? 1 : 0; };
+    apiRef.current.setSound = (on) => {
+      amb.on = on;
+      if (on) buildAmbience();
+      if (amb.master) amb.master.gain.value = on ? 1 : 0;
+    };
     apiRef.current.markFound = (arr) => {
       arr.forEach((id) => {
         if (id <= 7) {
@@ -1670,6 +1821,8 @@ export default function Mikdash() {
         }
       });
 
+      mixAmbience(t, dt, e2);
+
       doves.forEach((d) => {
         d.userData.a += d.userData.sp * 0.016;
         const { a, r, h, wing } = d.userData;
@@ -1701,6 +1854,7 @@ export default function Mikdash() {
       window.removeEventListener("keyup", ku);
       el.remove();
       renderer.dispose();
+      audioCtx?.close();
     };
   }, []);
 
@@ -1713,6 +1867,14 @@ export default function Mikdash() {
     apiRef.current.toast = showToast;
   }, [showToast]);
   useEffect(() => { apiRef.current.setNight?.(night); }, [night]);
+  // Skip the mount call when sound is already on: building the bed here would
+  // generate the noise buffer during first paint and open an AudioContext the
+  // browser then refuses to start. The first gesture builds it instead.
+  const soundInited = useRef(false);
+  useEffect(() => {
+    if (!soundInited.current) { soundInited.current = true; if (sound) return; }
+    apiRef.current.setSound?.(sound);
+  }, [sound]);
   useEffect(() => {
     // re-apply persisted finds visually once scene + storage both ready
     if (loaded && storageReady) apiRef.current.markFound?.(found);
@@ -1735,6 +1897,18 @@ export default function Mikdash() {
       `}</style>
 
       <div ref={mountRef} style={{ position: "absolute", inset: 0, cursor: walkMode ? "crosshair" : "grab" }} />
+
+      {noWebGL && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 28, textAlign: "center", color: "#eaddb4", background: "radial-gradient(circle at 50% 40%, #16203c, #070c18)" }}>
+          <div style={{ maxWidth: 480 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 40, color: "#ffd97a", marginBottom: 14 }}>מִקְדָּשׁ</div>
+            <div style={{ fontSize: 18, fontStyle: "italic", lineHeight: 1.6 }}>
+              This browser cannot open a WebGL context, so the House cannot be drawn.
+              Try a current desktop or mobile browser with hardware acceleration enabled.
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ position: "absolute", top: 18, left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
         <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: "clamp(24px, 4vw, 42px)", fontWeight: 900, color: night ? "#f2e4bd" : "#3b3220", letterSpacing: ".02em", textShadow: night ? "0 2px 24px rgba(0,0,0,.7)" : "0 2px 18px rgba(255,255,255,.85)" }}>
@@ -1767,6 +1941,9 @@ export default function Mikdash() {
         </button>
         <button className="chip" onClick={() => setNight((n) => !n)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: night ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "linear-gradient(135deg,#1a2440,#2c3a63)", color: night ? "#4a3a18" : "#e8ecf7", border: "1px solid rgba(212,164,55,.55)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {night ? "☀ יום" : "☾ לילה"}
+        </button>
+        <button className="chip" onClick={() => setSound((s) => !s)} title={sound ? "Silence the courts" : "Let the courts sound"} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: sound ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: sound ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+          {sound ? "♪ קול" : "⃠ דממה"}
         </button>
         <button className="chip" onClick={() => setQuestMode((q) => !q)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {questMode ? "מסע · Quest ✓" : "Free explore"}
@@ -1830,7 +2007,7 @@ export default function Mikdash() {
         </div>
       )}
 
-      {!loaded && (
+      {!loaded && !noWebGL && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#c9bd98", fontStyle: "italic", fontSize: 18 }}>
           Raising the white stone mountain…
         </div>

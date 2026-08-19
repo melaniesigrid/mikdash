@@ -14,7 +14,7 @@ and the roadmap toward a full game.
 
 ---
 
-## Current state (v3 — "The Living Courts")
+## Current state (v3.1 — "The Sound of the Courts")
 
 One self-contained React component: `Mikdash.jsx` (React 18 + Three.js r128,
 no other dependencies, no assets — every texture is generated procedurally at
@@ -33,7 +33,9 @@ and fire are GLSL shaders).
 | Animated figures | ✅ | 8 kohanim walking waypoint loops in the azarah; 8 Levites swaying on the fifteen steps |
 | Sixteen wonders quest | ✅ | Sequential unlock with toast guidance + free-explore toggle |
 | Persistent progress | ✅ | `window.storage` key `mikdash-progress-v3` (found list + day/night pref) |
-| WebAudio | ✅ | Shofar tekiah, freygish harp arpeggio, Shabbat trumpet fanfare, ketoret chime |
+| WebAudio events | ✅ | Shofar tekiah, freygish harp arpeggio, Shabbat trumpet fanfare, ketoret chime |
+| Ambient bed | ✅ | Wind (height + night), fire of the ma'aracha (near the altar), Levites' ascent (near the fifteen steps) — mixed per frame, one ♪ / ⃠ switch silences everything |
+| Graceful no-WebGL | ✅ | A device that cannot open a GL context gets a Hebrew notice, not a white page |
 
 ---
 
@@ -110,7 +112,15 @@ next tier would be 24).
    `userData.id ∈ [0..15]`. Picking walks up the parent chain (`findId`).
    Quest gating lives in `collect(id)`.
 10. **Audio** — lazily created `AudioContext`; `playShofar`, `playHarp`,
-    `playTrumpet`, `playChime`.
+    `playTrumpet`, `playChime`. Then the **ambient bed**: `buildAmbience()`
+    wires a persistent graph (brown-noise loop → lowpass = wind; the same
+    loop → bandpass = fire; a delayed, lowpassed bus = song), and
+    `mixAmbience(t, dt, nightAmt)` sets the three gains every frame from
+    `camera.position`. Distances are measured to `ALTAR_POS` and `STEPS_POS`.
+    Nothing sounds before the first gesture — browsers hold an
+    `AudioContext` suspended until then, so `buildAmbience()` is called from
+    `onDown` and `onKey`. `amb.on` is the single mute: it gates the four
+    event sounds and zeroes `amb.master`.
 11. **Walk mode** — `player` state, `groundHeight`, `resolveCollisions`,
     keyboard + dual-thumb touch input.
 12. **Render loop** — environment easing, fire, wonders idle animation
@@ -142,6 +152,11 @@ Note: written against three r128 API (works fine on newer, but
 `CapsuleGeometry` was intentionally avoided and controls are custom — no
 `OrbitControls` import needed).
 
+**Deployed:** every push to `main` builds and publishes to GitHub Pages via
+`.github/workflows/deploy.yml`. Pages serves the site under the repository
+name, so `vite.config.js` sets `base: "/mikdash/"` for builds only — rename the
+repo and that string has to move with it, or every asset 404s.
+
 ## Roadmap
 
 **Next (v4):**
@@ -150,7 +165,7 @@ Note: written against three r128 API (works fine on newer, but
       of the ma'aracha → ketoret → menorah), learning each station.
 - [ ] Interior of the Heichal (currently sealed): shulchan, menorah, incense
       altar, the paroches; entry permitted only in quest order.
-- [ ] Ambient audio bed: wind, distant Levite song (generated), fire crackle.
+- [x] Ambient audio bed: wind, distant Levite song (generated), fire crackle. *(v3.1)*
 - [ ] Shadow/perf pass: merge static geometry with `BufferGeometryUtils`,
       instanced columns, LOD for olive trees.
 
