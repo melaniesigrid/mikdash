@@ -1551,6 +1551,15 @@ export default function Mikdash() {
     // so a tree's shadow stays put while the tree moves. Invisible from the
     // orbit camera at this sun angle; it would show from directly beneath one.
     const windU = { value: 0 };
+    // The same two sines the shader runs, evaluated in JS. The wind you hear
+    // and the wind you watch were previously two unrelated clocks — the trees
+    // bent on uWind while the bed swelled on sin(t*0.11)*sin(t*0.043), so a
+    // visitor standing among the palms heard a lull exactly as the fronds
+    // threw themselves over. One signal now, sampled where the camera stands.
+    const gustAt = (x, z, tt) => {
+      const ph = x * 0.021 + z * 0.016;
+      return Math.sin(tt * 0.85 + ph) * 0.62 + Math.sin(tt * 1.63 + ph * 2.3) * 0.38;
+    };
     const windward = (mat, amp) => {
       mat.onBeforeCompile = (shader) => {
         shader.uniforms.uWind = windU;
@@ -2513,7 +2522,7 @@ export default function Mikdash() {
     for (let l = 0; l < 4; l++) cyl(0.35, 0.4, 2.4, 6, foxFur, -1.6 + (l % 2) * 3.4, 1.2, l < 2 ? -1 : 1, fox);
     fox.position.set(70, LAND_Y, HALF + 90);
     fox.rotation.y = -0.7;
-    fox.userData = { id: 8, tail };
+    fox.userData = { id: 8, tail, head: fh, snout, face: -0.7, home: new THREE.Vector3(70, LAND_Y, HALF + 90) };
     scene.add(fox);
     clickables.push(fox);
 
@@ -3075,6 +3084,45 @@ export default function Mikdash() {
       doves.push(dove);
     }
 
+    // ═══════════ סִיס — the swifts ═══════════
+    //
+    // Not a flourish: the common swifts of Jerusalem nest in the crevices of
+    // the Western Wall's stones and have done for as long as anyone has
+    // counted. They arrive back from Africa each year toward the end of the
+    // winter and leave by early summer, and the city marks the return. Nothing
+    // else in this scene says "this stone is old and lived in" as fast as
+    // birds that treat it as a cliff.
+    //
+    // They fly at dusk and at first light, in fast screaming parties around
+    // walls — never at midday — so they are tied to the same rake term the
+    // dust uses, and the whole flock is switched off when the sun is high.
+    const swiftMat = new THREE.MeshStandardMaterial({ color: 0x151109, roughness: 1, transparent: true, opacity: 0 });
+    const swiftFlock = new THREE.Group();
+    swiftFlock.visible = false;
+    const swifts = [];
+    for (let i = 0; i < 18; i++) {
+      const g = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.SphereGeometry(0.85, 6, 5), swiftMat);
+      body.scale.set(2.4, 0.62, 0.62);
+      g.add(body);
+      // Swept back hard — the scythe outline is the whole identification, and
+      // at this distance the silhouette is all anyone gets.
+      for (const sgn of [-1, 1]) {
+        const wing = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 0.85), swiftMat);
+        wing.position.set(-1.1, 0, sgn * 1.7);
+        wing.rotation.y = sgn * 0.62;
+        g.add(wing);
+      }
+      g.userData = {
+        a: rnd(0, 6.283), r: rnd(300, 580), h: rnd(34, 128),
+        sp: rnd(0.42, 0.78) * (Math.random() < 0.5 ? 1 : -1),
+        bob: rnd(7, 22), bobSp: rnd(0.7, 1.6), phase: rnd(0, 6.283),
+      };
+      swiftFlock.add(g);
+      swifts.push(g);
+    }
+    scene.add(swiftFlock);
+
     // ═══════════ Audio ═══════════
     let audioCtx = null;
     const ensureAudio = () => {
@@ -3450,7 +3498,11 @@ export default function Mikdash() {
       const ctx = audioCtx;
       const p = camera.position;
 
-      const gust = 0.55 + 0.45 * Math.sin(t * 0.11) * Math.sin(t * 0.043 + 1.7);
+      // Rectified and smoothed: the trees care which way the gust blows, the
+      // ear only cares how hard. A slow term underneath keeps the bed from
+      // pumping at the fronds' rate, which would sound mechanical.
+      const swirl = Math.abs(gustAt(p.x, p.z, t));
+      const gust = clamp01(0.34 + 0.44 * swirl + 0.22 * Math.sin(t * 0.047 + 1.7));
       const alt = clamp01((p.y - 10) / 240);
       amb.windF.frequency.value = 250 + gust * 400;
       glide(amb.wind, (0.05 + alt * 0.09) * (0.75 + 0.45 * nightAmt) * gust, dt);
@@ -3875,6 +3927,27 @@ export default function Mikdash() {
       // layer was invisible at the one time of day the House opens on — real
       // in the code and absent on screen. Desert air is never actually clear.
       const dustLit = (0.3 + 0.7 * rake * rake) * (1 - e2 * 0.8);
+      // The swifts share the dust's rake: out at dusk and dawn, gone at noon.
+      // A parabola on the day/night ease, not the rake: zero in full daylight,
+      // zero in the dark, peaking as the light goes. The rake term saturates at
+      // night and would have left them circling the walls at midnight, which
+      // swifts do not do — they are birds of the last hour of light and the
+      // first. Catching them is a reward for watching the sun go down.
+      const swiftLit = Math.min(1, 1.25 * 4 * e2 * (1 - e2));
+      swiftFlock.visible = swiftLit > 0.01;
+      if (swiftFlock.visible) {
+        swiftMat.opacity = Math.min(1, swiftLit);
+        for (let si = 0; si < swifts.length; si++) {
+          const u = swifts[si].userData;
+          u.a += u.sp * dt;
+          const y = u.h + Math.sin(t * u.bobSp + u.phase) * u.bob;
+          swifts[si].position.set(Math.cos(u.a) * u.r, y, Math.sin(u.a) * u.r);
+          // Face along the tangent, and bank into the turn the way they do.
+          swifts[si].rotation.y = -u.a + (u.sp > 0 ? Math.PI / 2 : -Math.PI / 2);
+          swifts[si].rotation.z = (u.sp > 0 ? -0.5 : 0.5) + Math.sin(t * u.bobSp + u.phase) * 0.35;
+        }
+      }
+
       for (let hi = 0; hi < haze.length; hi++) {
         const u = haze[hi].userData;
         u.mat.opacity = u.base * dustLit;
@@ -4069,7 +4142,32 @@ export default function Mikdash() {
       laverWater.position.y = IC_H + 5.5 + Math.sin(t * 2.2) * 0.06;
 
       fox.position.y = LAND_Y + Math.abs(Math.sin(t * 2.6)) * 0.25;
-      fox.userData.tail.rotation.x = Math.sin(t * 3) * 0.28;
+      // Makkot 24b is a fox *coming out* of the place of the Holy of Holies —
+      // the thing that made Rabbi Akiva laugh when the others tore their
+      // clothes. A fox that sits perfectly still is a statue of that story,
+      // not the story. So he paces a short beat below the stairs, drops his
+      // head to the ground on the turn, and looks up now and then.
+      {
+        const fu = fox.userData;
+        const beat = Math.sin(t * 0.28);                    // slow there-and-back
+        fox.position.x = fu.home.x + beat * 11;
+        // Ease the turn rather than snapping it: reading the sign of the
+        // velocity directly flips him through 180° in a single frame, which
+        // reads as a glitch, not an animal changing its mind.
+        const want = -0.7 + (Math.cos(t * 0.28) > 0 ? 0 : Math.PI);
+        fu.face += (want - fu.face) * (1 - Math.exp(-dt * 3.2));
+        fox.rotation.y = fu.face;
+        // Weight shifts as he pads; the body dips slightly on each step.
+        fox.position.y = fu.home.y + Math.abs(Math.sin(t * 3.1)) * 0.35;
+        // Head: mostly down at the scent, lifted on a slow cycle.
+        const lift = Math.max(0, Math.sin(t * 0.41 + 1.2));
+        fu.head.position.y = 3.6 - 0.5 + lift * 0.9;
+        fu.head.rotation.z = -0.35 + lift * 0.45;
+        fu.snout.position.y = 3.3 - 0.6 + lift * 1.0;
+        fu.snout.rotation.z = -Math.PI / 2 - 0.3 + lift * 0.4;
+        fu.tail.rotation.x = Math.sin(t * 3) * 0.28;
+        fu.tail.rotation.y = Math.sin(t * 1.7) * 0.18;
+      }
       fox.rotation.y = -0.7 + Math.sin(t * 0.4) * 0.35;
 
       // A sounding string is a blur, not a line. Swell the radius and shiver it
@@ -4148,7 +4246,11 @@ export default function Mikdash() {
       mixAmbience(t, dt, e2);
 
       doves.forEach((d) => {
-        d.userData.a += d.userData.sp * 0.016;
+        // Was a hard-coded 0.016 — an assumed 60Hz frame. The doves circled
+        // half again as fast on a 144Hz display and crawled on a struggling
+        // one. Same bug shape as the day/night ease; the kohanim next door
+        // already used dt.
+        d.userData.a += d.userData.sp * dt;
         const { a, r, h, wing } = d.userData;
         d.position.set(-150 + Math.cos(a) * r, h + Math.sin(a * 3) * 7, Math.sin(a) * r);
         d.rotation.y = -a + Math.PI / 2;

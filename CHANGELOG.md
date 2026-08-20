@@ -1,5 +1,42 @@
 # Changelog
 
+## v3.14 — "Swifts at Dusk" (0.3.14)
+
+- **The doves were flying at whatever speed the display ran at.** The exact bug
+  the TODO predicted after the day/night ease was fixed: `d.userData.a +=
+  d.userData.sp * 0.016` — a hard-coded 60Hz frame — so the flock circled half
+  again as fast on a 144Hz laptop and crawled on anything struggling. The
+  kohanim walking below them already used `dt` correctly. Now they both do.
+- **סִיס — the swifts.** Not a flourish. Jerusalem's common swifts nest in the
+  crevices of the Western Wall's stones and have as long as anyone has kept
+  count; they come back from Africa at the end of winter and the city marks the
+  return. Nothing says "this stone is old and lived in" faster than birds that
+  treat it as a cliff. Eighteen of them, wings swept hard back because the
+  scythe outline is the whole identification at this distance, banking into
+  their turns around the walls.
+  - Their visibility is a parabola on the day/night ease, peaking as the light
+    goes and zero at both ends. The first cut keyed them to the same rake term
+    the dust uses, which saturates at night and left them circling the walls at
+    midnight — which swifts do not do. Catching them is now a reward for
+    watching the sun go down.
+- **The fox does something.** Makkot 24b is a fox *coming out* of the place of
+  the Holy of Holies — the thing that made Rabbi Akiva laugh while the others
+  tore their clothes. A fox sitting perfectly still is a statue of that story
+  rather than the story. He now paces a short beat below the southern stairs,
+  drops his head to the ground and lifts it on a slow cycle, and his tail moves
+  in two axes instead of one. His turn is eased: reading the sign of the
+  velocity directly flipped him through 180° in a single frame, which reads as
+  a glitch and not as an animal changing its mind.
+- **The wind you hear and the wind you watch are one wind.** They were two
+  unrelated clocks — the trees bent on `uWind` while the ambient bed swelled on
+  `sin(t*0.11)*sin(t*0.043)` — so a visitor standing among the palms could hear
+  a lull at the exact moment the fronds threw themselves over. `gustAt(x, z, t)`
+  is now the JS twin of the shader's two sines, sampled where the camera
+  stands, rectified for the bed (the trees care which way it blows; the ear only
+  cares how hard) with a slow term underneath so it does not pump at the fronds'
+  rate.
+
+
 ## v3.13 — "The Levites' Steps Can Be Played" (0.3.13)
 
 - **Melodies, played on the fifteen steps.** The steps were already an

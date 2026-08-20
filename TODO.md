@@ -52,11 +52,10 @@ preferences.
       the same displacement.
 - [x] **Ground cover.** 216 bushes biased toward the precinct, a 108-bush fringe
       spilling over the paving edge, 108 half-buried stones. Merged and swayed.
-- [ ] **Birds beyond the doves.** Swifts over the walls at dusk. Jerusalem's
-      swifts are a real and famous thing, and they are cheap: instanced quads on
-      curved paths, only visible near sunset.
-- [ ] **The fox should move.** Makkot 24b is a fox *emerging from* the Holy of
-      Holies; it currently sits still. Even a slow head-turn would land it.
+- [x] **Swifts.** 18 of them working the walls, visible on a parabola over the
+      day/night ease so they peak at dusk and vanish at both noon and midnight.
+- [x] **The fox moves.** Paces below the stairs, head down to the scent and up
+      again, eased turn.
 - [ ] **A flock of sheep** on the approach road. Pilgrims brought animals up;
       most korbanot walked to Jerusalem. Also solves the empty middle distance.
 - [ ] **Terraced hillside.** The Judean hills around Jerusalem are terraced for
@@ -109,10 +108,8 @@ preferences.
 - [ ] **The camels.** One low grunt, rarely, when the camera is near.
 - [ ] **Footsteps in walk mode.** Different on marble, on paving, on dust — the
       surface is already known from `groundHeight()`.
-- [ ] **Wind should follow the trees.** The ambient wind bed and the frond
-      motion are now two separate signals that visibly disagree — the trees bend
-      on `uWind`, the bed swells on its own clock. One shared gust value should
-      drive both.
+- [x] **Wind bed follows the trees.** `gustAt()` is the JS twin of the shader's
+      two sines, sampled at the camera and rectified for the ear.
 - [ ] **Distance-attenuate the fifteen steps.** They ring at full volume from
       anywhere in the precinct.
 
@@ -125,10 +122,9 @@ preferences.
       shot in `ff3a997` and reached production. `orbit` now spreads from `HOME`
       so they cannot diverge, but a cheap assertion — opening radius must exceed
       the precinct's half-diagonal — would have caught it before deploy.
-- [ ] **Frame-rate independence audit.** The day/night ease was a fixed fraction
-      per frame; the same bug shape likely exists in the dove flight, the
-      figures' walk cycle and the fox. Anything using a bare per-frame constant
-      instead of `dt`.
+- [x] **Frame-rate independence audit.** Found exactly one more: the doves, on a
+      hard-coded 0.016. The kohanim were already correct. Everything else in the
+      loop is driven from absolute `t`, which is inherently safe.
 - [ ] **Mobile pass.** Shadow map now steps down on coarse pointers, but the
       tree count went up ninety-fold in mesh terms. Needs measuring on a real
       handset, not assumed.
