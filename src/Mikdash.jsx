@@ -2766,6 +2766,18 @@ export default function Mikdash() {
         .navbtn:hover { transform: translateY(-1px); background: rgba(58,46,20,.92); border-color: rgba(212,164,55,.75); }
         .navbtn:active { transform: translateY(1px) scale(.96); background: linear-gradient(135deg,#f3e6c0,#e0cd97); color: #4a3a18; }
         .navbtn:focus-visible { outline: 2px solid #ffd97a; outline-offset: 2px; }
+        /* The hints list stops short of the screen bottom — and on a phone,
+           short of the on-screen navigation pad it would otherwise hide under. */
+        .hints-panel { max-height: max(150px, min(48vh, calc(100vh - 324px))); }
+        @media (max-width: 720px) {
+          .hints-panel { max-height: max(150px, min(48vh, calc(100vh - 570px))); }
+        }
+        /* A phone held sideways has no room below the chips: stand the list
+           beside them instead, between the chip column and the navigation pad. */
+        @media (max-height: 560px) {
+          .hints-panel { top: 74px !important; bottom: 14px; right: 178px !important;
+            width: min(285px, calc(100vw - 210px)) !important; max-height: none; }
+        }
         @keyframes countPop { 0% { transform: scale(1); } 38% { transform: scale(1.32); color: #ffd97a; } 100% { transform: scale(1); } }
         @keyframes gleam { 0%,100% { box-shadow: 0 0 0 0 rgba(255,217,122,0); } 50% { box-shadow: 0 0 0 5px rgba(255,217,122,.18); } }
         @keyframes veilIn { from { opacity: 0; } to { opacity: 1; } }
@@ -2802,6 +2814,31 @@ export default function Mikdash() {
                      inset 0 1px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(80,92,108,.32); }
         .seal-silver::before { border-radius:22px 22px 3px 3px; border-color:rgba(80,92,108,.35); }
         .seal-silver::after { background:linear-gradient(90deg,transparent,rgba(150,160,174,.9) 16%,rgba(244,247,251,.95) 50%,rgba(150,160,174,.9) 84%,transparent); }
+
+        /* ─── Keeping the top out from under the rail ─── the title, its
+           subtitle, and the quest banner are all centered across the whole
+           viewport, while the chip rail floats over the right 163px of it.
+           Nothing reserved that column, so all three ran underneath it: at
+           390px the subtitle put 145px of itself behind the נסתרות counter,
+           and measured across widths the subtitle stayed buried until about
+           1100px — this was never only a phone bug.
+
+           Two tiers, because the phone has no room to stay centered:
+           narrow reserves the rail on the right only and lets the three sit
+           in the column that is left; wide reserves it on both sides, so the
+           block still reads as centered and clears the rail either way.
+           The banner keeps its shrink-to-fit pill on wide screens — capping
+           max-width does the job there, where pinning left AND right would
+           stretch the pill across the page. */
+        @media (max-width: 720px) {
+          .topbar { padding:0 168px 0 14px; }
+          .quest-banner { left:14px !important; right:168px !important;
+            transform:none !important; max-width:none !important; }
+        }
+        @media (min-width: 721px) {
+          .topbar { padding:0 170px; }
+          .quest-banner { max-width:calc(100vw - 340px) !important; }
+        }
 
         /* ─── Framed cards ─── parchment grain, an inner rule, and reinforced
            corners, so a card reads as a plaque rather than a rounded box. */
@@ -2842,7 +2879,7 @@ export default function Mikdash() {
         </div>
       )}
 
-      <div style={{ position: "absolute", top: 18, left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
+      <div className="topbar" style={{ position: "absolute", top: 18, left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
         <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: "clamp(24px, 4vw, 42px)", fontWeight: 900, color: night ? "#f2e4bd" : "#3b3220", letterSpacing: ".02em", textShadow: night ? "0 2px 24px rgba(0,0,0,.7)" : "0 2px 18px rgba(255,255,255,.85)" }}>
           בֵּית הַמִּקְדָּשׁ
         </div>
@@ -2853,7 +2890,7 @@ export default function Mikdash() {
 
       {/* Quest banner */}
       {questMode && nextTarget >= 0 && (
-        <div style={{ position: "absolute", top: 88, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", background: "rgba(30,24,12,.78)", backdropFilter: "blur(6px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 22px", color: "#eaddb4", fontSize: 14.5, fontStyle: "italic", maxWidth: "82vw", textAlign: "center", boxShadow: "0 4px 18px rgba(0,0,0,.3)" }}>
+        <div className="quest-banner" style={{ position: "absolute", top: 88, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", background: "rgba(30,24,12,.78)", backdropFilter: "blur(6px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 22px", color: "#eaddb4", fontSize: 14.5, fontStyle: "italic", maxWidth: "82vw", textAlign: "center", boxShadow: "0 4px 18px rgba(0,0,0,.3)" }}>
           <span style={{ fontFamily: "'Frank Ruhl Libre', serif", fontStyle: "normal", fontWeight: 700, marginRight: 8, color: "#ffd97a" }}>
             {found.length + 1} / {DISCOVERIES.length}
           </span>
@@ -2872,7 +2909,7 @@ export default function Mikdash() {
         </div>
       )}
 
-      <div style={{ position: "absolute", top: 18, right: 16, display: "flex", flexDirection: "column", gap: 9, alignItems: "flex-end" }}>
+      <div style={{ position: "absolute", top: 18, right: 16, display: "flex", flexDirection: "column", gap: 9, alignItems: "flex-end", zIndex: 4 }}>
         <div style={{ background: "rgba(30,24,12,.85)", backdropFilter: "blur(6px)", borderRadius: 14, padding: "8px 15px", color: "#f0e6cd", border: "1px solid rgba(212,164,55,.5)", boxShadow: "0 6px 24px rgba(0,0,0,.3)", textAlign: "center" }}>
           <div style={{ fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: 0.7, fontFamily: "'Frank Ruhl Libre', serif" }}>נסתרות</div>
           <div key={found.length} style={{ fontSize: 21, fontWeight: 700, fontFamily: "'Frank Ruhl Libre', serif", animation: "countPop .55s ease", ...(allFound ? { color: "#ffd24a", animation: "countPop .55s ease, glowPulse 2s infinite .55s" } : {}) }}>
@@ -2919,8 +2956,16 @@ export default function Mikdash() {
       </div>
 
       {hints && (
-        <div className="panel" style={{ position: "absolute", top: 230, right: 16, width: 285, maxHeight: "48vh", overflowY: "auto", background: "rgba(28,22,10,.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 16, padding: "16px 18px", color: "#e8dcba", boxShadow: "0 12px 40px rgba(0,0,0,.4)" }}>
-          <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15, marginBottom: 4 }}>שלושים ושש נסתרות</div>
+        <div className="panel hints-panel" style={{ position: "absolute", top: 296, right: 16, width: "min(285px, calc(100vw - 32px))", boxSizing: "border-box", overflowY: "auto", WebkitOverflowScrolling: "touch", background: "rgba(28,22,10,.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 16, padding: "16px 18px", color: "#e8dcba", boxShadow: "0 12px 40px rgba(0,0,0,.4)", zIndex: 3 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>שלושים ושש נסתרות</div>
+            <button
+              onClick={() => setHints(false)}
+              title="Close the hints"
+              aria-label="Close the hints"
+              style={{ flex: "0 0 auto", width: 30, height: 30, marginTop: -3, marginRight: -6, lineHeight: 1, fontSize: 16, background: "rgba(212,164,55,.14)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, cursor: "pointer", touchAction: "manipulation" }}
+            >×</button>
+          </div>
           <div style={{ fontSize: 12.5, fontStyle: "italic", opacity: 0.75, marginBottom: 10 }}>Eighteen silver rimonim, eighteen living wonders — chai, twice over{questMode ? ", revealed in order" : ""}.</div>
           {DISCOVERIES.map((d, i) => {
             const done = found.includes(i);

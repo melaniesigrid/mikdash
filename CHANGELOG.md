@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.6 — "Out From Under the Rail" (0.3.6)
+
+- **The top of the House no longer hides behind its own buttons.** The title,
+  its subtitle, and the quest banner were each centered across the full
+  viewport while the chip rail floats over the right 163px of it. Nothing
+  reserved that column, so all three ran underneath it. Measured at 390px:
+  the subtitle put 145px of itself behind the נסתרות counter, the title 22px,
+  the banner 43px. It was never only a phone bug — the subtitle stayed buried
+  until roughly 1100px, which covers most tablets and small laptops. Now the
+  rail's column is reserved: on a narrow screen from the right only, since
+  there is no room left to stay centered, and on a wide one from both sides,
+  so the block still reads as centered. Verified clear from 320px to 1920px.
+
 ## v3.5 — "Thirty-Six" (0.3.5)
 
 - **Thirty-six nistarot.** Twice chai, and the count of the hidden righteous.
@@ -27,6 +40,11 @@
   visitors pressed at them and concluded the House was broken. It says now:
   הַהֵיכָל סָגוּר — the Heichal is still shut, its inside is not built yet.
   Opening it is the top of the v4 roadmap, broken into real steps in README.
+- **The pesichah card keeps its head above water on a phone.** Its gold seal
+  was pinned at top:-38px, outside the card's own overflow-y:auto box, so it
+  was clipped the moment the card grew tall enough to scroll — which on a
+  phone is always. The seal is gone, and the title margin that reserved space
+  for it with it. The discovery cards keep theirs.
 
 ## v3.4 — "The Opening" (0.3.4)
 
