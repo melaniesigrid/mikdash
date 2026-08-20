@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.3 — "Gold, Fire, and Fifteen Notes" (0.3.3)
+
+- **The facade was black, and it was a bug.** A metal surface in three.js takes
+  almost all of its colour from what it reflects, and there was no environment
+  to reflect — so gold plate rendered black except where a light glinted off
+  it. Added a procedural equirectangular environment (sky over haze over
+  hillside) through `PMREMGenerator`, applied to every metal. The Ulam facade,
+  the columns, the menorah and Nicanor's bronze all read as metal now.
+- **A bigger fire, with more orange.** Six nested cones instead of four. The
+  two new tongues are *solid* orange rather than additive — additive orange
+  over sunlit white stone is just white, and orange was the point. Taller
+  again, with more embers rising higher.
+- **On-screen navigation.** A pad of held buttons that glide the camera:
+  swing, tilt, zoom and home in orbit; turn and walk in first person. Arrow
+  keys and WASD now drive the orbit camera too. Nothing sticks if you release
+  outside the button.
+- **Joy.** The fifteen steps are tuned — strike one and it sounds its degree of
+  the ascent, flashes, and puffs dust. Every wonder found throws gold dust, and
+  the counter pops as it ticks up.
+
 ## v3.2 — "Fire and Daylight" (0.3.2)
 
 - **The day no longer washes out.** ACES tone mapping, a stronger sun against

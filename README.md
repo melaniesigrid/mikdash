@@ -14,7 +14,7 @@ and the roadmap toward a full game.
 
 ---
 
-## Current state (v3.2 — "Fire and Daylight")
+## Current state (v3.3 — "Gold, Fire, and Fifteen Notes")
 
 One self-contained React component: `Mikdash.jsx` (React 18 + Three.js r128,
 no other dependencies, no assets — every texture is generated procedurally at
@@ -30,6 +30,10 @@ and fire are GLSL shaders).
 | GLSL sky (day ⇄ night timelapse) | ✅ | Sun/moon arcs, hashed twinkling stars, milky band, dithering |
 | GLSL fire (altar) | ✅ | Four nested cones — an amber solid body, a blue heart, two additive glow shells — plus embers, blue sparks, smoke, and warm + blue point lights |
 | Daylight contrast | ✅ | ACES tone mapping, a stronger sun against less ambient fill, stone mixed below white so the courses survive direct sun |
+| Metals | ✅ | A procedural equirect environment (sky / haze / hillside) via `PMREMGenerator` — without it, `metalness ≈ 1` renders **black**, which is what the Ulam facade was doing |
+| On-screen navigation | ✅ | Held buttons glide the camera: swing, tilt, zoom, home in orbit; turn and walk in first person. Arrow keys and WASD do the same in orbit |
+| The fifteen steps sound | ✅ | Each step carries one degree of the ascent — click it and it rings, flashes, and puffs dust |
+| Gold dust | ✅ | One sprite pool, thrown by anything worth celebrating; the counter pops when it ticks up |
 | First-person walk mode | ✅ | WASD/arrows + drag-look, Shift to run, mobile dual-thumb controls, AABB collision, terrain height function |
 | Animated figures | ✅ | 8 kohanim walking waypoint loops in the azarah; 8 Levites swaying on the fifteen steps |
 | Sixteen wonders quest | ✅ | Sequential unlock with toast guidance + free-explore toggle |
@@ -125,9 +129,17 @@ next tier would be 24).
    geometry they guard.
 8. **Figures** — `makeFigure(robeColor, sashColor)`; kohanim follow
    `KOHEN_PATHS` waypoint loops, Levites stand on steps and sway.
+8b. **Navigation** — `nav` holds a flag per direction; the render loop applies
+    motion per frame so a long press glides instead of stepping. React only
+    ever calls `apiRef.current.nav(key, on)`. A window-level `pointerup`
+    releases every flag, so lifting a finger off a button cannot leave the
+    camera drifting. `resetView()` returns to `HOME`.
 9. **Wonders** — `clickables[]`; every findable object carries
    `userData.id ∈ [0..15]`. Picking walks up the parent chain (`findId`).
-   Quest gating lives in `collect(id)`.
+   Quest gating lives in `collect(id)`. The fifteen steps are in `clickables`
+   too, but carry `userData.step` instead of an id — `onUp` checks for that
+   first, sounds the note, flashes the step's own cloned material and puffs
+   dust. `burst(pos, opts)` drives one shared sprite pool for both.
 10. **Audio** — lazily created `AudioContext`; `playShofar`, `playHarp`,
     `playTrumpet`, `playChime`. Then the **ambient bed**: `buildAmbience()`
     wires a persistent graph (brown-noise loop → lowpass = wind; the same

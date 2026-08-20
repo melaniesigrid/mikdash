@@ -4,7 +4,7 @@ import * as THREE from "three";
 /*
   ═══════════════════════════════════════════════════════════════════════════
    בֵּית הַמִּקְדָּשׁ — MIKDASH: an explorable Temple
-   v3.2 — "Fire and Daylight"
+   v3.3 — "Gold, Fire, and Fifteen Notes"
 
    · Yechezkel 40–48 floor plan at 1 unit = 1 amah, in monumental white stone
    · GLSL sky (day ⇄ night timelapse), GLSL noise-displaced altar fire
@@ -15,6 +15,10 @@ import * as THREE from "three";
      unlock IN SEQUENCE as a quest — with free-explore toggle
    · A synthesized ambient bed — wind over the mountain, the fire of the
      ma'aracha, the Levites' ascent — mixed by where the eye stands
+   · On-screen navigation pad — orbit, tilt, zoom, walk — for anyone who
+     would rather not drag or scroll
+   · The fifteen steps are tuned: strike one and it sounds its degree of the
+     ascent, and every wonder found throws gold dust
    · Progress persists across sessions via window.storage
 
    See README.md in this repository for the full design document.
@@ -228,6 +232,29 @@ function fireSpriteTex() {
     g.addColorStop(1, "rgba(180,40,0,0)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
   });
+}
+
+// A metal surface in three.js takes almost all of its colour from what it
+// reflects. With no environment there is nothing to reflect, so gold plate
+// renders black except where a light happens to glint off it — which is
+// exactly what the Ulam facade was doing. This is that environment: sky over
+// haze over Judean hillside, in one equirectangular strip.
+function envSkyTex() {
+  const t = makeCanvas(256, 128, (ctx, w, h) => {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0.0, "#4d80c8");
+    g.addColorStop(0.38, "#a9c6e4");
+    g.addColorStop(0.5, "#f2e8d2");
+    g.addColorStop(0.56, "#d8c399");
+    g.addColorStop(1.0, "#8f7a55");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    const sun = ctx.createRadialGradient(w * 0.68, h * 0.24, 1, w * 0.68, h * 0.24, 34);
+    sun.addColorStop(0, "rgba(255,252,236,1)");
+    sun.addColorStop(1, "rgba(255,246,222,0)");
+    ctx.fillStyle = sun; ctx.fillRect(0, 0, w, h);
+  });
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  return t;
 }
 
 function blueSpriteTex() {
@@ -453,12 +480,20 @@ export default function Mikdash() {
     // gold plate: metallic but NOT self-emissive by day — no more "sun inside the House"
     const goldPlate = new THREE.MeshStandardMaterial({ map: goldMap, metalness: 0.95, roughness: 0.22, emissive: 0x1c1200, emissiveIntensity: 0 });
     const bronze = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, metalness: 0.75, roughness: 0.35 });
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    const eqTex = envSkyTex();
+    const envMap = pmrem.fromEquirectangular(eqTex).texture;
+    eqTex.dispose(); pmrem.dispose();
     const cedarMap = cedarTex(); cedarMap.repeat.set(2, 1);
     const cedar = new THREE.MeshStandardMaterial({ map: cedarMap, roughness: 0.7 });
     const silver = new THREE.MeshStandardMaterial({ color: 0xdde2e9, metalness: 0.96, roughness: 0.12 });
     const foundGold = new THREE.MeshStandardMaterial({ color: 0xffd24a, metalness: 0.9, roughness: 0.2, emissive: 0x8a6a00, emissiveIntensity: 0.55 });
     const windowMat = new THREE.MeshStandardMaterial({ color: 0x201509, emissive: 0xffb347, emissiveIntensity: 0 });
     const stoneDarkM = new THREE.MeshStandardMaterial({ map: ashlar({ base: [206, 196, 172] }), roughness: 0.9 });
+    // only the metals take the environment — the stone is lit and tuned already
+    const metals = [gold, goldPlate, bronze, silver, foundGold];
+    metals.forEach((m) => { m.envMap = envMap; m.envMapIntensity = 1; });
 
     const colliders = [];
     const addCollider = (minX, maxX, minZ, maxZ) => colliders.push({ minX, maxX, minZ, maxZ });
@@ -578,7 +613,7 @@ export default function Mikdash() {
     // is behind it, so over sunlit white stone it disappears — the solid cone
     // is what gives the fire a silhouette in daylight. `blue` sets how much of
     // the base burns blue, which is where a real flame is hottest.
-    const makeFlame = (radius, height, { segments = 20, solid = false, blue = 0, heartOnly = false } = {}) => {
+    const makeFlame = (radius, height, { segments = 20, solid = false, blue = 0, heartOnly = false, orange = false, alphaScale = 1 } = {}) => {
       const uniforms = {
         uTime: { value: 0 }, uIntensity: { value: 1 },
         uDay: { value: 1 }, uBlue: { value: blue },
@@ -622,14 +657,19 @@ export default function Mikdash() {
             ${solid
               ? `// the solid body carries saturated amber, not white: over sunlit
                  // stone it is colour, not brightness, that reads
-                 vec3 col = mix(vec3(1.00, 0.74, 0.24), vec3(0.98, 0.34, 0.04), smoothstep(0.10, 0.55, vH));
+                 vec3 col = mix(vec3(${orange ? "1.00, 0.56, 0.10" : "1.00, 0.74, 0.24"}),
+                                vec3(${orange ? "0.96, 0.26, 0.02" : "0.98, 0.34, 0.04"}), smoothstep(0.10, 0.55, vH));
                  col = mix(col, vec3(0.60, 0.07, 0.01), smoothstep(0.55, 1.0, vH));
                  float heartSpan = 0.62;`
-              : `// the glow keeps the white-yellow core → orange mids → red tips,
-                 // and warms toward saturated orange as the day comes up
-                 vec3 col = mix(mix(vec3(1.0, 0.93, 0.55), vec3(1.0, 0.60, 0.14), uDay),
-                                vec3(1.0, 0.45, 0.08), smoothstep(0.06, 0.60, vH));
-                 col = mix(col, vec3(0.78, 0.11, 0.01), smoothstep(0.60, 1.0, vH));
+              : `${orange
+                     // the outer tongues: no white at all, orange from root to tip
+                     ? `vec3 col = mix(vec3(1.0, 0.63, 0.13), vec3(1.0, 0.31, 0.03), smoothstep(0.04, 0.52, vH));
+                        col = mix(col, vec3(0.74, 0.08, 0.01), smoothstep(0.52, 1.0, vH));`
+                     // the glow keeps the white-yellow core → orange mids → red tips,
+                     // and warms toward saturated orange as the day comes up
+                     : `vec3 col = mix(mix(vec3(1.0, 0.93, 0.55), vec3(1.0, 0.60, 0.14), uDay),
+                                       vec3(1.0, 0.45, 0.08), smoothstep(0.06, 0.60, vH));
+                        col = mix(col, vec3(0.78, 0.11, 0.01), smoothstep(0.60, 1.0, vH));`}
                  float heartSpan = 0.40;`}
 
             // the blue heart: hottest, breathing with the turbulence. The heart
@@ -652,7 +692,7 @@ export default function Mikdash() {
                  a *= smoothstep(0.0, 0.10, vH) + 0.40;
                  ${heartOnly ? "a *= clamp(heart * 1.15, 0.0, 1.0) * (0.5 + body * 0.75);" : ""}
                  gl_FragColor = vec4(col * mix(1.0, 0.9, uDay),
-                   clamp(a * uIntensity, 0.0, 1.0) * mix(${heartOnly ? "0.74" : "0.34"}, 1.0, uDay));`
+                   clamp(a * uIntensity, 0.0, 1.0) * mix(${heartOnly ? "0.74" : "0.34"}, 1.0, uDay) * ${alphaScale.toFixed(2)});`
               : `gl_FragColor = vec4(col * mix(1.15, 0.5, uDay), clamp(a * mix(1.0, 0.38, uDay), 0.0, 1.0));`}
           }`,
       });
@@ -667,34 +707,34 @@ export default function Mikdash() {
     const TOP = IC_H;
     // renderOrder is explicit: three cones share a centre, and distance
     // sorting alone would let them swap places as the camera turns.
-    const flameCore = makeFlame(4.0, 11.5, { solid: true, blue: 0.2 });
-    flameCore.mesh.position.set(AX, TOP + 20.0, 0);
-    flameCore.mesh.renderOrder = 1;
-    scene.add(flameCore.mesh);
-    // narrow and tall: a blue spire standing inside the amber body reads as a
-    // heart, where a wide blue cone only reads as a pool at the flame's foot
-    const flameHeart = makeFlame(1.95, 13.5, { segments: 16, solid: true, blue: 1, heartOnly: true });
-    flameHeart.uniforms.uIntensity.value = 1.3;
-    flameHeart.mesh.position.set(AX, TOP + 21.2, 0);
+    // Six cones. Each is a shell, so stacking them is how the fire gets its
+    // depth: a body you cannot see through, a heart, and four glow shells at
+    // different sizes turning at different speeds so the tongues never repeat.
+    const flames = [];
+    const addFlame = (radius, height, opts, { y, order, ts, rot, intensity = 1 }) => {
+      const f = makeFlame(radius, height, opts);
+      f.mesh.position.set(AX, TOP + y, 0);
+      f.mesh.renderOrder = order;
+      f.uniforms.uIntensity.value = intensity;
+      scene.add(f.mesh);
+      flames.push({ uniforms: f.uniforms, mesh: f.mesh, ts, rot });
+      return f;
+    };
+    addFlame(4.9, 14.5, { solid: true, blue: 0.2 }, { y: 21.4, order: 1, ts: 1.1, rot: 0.72 });
+    addFlame(4.6, 16.0, { blue: 0.55 }, { y: 22.6, order: 2, ts: 1.25, rot: -0.55, intensity: 1.5 });
+    addFlame(6.3, 18.5, { solid: true, orange: true, alphaScale: 0.52 }, { y: 23.5, order: 2, ts: 0.85, rot: 0.31, intensity: 1.15 });
+    addFlame(7.3, 20.0, { solid: true, orange: true, alphaScale: 0.36 }, { y: 24.2, order: 2, ts: 1.45, rot: -0.23, intensity: 0.95 });
+    addFlame(8.2, 21.5, { blue: 0.16 }, { y: 24.8, order: 3, ts: 1.0, rot: 0.4 });
     // drawn last: additive tongues painted over the heart would add white to
     // it and the blue would be gone by night
-    flameHeart.mesh.renderOrder = 5;
-    scene.add(flameHeart.mesh);
-    const flameInner = makeFlame(3.7, 12.5, { blue: 0.55 });
-    flameInner.mesh.position.set(AX, TOP + 20.6, 0);
-    flameInner.uniforms.uIntensity.value = 1.5;
-    flameInner.mesh.renderOrder = 2;
-    scene.add(flameInner.mesh);
-    const flameOuter = makeFlame(6.6, 16.5, { blue: 0.2 });
-    flameOuter.mesh.position.set(AX, TOP + 22.2, 0);
-    flameOuter.mesh.renderOrder = 3;
-    scene.add(flameOuter.mesh);
+    addFlame(2.1, 16.5, { segments: 16, solid: true, blue: 1, heartOnly: true, alphaScale: 0.88 },
+             { y: 23.0, order: 5, ts: 1.6, rot: -0.95, intensity: 1.3 });
 
     const fireParticles = [];
-    for (let i = 0; i < 34; i++) {
+    for (let i = 0; i < 54; i++) {
       const m = new THREE.SpriteMaterial({ map: fireTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
       const sp = new THREE.Sprite(m);
-      sp.userData = { ph: rnd(0, 1), sp: rnd(0.35, 0.7), a: rnd(0, 6.28), r: rnd(0.5, 3.6), drift: rnd(-0.6, 0.6) };
+      sp.userData = { ph: rnd(0, 1), sp: rnd(0.3, 0.68), a: rnd(0, 6.28), r: rnd(0.5, 4.6), drift: rnd(-0.7, 0.7) };
       scene.add(sp);
       fireParticles.push(sp);
     }
@@ -710,20 +750,44 @@ export default function Mikdash() {
     }
 
     const smokeParticles = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 20; i++) {
       const m = new THREE.SpriteMaterial({ map: smokeTex, depthWrite: false, transparent: true });
       const sp = new THREE.Sprite(m);
       sp.userData = { ph: rnd(0, 1), sp: rnd(0.1, 0.18), sway: rnd(2, 5), off: rnd(0, 6.28) };
       scene.add(sp);
       smokeParticles.push(sp);
     }
+    // Gold dust. One pool of sprites, thrown by anything worth celebrating —
+    // a wonder found, a step struck.
+    const dustPool = [];
+    for (let i = 0; i < 60; i++) {
+      const m = new THREE.SpriteMaterial({ map: fireTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 });
+      const sp = new THREE.Sprite(m);
+      sp.visible = false;
+      scene.add(sp);
+      dustPool.push(sp);
+    }
+    let dustNext = 0;
+    const burst = (pos, { count = 26, speed = 13, tint = 0xffd24a, size = 2.1, rise = 1.6 } = {}) => {
+      for (let i = 0; i < count; i++) {
+        const sp = dustPool[(dustNext = (dustNext + 1) % dustPool.length)];
+        sp.visible = true;
+        sp.position.copy(pos);
+        sp.material.color.setHex(tint);
+        sp.userData = {
+          v: new THREE.Vector3(rnd(-1, 1), rnd(0.35, 1) * rise, rnd(-1, 1)).normalize().multiplyScalar(speed * rnd(0.35, 1)),
+          life: 1, sc: rnd(0.55, 1) * size,
+        };
+      }
+    };
+
     // warm light: physical decay so it doesn't wash the gold facade into a "sun"
     const fireLight = new THREE.PointLight(0xff8c33, 1.0, 130, 2);
-    fireLight.position.set(AX, TOP + 22, 0);
+    fireLight.position.set(AX, TOP + 25, 0);
     scene.add(fireLight);
     // the heart throws its own colour onto the hearth stones
     const fireBlueLight = new THREE.PointLight(0x3f7dff, 0.7, 62, 2);
-    fireBlueLight.position.set(AX, TOP + 16.4, 0);
+    fireBlueLight.position.set(AX, TOP + 16.8, 0);
     scene.add(fireBlueLight);
 
     // small torch flames reuse the sprite system
@@ -872,9 +936,17 @@ export default function Mikdash() {
     const inner = box(IC + 50, IC_H, IC, wave, -60, IC_H / 2, 0);
     inner.receiveShadow = true;
     const IC_E = -60 + (IC + 50) / 2; // = 70, eastern edge of inner court
+    // Fifteen steps, fifteen Shir HaMa'alot — so each one is tuned and can be
+    // struck. Each gets its own material so it can flash when it sounds.
+    const stepMeshes = [];
     for (let s = 0; s < 15; s++) {
       const w = 70 - s * 2.4;
-      box(2.6, IC_H / 15 + 0.15, w, marble, IC_E + (14 - s) * 2.6, IC_H - (s + 1) * (IC_H / 15), 0);
+      const mat = marble.clone();
+      mat.emissive = new THREE.Color(0xffd24a);
+      mat.emissiveIntensity = 0;
+      const st = box(2.6, IC_H / 15 + 0.15, w, mat, IC_E + (14 - s) * 2.6, IC_H - (s + 1) * (IC_H / 15), 0);
+      st.userData.step = 14 - s;   // the lowest step is the lowest note
+      stepMeshes.push(st);
     }
     const par = (w, d, x, z) => {
       box(w, 2.8, d, white, x, IC_H + 1.4, z);
@@ -1125,6 +1197,7 @@ export default function Mikdash() {
 
     // ═══════════ SIXTEEN WONDERS ═══════════
     const clickables = [];
+    clickables.push(...stepMeshes);
     const veiledSilver = silver.clone();
     veiledSilver.transparent = true;
     veiledSilver.opacity = 0.28;
@@ -1373,6 +1446,23 @@ export default function Mikdash() {
       });
     };
 
+    // fifteen degrees of the ascent, freygish on D — the mode the harp sings in
+    const STEP_SCALE = [146.83, 155.56, 185.0, 196.0, 220.0, 233.08, 261.63, 293.66,
+                        311.13, 369.99, 392.0, 440.0, 466.16, 523.25, 587.33];
+    const playStep = (i) => {
+      if (!amb.on) return;
+      const ctx = ensureAudio(); const t0 = ctx.currentTime;
+      const f = STEP_SCALE[Math.max(0, Math.min(14, i))];
+      [[1, "triangle", 0.17], [2, "sine", 0.055], [3, "sine", 0.02]].forEach(([mul, type, peak]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type; o.frequency.value = f * mul;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(peak, t0 + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.7);
+        o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 1.8);
+      });
+    };
+
     // ═══════════ Ambient bed: wind, the ma'aracha, the Levites' song ═══════════
     // Three synthesized voices mixed every frame by where the eye stands: wind
     // over the mountain (everywhere, stronger high up and at night), the fire
@@ -1541,6 +1631,15 @@ export default function Mikdash() {
       moveVec: { f: 0, s: 0 },
     };
     const EYE = 3.4;
+    // On-screen navigation. Held buttons set a flag and the render loop moves
+    // the camera per frame, so a long press glides instead of stepping.
+    const nav = { l: 0, r: 0, u: 0, d: 0, in: 0, out: 0 };
+    const HOME = { theta: Math.PI * 0.2, phi: Math.PI * 0.37, radius: 700, target: new THREE.Vector3(-40, 30, 0) };
+    apiRef.current.nav = (k, on) => { if (k in nav) nav[k] = on ? 1 : 0; };
+    apiRef.current.resetView = () => {
+      orbit.theta = HOME.theta; orbit.phi = HOME.phi; orbit.radius = HOME.radius;
+      orbit.target.copy(HOME.target);
+    };
 
     const applyCamera = () => {
       if (walkRef.current) {
@@ -1626,6 +1725,7 @@ export default function Mikdash() {
       }
       orbit.lastX = p.clientX; orbit.lastY = p.clientY;
     };
+    let stepsHeard = false;
     const findId = (obj) => {
       let o = obj;
       while (o) { if (o.userData && o.userData.id !== undefined) return o; o = o.parent; }
@@ -1657,6 +1757,17 @@ export default function Mikdash() {
       raycaster.setFromCamera(mv, camera);
       const hits = raycaster.intersectObjects(clickables, true);
       if (!hits.length) return;
+      const struck = hits[0].object.userData.step;
+      if (struck !== undefined) {
+        playStep(struck);
+        hits[0].object.material.emissiveIntensity = 0.85;
+        burst(hits[0].point, { count: 7, speed: 5.5, size: 0.9, tint: 0xfff0b8 });
+        if (!stepsHeard) {
+          stepsHeard = true;
+          apiRef.current.toast?.("שיר המעלות — every one of the fifteen steps remembers its note.");
+        }
+        return;
+      }
       const holder = findId(hits[0].object);
       if (!holder) return;
       const id = holder.userData.id;
@@ -1671,6 +1782,8 @@ export default function Mikdash() {
       if (id === 13) { ketoretState.active = true; playChime(); }
       if (id === 14) nicanor.userData.target = 1;
       if (id === 15) playTrumpet();
+      // every wonder found throws gold dust
+      burst(holder.getWorldPosition(new THREE.Vector3()), { count: 30, speed: 15 });
       apiRef.current.openFact?.(id);
     };
     const onWheel = (e) => {
@@ -1744,6 +1857,9 @@ export default function Mikdash() {
       windowMat.emissiveIntensity = e2 * 1.6;
       doorGlow.intensity = e2 * 1.5;
       goldPlate.emissiveIntensity = e2 * 0.18;
+      // at night there is far less sky for the gold to reflect
+      const envI = lerp(1.05, 0.26, e2);
+      for (let mi = 0; mi < metals.length; mi++) metals[mi].envMapIntensity = envI;
       shetiyaLight.intensity = lerp(0.9, 1.6, e2);
       fireLight.intensity = lerp(1.3, 2.4, e2) + Math.sin(t * 13) * 0.12 + (vnoiseJS(t * 7) - 0.5) * 0.3;
       fireBlueLight.intensity = lerp(0.85, 1.45, e2) + (vnoiseJS(t * 11 + 40) - 0.5) * 0.35;
@@ -1768,6 +1884,8 @@ export default function Mikdash() {
         if (k.KeyS || k.ArrowDown) f -= 1;
         if (k.KeyA || k.ArrowLeft) s -= 1;
         if (k.KeyD || k.ArrowRight) s += 1;
+        f += nav.u - nav.d;                       // the on-screen arrows walk
+        player.yaw += (nav.r - nav.l) * dt * 1.9; // and turn
         const mag = Math.hypot(f, s);
         if (mag > 0.01) {
           const speed = (k.ShiftLeft || k.ShiftRight ? 42 : 22) * dt / Math.max(1, mag);
@@ -1787,25 +1905,27 @@ export default function Mikdash() {
         player.pos.y += (gy - player.pos.y) * Math.min(1, dt * 10);
         // gentle head-bob while moving
         if (mag > 0.01) player.pos.y += Math.sin(t * 9) * 0.08;
-      } else if (!orbit.dragging) {
-        orbit.theta += orbit.drift;
+      } else {
+        // orbit mode: the same arrows swing and tilt, and the keyboard joins in
+        const k = player.keys;
+        const nx = nav.r - nav.l + (k.ArrowRight || k.KeyD ? 1 : 0) - (k.ArrowLeft || k.KeyA ? 1 : 0);
+        const ny = nav.d - nav.u + (k.ArrowDown || k.KeyS ? 1 : 0) - (k.ArrowUp || k.KeyW ? 1 : 0);
+        const nz = nav.in - nav.out + (k.Equal || k.NumpadAdd ? 1 : 0) - (k.Minus || k.NumpadSubtract ? 1 : 0);
+        if (nx) orbit.theta += nx * dt * 0.8;
+        if (ny) orbit.phi = Math.max(0.1, Math.min(1.46, orbit.phi + ny * dt * 0.6));
+        if (nz) orbit.radius = Math.max(80, Math.min(1500, orbit.radius - nz * dt * 560));
+        if (!orbit.dragging && !nx && !ny && !nz) orbit.theta += orbit.drift;
       }
       applyCamera();
 
       // ── fire ──
       const day = 1 - e2;
-      flameOuter.uniforms.uTime.value = t;
-      flameInner.uniforms.uTime.value = t * 1.25;
-      flameCore.uniforms.uTime.value = t * 1.1;
-      flameHeart.uniforms.uTime.value = t * 1.6;
-      flameOuter.uniforms.uDay.value = day;
-      flameInner.uniforms.uDay.value = day;
-      flameCore.uniforms.uDay.value = day;
-      flameHeart.uniforms.uDay.value = day;
-      flameOuter.mesh.rotation.y = t * 0.4;
-      flameInner.mesh.rotation.y = -t * 0.55;
-      flameCore.mesh.rotation.y = t * 0.72;
-      flameHeart.mesh.rotation.y = -t * 0.95;
+      for (let fi = 0; fi < flames.length; fi++) {
+        const f = flames[fi];
+        f.uniforms.uTime.value = t * f.ts;
+        f.uniforms.uDay.value = day;
+        f.mesh.rotation.y = t * f.rot;
+      }
       blueSparks.forEach((sp) => {
         const u = sp.userData;
         const life = (t * u.sp + u.ph) % 1;
@@ -1825,10 +1945,10 @@ export default function Mikdash() {
         const r = u.r * (1 - life * 0.75);
         sp.position.set(
           AX + Math.cos(u.a + t * 0.8) * r + u.drift * life * 3,
-          TOP + 16.5 + life * 17,
+          TOP + 16.5 + life * 24,
           Math.sin(u.a + t * 0.8) * r
         );
-        const sc = (1 - life) * rndCache(u.ph) * 3.4 + 0.5;
+        const sc = (1 - life) * rndCache(u.ph) * 4.1 + 0.5;
         sp.scale.set(sc, sc * 1.35, 1);
         sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.2, 0.78, e2);
       });
@@ -1837,13 +1957,31 @@ export default function Mikdash() {
         const life = ((t * u.sp + u.ph) % 1);
         sp.position.set(
           AX + Math.sin(t * 0.6 + u.off) * u.sway * life,
-          TOP + 26 + life * 58,
+          TOP + 33 + life * 58,
           Math.cos(t * 0.5 + u.off) * u.sway * life
         );
         const sc = 4 + life * 16;
         sp.scale.set(sc, sc, 1);
         sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.42, 0.16, e2);
       });
+      for (let i = 0; i < dustPool.length; i++) {
+        const sp = dustPool[i];
+        if (!sp.visible) continue;
+        const u = sp.userData;
+        u.life -= dt * 0.8;
+        if (u.life <= 0) { sp.visible = false; sp.material.opacity = 0; continue; }
+        u.v.y -= dt * 11;                       // gold dust falls back to the court
+        sp.position.addScaledVector(u.v, dt);
+        const sc = u.sc * (0.35 + u.life);
+        sp.scale.set(sc, sc, 1);
+        sp.material.opacity = Math.min(1, u.life * 1.5);
+      }
+      for (let i = 0; i < stepMeshes.length; i++) {
+        const m = stepMeshes[i].material;
+        if (m.emissiveIntensity > 0.001) m.emissiveIntensity *= Math.pow(0.02, dt);
+        else m.emissiveIntensity = 0;
+      }
+
       kitchenSmokes.forEach((sm) => {
         const cyc = (t * 0.14 + sm.userData.ph) % 1;
         sm.position.set(sm.userData.x + Math.sin(t + sm.userData.ph * 9) * cyc * 3, 6 + cyc * 26, sm.userData.z);
@@ -1995,6 +2133,37 @@ export default function Mikdash() {
   }, [loaded, storageReady]);
   useEffect(() => { if (walkMode) apiRef.current.enterWalk?.(); }, [walkMode]);
 
+  // A held button sets a flag the render loop reads, so pressing glides the
+  // camera instead of stepping it. The window-level release is the safety net:
+  // lift a finger outside the button and nothing keeps moving.
+  const NAV_KEYS = ["l", "r", "u", "d", "in", "out"];
+  useEffect(() => {
+    const release = () => NAV_KEYS.forEach((k) => apiRef.current.nav?.(k, false));
+    window.addEventListener("pointerup", release);
+    window.addEventListener("pointercancel", release);
+    window.addEventListener("blur", release);
+    return () => {
+      window.removeEventListener("pointerup", release);
+      window.removeEventListener("pointercancel", release);
+      window.removeEventListener("blur", release);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const hold = (k) => ({
+    onPointerDown: (e) => { e.preventDefault(); apiRef.current.nav?.(k, true); },
+    onPointerUp: () => apiRef.current.nav?.(k, false),
+    onPointerLeave: () => apiRef.current.nav?.(k, false),
+    onContextMenu: (e) => e.preventDefault(),
+  });
+  const navStyle = {
+    width: 40, height: 40, display: "grid", placeItems: "center",
+    fontFamily: "'Frank Ruhl Libre', serif", fontSize: 16, lineHeight: 1,
+    background: "rgba(30,24,12,.82)", color: "#e9d9a8",
+    border: "1px solid rgba(212,164,55,.42)", borderRadius: 12,
+    cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)",
+    userSelect: "none", touchAction: "none", padding: 0,
+  };
+
   const allFound = found.length === DISCOVERIES.length;
 
   return (
@@ -2007,6 +2176,11 @@ export default function Mikdash() {
         .panel { animation: rise .45s cubic-bezier(.2,.8,.3,1) both; }
         .chip { transition: all .2s ease; }
         .chip:hover { transform: translateY(-1px); }
+        .navbtn { transition: transform .12s ease, background .15s ease, border-color .15s ease; }
+        .navbtn:hover { transform: translateY(-1px); background: rgba(58,46,20,.92); border-color: rgba(212,164,55,.75); }
+        .navbtn:active { transform: translateY(1px) scale(.96); background: linear-gradient(135deg,#f3e6c0,#e0cd97); color: #4a3a18; }
+        .navbtn:focus-visible { outline: 2px solid #ffd97a; outline-offset: 2px; }
+        @keyframes countPop { 0% { transform: scale(1); } 38% { transform: scale(1.32); color: #ffd97a; } 100% { transform: scale(1); } }
       `}</style>
 
       <div ref={mountRef} style={{ position: "absolute", inset: 0, cursor: walkMode ? "crosshair" : "grab" }} />
@@ -2045,7 +2219,7 @@ export default function Mikdash() {
       <div style={{ position: "absolute", top: 18, right: 16, display: "flex", flexDirection: "column", gap: 9, alignItems: "flex-end" }}>
         <div style={{ background: "rgba(30,24,12,.85)", backdropFilter: "blur(6px)", borderRadius: 14, padding: "8px 15px", color: "#f0e6cd", border: "1px solid rgba(212,164,55,.5)", boxShadow: "0 6px 24px rgba(0,0,0,.3)", textAlign: "center" }}>
           <div style={{ fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: 0.7, fontFamily: "'Frank Ruhl Libre', serif" }}>נסתרות</div>
-          <div style={{ fontSize: 21, fontWeight: 700, fontFamily: "'Frank Ruhl Libre', serif", ...(allFound ? { color: "#ffd24a", animation: "glowPulse 2s infinite" } : {}) }}>
+          <div key={found.length} style={{ fontSize: 21, fontWeight: 700, fontFamily: "'Frank Ruhl Libre', serif", animation: "countPop .55s ease", ...(allFound ? { color: "#ffd24a", animation: "countPop .55s ease, glowPulse 2s infinite .55s" } : {}) }}>
             {found.length} / {DISCOVERIES.length}
           </div>
         </div>
@@ -2064,6 +2238,28 @@ export default function Mikdash() {
         <button className="chip" onClick={() => setHints((h) => !h)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {hints ? "Hide hints" : "רמזים"}
         </button>
+      </div>
+
+      {/* On-screen navigation, for anyone who would rather not drag or scroll */}
+      <div style={{ position: "absolute", left: 16, bottom: 58, display: "grid", gridTemplateColumns: "repeat(3, 40px)", gap: 6, zIndex: 5 }}>
+        <div />
+        <button className="navbtn" style={navStyle} {...hold("u")} title={walkMode ? "Walk forward" : "Tilt up"} aria-label={walkMode ? "Walk forward" : "Tilt up"}>▲</button>
+        <div />
+        <button className="navbtn" style={navStyle} {...hold("l")} title={walkMode ? "Turn left" : "Swing left"} aria-label={walkMode ? "Turn left" : "Swing left"}>◀</button>
+        {walkMode ? <div /> : (
+          <button className="navbtn" style={navStyle} onClick={() => apiRef.current.resetView?.()} title="Back to the opening view" aria-label="Back to the opening view">⌂</button>
+        )}
+        <button className="navbtn" style={navStyle} {...hold("r")} title={walkMode ? "Turn right" : "Swing right"} aria-label={walkMode ? "Turn right" : "Swing right"}>▶</button>
+        <div />
+        <button className="navbtn" style={navStyle} {...hold("d")} title={walkMode ? "Walk back" : "Tilt down"} aria-label={walkMode ? "Walk back" : "Tilt down"}>▼</button>
+        <div />
+        {!walkMode && (
+          <>
+            <button className="navbtn" style={navStyle} {...hold("out")} title="Zoom out" aria-label="Zoom out">−</button>
+            <div />
+            <button className="navbtn" style={navStyle} {...hold("in")} title="Zoom in" aria-label="Zoom in">+</button>
+          </>
+        )}
       </div>
 
       {hints && (
