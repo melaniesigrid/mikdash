@@ -1,8 +1,8 @@
 # מִקְדָּשׁ · MIKDASH
 
 **An explorable 3D Beit HaMikdash — the prophetic floor plan of Yechezkel 40–48
-rendered in the grandeur of a monumental white-stone precinct, with sixteen hidden
-wonders drawn from Tanach, Talmud, and archaeology.**
+rendered in the grandeur of a monumental white-stone precinct, with thirty-six
+hidden wonders drawn from Tanach, Talmud, and archaeology.**
 
 > "מִצִּיּוֹן מִכְלַל יֹפִי אֱלֹהִים הוֹפִיעַ" — Tehillim 50:2
 > "Out of Zion, the perfection of beauty, G-d shone forth."
@@ -14,7 +14,7 @@ and the roadmap toward a full game.
 
 ---
 
-## Current state (v3.4 — "The Opening")
+## Current state (v3.5 — "Thirty-Six")
 
 One self-contained React component: `Mikdash.jsx` (React 18 + Three.js r128,
 no other dependencies, no assets — every texture is generated procedurally at
@@ -35,8 +35,10 @@ and fire are GLSL shaders).
 | The fifteen steps sound | ✅ | Each step carries one degree of the ascent — click it and it rings, flashes, and puffs dust |
 | Gold dust | ✅ | One sprite pool, thrown by anything worth celebrating; the counter pops when it ticks up |
 | First-person walk mode | ✅ | WASD/arrows + drag-look, Shift to run, mobile dual-thumb controls, AABB collision, terrain height function |
-| Animated figures | ✅ | 8 kohanim walking waypoint loops in the azarah; 8 Levites swaying on the fifteen steps |
-| Sixteen wonders quest | ✅ | Sequential unlock with toast guidance + free-explore toggle |
+| Animated figures | ✅ | 12 kohanim walking waypoint loops in the azarah; 6 Levites swaying on the fifteen steps — eighteen who answer when clicked |
+| Thirty-six nistarot quest | ✅ | 18 rimonim + 18 wonders, sequential unlock with toast guidance + free-explore toggle |
+| A ring of light on everything | ✅ | The rimonim float in one; the wonders, which are architecture and cannot float, carry one at their feet. Both hide once found |
+| The Heichal is shut, and says so | ✅ | Striking the cedar doors answers — הַהֵיכָל סָגוּר — instead of leaving a visitor pressing at a wall. The interior is the next thing being built |
 | The pesichah (opening) | ✅ | A first-visit card that teaches the ring-of-light affordance and names where wonder #1 waits; "Show me the first" flies the camera in. Shown once, ever |
 | First-step rescue | ✅ | 40s with nothing found and the beacon rises over wonder #1 unasked; the banner's *Show me* gleams until the first find |
 | Persistent progress | ✅ | `window.storage` key `mikdash-progress-v3` (found list + day/night pref) |
@@ -89,6 +91,27 @@ and fire are GLSL shaders).
 | Trumpeting Stone inscription (real artifact, 1968) | Israel Museum, IAA 78-1439 |
 | Great shofar of ingathering | Yeshayahu 27:13 |
 | Fire from Heaven vs. built by Mashiach | Rambam Hilchot Melachim 11; Rashi/Tanchuma |
+| Ten miracles in the Mikdash | Avot 5:5 |
+| Thirteen shofar-shaped chests | Shekalim 6:5; 3:2 |
+| Chamber of the Discreet | Shekalim 5:6; Rambam Matnot Aniyim 10:8 |
+| The Claimant's Stone | Bava Metzia 28b |
+| Chamber of Hewn Stone, the Sanhedrin | Middot 5:4; Sanhedrin 88b; Avodah Zarah 8b |
+| A ramp and not steps | Shemot 20:23; Middot 3:3 |
+| The shitin, from the six days of Creation | Sukkah 49a; Yoma 54a |
+| Water Gate and the Shiloach flask | Middot 2:6; Sukkah 48b |
+| Mount Moriah chosen before the building | Divrei HaYamim II 3:1; Bereishit Rabbah 14:8 |
+| Aliyah la'regel, all Israel chaverim | Devarim 16:16; Shekalim 1:1; Chagigah 26a |
+| Ben Katin's wheel and twelve spouts | Yoma 37a; Middot 3:6 |
+| The golden vine over the entrance | Middot 3:8; Josephus, War 5.210 |
+| Willows against the altar on Sukkot | Sukkah 45a |
+| The flute of Simchat Beit HaSho'evah | Sukkah 51a |
+| Trees of healing on the river's banks | Yechezkel 47:12; Sanhedrin 100a |
+| The Shulchan lifted for the pilgrims | Menachot 29a; Chagigah 26b |
+| The lottery that replaced the race | Yoma 22a; Tamid 1:2 |
+| The wood offering and the fifteenth of Av | Ta'anit 26a, 28a, 30b |
+| Red heifer, and the causeway of arches | Bamidbar 19; Parah 3:6; Yoma 14a |
+| The Shechinah never left the Western Wall | Shemot Rabbah 2:2; Shir HaShirim Rabbah 2:9 |
+| Eighteen who answer (kohanim + Levites) | Tamid 1–7; Bikkurim 3:2–4; Arachin 10b–11a; Ta'anit 27b |
 
 **The Divine Name.** In English the House's Maker is written **Hashem**, or
 **G-d** where a translation needs the word. Never "God" spelled out. Halachically
@@ -102,13 +125,27 @@ The same rule bars any Hebrew Divine Name from appearing in the source or the UI
 
 **Content rule:** all hidden-object language uses Jewish framing only —
 *nistarot* (hidden things), *rimonim* (pomegranates), wonders. No
-"easter egg" terminology anywhere in UI or code comments. Hidden-content
-counts stay in **multiples of 8** (currently 16 = 8 rimonim + 8 wonders;
-next tier would be 24).
+"easter egg" terminology anywhere in UI or code comments.
+
+**The number rule.** Every countable collection in this House is a **multiple of
+18** — חי, life. Currently 36 nistarot (18 rimonim + 18 wonders), 18 figures who
+answer (12 kohanim + 6 Levites), 18 doves. Thirty-six is חי twice and the count
+of the hidden righteous, which is the right number for hidden things. The next
+tier is 54. Two counts are fixed by their sources and are *not* subject to this
+rule: the **fifteen** steps (Middot 2:5) and the **eleven** spices of the ketoret
+(Keritot 6a) — a source always outranks the pattern.
+
+**Ids are not indices.** `DISCOVERIES[0..15]` is the original circuit and must
+never be reordered or inserted into: progress persists as a list of indices under
+`mikdash-progress-v3`, so a shuffle would silently hand people the wrong findings.
+New teachings are **appended**. That is why `RIMON_POS` carries an explicit `id`
+per entry (ids 0–7 and 16–25) and the scene keeps a `rimonById` lookup instead of
+indexing the array.
 
 ## Code architecture (single file, ordered top to bottom)
 
-1. **Constants** — `C`, `HALF`, `STORE_KEY`, `DISCOVERIES[16]`, `RIMON_POS[8]`.
+1. **Constants** — `C`, `HALF`, `STORE_KEY`, `DISCOVERIES[36]`,
+   `RIMON_POS[18]` (each `{ id, pos }`), `KOHEN_VOICES[12]`, `LEVI_VOICES[6]`.
 2. **Procedural textures** — `ashlar`, `seaWaveMarble`, `marbleTex`, `goldTex`,
    `cedarTex`, `groundTexture`, `pavingTex`, `cloudTex`, `fireSpriteTex`,
    `smokeSpriteTex`, `plaqueTex` (the לבית התקיעה inscription).
@@ -147,7 +184,12 @@ next tier would be 24).
     releases every flag, so lifting a finger off a button cannot leave the
     camera drifting. `resetView()` returns to `HOME`.
 9. **Wonders** — `clickables[]`; every findable object carries
-   `userData.id ∈ [0..15]`. Picking walks up the parent chain (`findId`).
+   `userData.id ∈ [0..35]`. Picking walks up the parent chain (`findId`).
+   `halos[]` lays a turning ring of light at the foot of every wonder that is
+   not a rimon (a rimon floats inside its own ring), hidden once found. The
+   cedar doors of the Ulam are in `clickables` too, carrying
+   `userData.sealed` instead of an id — `onUp` checks for that first and
+   answers with a toast.
    Quest gating lives in `collect(id)`. The fifteen steps are in `clickables`
    too, but carry `userData.step` instead of an id — `onUp` checks for that
    first, sounds the note, flashes the step's own cloned material and puffs
@@ -220,12 +262,29 @@ repo and that string has to move with it, or every asset 404s.
 
 ## Roadmap
 
-**Next (v4):**
-- [ ] Avodah quest chain: after the sixteen, a second sequence of 8 —
-      follow a kohen through a morning's service (terumat hadeshen → arrangement
-      of the ma'aracha → ketoret → menorah), learning each station.
-- [ ] Interior of the Heichal (currently sealed): shulchan, menorah, incense
-      altar, the paroches; entry permitted only in quest order.
+**Next (v4) — going inside.** This is the most-asked-for thing and the House
+does not do it yet: the Heichal is solid geometry with a collider across the
+whole platform, so a visitor can walk up to the doors and no further. Since
+v3.5 the doors at least answer when struck. The work to open them:
+
+- [ ] Hollow the Heichal: replace the solid `wave` block with walls, floor and
+      ceiling, and cut the doorway. The collider `addCollider(-238, -106, -45, 45)`
+      has to become a wall-by-wall set, or a walker will still bounce off the
+      inside of the House.
+- [ ] Interior lighting: no daylight reaches it — the splayed windows
+      (Melachim I 6:4, narrow outside and wide within) plus the menorah are the
+      only sources. The environment easing (`env.cur → env.target`) drives every
+      light in the scene, so an interior needs its own term or it will go dark
+      with the sky.
+- [ ] Furnish it: shulchan on the north, menorah on the south (Yoma 51b),
+      the golden incense altar between them, and the paroches at the west.
+- [ ] Stop at the paroches. The Kodesh HaKodashim stays closed — see non-goals.
+      The paroches itself is the wall, and clicking it should teach why.
+- [ ] Gate entry to quest order, and let a kohen walk in ahead of the visitor
+      so nobody enters alone.
+- [ ] Avodah quest chain: after the thirty-six, a sequence of 18 — follow a
+      kohen through a morning's service (terumat hadeshen → arrangement of the
+      ma'aracha → ketoret → menorah), learning each station.
 - [x] Ambient audio bed: wind, distant Levite song (generated), fire crackle. *(v3.1)*
 - [ ] Shadow/perf pass: merge static geometry with `BufferGeometryUtils`,
       instanced columns, LOD for olive trees.
@@ -248,7 +307,8 @@ of Hashem; spelling out the Divine Name in English; combat or violence mechanics
 
 - Measurements: cite a source (pasuk / daf / Josephus §) in a comment beside
   any dimension you add — the codebase should read like a sourced sefer.
-- Multiples of 8 for any new collection of hidden content.
+- Multiples of 18 for any new collection — see "The number rule" above. Append
+  new teachings to `DISCOVERIES`; never insert or reorder.
 - Every new wonder needs: geometry, a `DISCOVERIES` entry (title in Hebrew +
   English, teaching text with source, hint), optional sound/animation payload
   in the `onUp` switch, and — if state must persist — handling in `markFound`.

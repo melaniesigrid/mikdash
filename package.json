@@ -1,8 +1,8 @@
 {
   "name": "mikdash",
   "private": true,
-  "version": "0.3.4",
-  "description": "An explorable 3D Beit HaMikdash — Yechezkel 40–48 in monumental white stone, with sixteen hidden wonders",
+  "version": "0.3.5",
+  "description": "An explorable 3D Beit HaMikdash — Yechezkel 40–48 in monumental white stone, with thirty-six hidden wonders",
   "type": "module",
   "scripts": {
     "dev": "vite",

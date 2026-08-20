@@ -4,15 +4,16 @@ import * as THREE from "three";
 /*
   ═══════════════════════════════════════════════════════════════════════════
    בֵּית הַמִּקְדָּשׁ — MIKDASH: an explorable Temple
-   v3.3 — "Gold, Fire, and Fifteen Notes"
+   v3.5 — "Thirty-Six"
 
    · Yechezkel 40–48 floor plan at 1 unit = 1 amah, in monumental white stone
    · GLSL sky (day ⇄ night timelapse), GLSL noise-displaced altar fire
      with a blue heart, built to read against sunlit stone as well as night
    · First-person walk mode with collision + ground-height terrain
    · Kohanim walking the inner court, Levites swaying on the fifteen steps
-   · Sixteen hidden wonders (8 silver rimonim + 8 living wonders) that
-     unlock IN SEQUENCE as a quest — with free-explore toggle
+   · Thirty-six hidden nistarot — chai doubled: 18 silver rimonim and 18
+     living wonders — that unlock IN SEQUENCE as a quest, with a free-explore
+     toggle. Every countable collection in this House is a multiple of 18.
    · A synthesized ambient bed — wind over the mountain, the fire of the
      ma'aracha, the Levites' ascent — mixed by where the eye stands
    · On-screen navigation pad — orbit, tilt, zoom, walk — for anyone who
@@ -45,10 +46,33 @@ const DISCOVERIES = [
   { kind: "wonder", title: "קטורת — The Eleven Spices", text: "Keritot 6a counts eleven spices in the ketoret — including chelbenah, foul-smelling alone, deliberately included: a fast that excludes the sinners of Israel is no fast at all. And the house of Avtinas guarded one secret: ma'aleh ashan, the herb that made the smoke rise in a single straight column, unbent by any wind.", hint: "A small golden table before the House holds eleven fragrances. Wake them." },
   { kind: "wonder", title: "שערי ניקנור — The Doors That Crossed the Sea", text: "Yoma 38a: Nicanor brought two bronze doors from Alexandria. A storm rose; the sailors threw one into the sea — and it surfaced beneath the ship at Akko (some say the sea simply refused to keep it). All the Temple's gates were later plated gold, except Nicanor's: the miracle-bronze gleamed like gold on its own. You have just opened them.", hint: "Bronze that crossed the sea guards the top of the fifteen steps." },
   { kind: "wonder", title: "לבית התקיעה — The Trumpeting Stone", text: "In 1968, archaeologists at the Temple Mount's southwest corner found a fallen parapet stone carved: 'לבית התקיעה להב…' — 'To the place of trumpeting, to procl[aim]…' From that height a kohen sounded the trumpet each Friday at dusk: fields emptied, shops shuttered, and Shabbat descended on Jerusalem. The stone is real — it waits in the Israel Museum, and here, restored to its corner.", hint: "At the southwest height, a stone announces Shabbat." },
+  // ── The deeper eighteen. Ids 0–15 are the opening circuit and never move —
+  // progress is stored by index, so anything new is appended, never inserted.
+  { kind: "rimon", title: "עשרה נסים — Ten Miracles in the House", text: "Avot 5:5 counts them: no woman ever miscarried from the scent of the sacred meat, and the meat never spoiled; no fly was seen in the slaughterhouse; the Kohen Gadol never became impure on Yom Kippur; rain never put out the fire of the woodpile; no wind ever bent the column of smoke; no disqualification was ever found in the omer, the two loaves, or the showbread; the people stood pressed together and bowed with room to spare; no snake or scorpion ever injured anyone in Jerusalem; and no one ever said to his fellow, “the place is too narrow for me to stay the night in Jerusalem.”", hint: "Ten of them — and one waits high above the golden ridge of the Royal Stoa." },
+  { kind: "rimon", title: "שלושה עשר שופרות — The Thirteen Chests", text: "Shekalim 6:5: thirteen chests stood in the Mikdash, each with a mouth narrow above and wide below — shaped like a shofar, so that no hand could reach back in and take out what had been given. Each was labeled for its purpose: the shekalim, the bird-offerings, the incense, the gold of the kapporet, freewill gifts. And the men who emptied them wore garments with no hem, no cuff and no fold, so that no one could ever suspect them (Shekalim 3:2).", hint: "Among the northern columns, thirteen mouths that opened only downward." },
+  { kind: "rimon", title: "לשכת חשאים — The Chamber of the Discreet", text: "Shekalim 5:6: in it the discreet would place their gifts in secret, and the poor of good family would take from it in secret. The Rambam ranks this second only to a loan that prevents poverty: the giver does not know who receives, and the receiver does not know who gave (Hilchot Matnot Aniyim 10:8). A whole room built so that no one would ever have to say thank you.", hint: "In the far northeastern kitchen court, a gift that no one signed." },
+  { kind: "rimon", title: "אבן הטוען — The Claimant's Stone", text: "Bava Metzia 28b: there was a stone in Jerusalem — whoever had lost something went there, and whoever had found something went there. The finder stood and announced, the loser stood and gave the identifying signs, and took back what was his. An entire city's honesty, organized around one rock in the open air.", hint: "On the eastern pavement, a plain stone that gives back what was lost." },
+  { kind: "rimon", title: "לשכת הגזית — The Chamber of Hewn Stone", text: "Middot 5:4: the Great Sanhedrin sat in the Chamber of Hewn Stone — seventy-one elders in a half-circle, so that each one could see the faces of all the others. From here Torah went out to all Israel (Sanhedrin 88b). And when murderers grew many, the Sanhedrin rose and left the chamber, so that capital cases could no longer be tried (Avodah Zarah 8b): they would rather leave the room than kill in it.", hint: "Along the southern edge of the inner court, where seventy-one sat in a half circle." },
+  { kind: "rimon", title: "הכבש — A Ramp, and Not Steps", text: "“Do not ascend My altar by steps, so that your nakedness not be uncovered upon it” (Shemot 20:23) — so the altar is climbed by a ramp of thirty-two amot (Middot 3:3). Rashi asks what nakedness a robed kohen could uncover, and answers: the stones have no feelings, and still the Torah asks that they not be treated dismissively. How much more so a human being, who is in the image of his Maker.", hint: "At the foot of the long incline that climbs the burning mountain." },
+  { kind: "rimon", title: "השיתין — The Drains Beneath the Altar", text: "Sukkah 49a: the shitin — the shafts beneath the altar's southwestern corner into which the libations poured — were created during the six days of Creation, and they descend to the deep. Nearby, a kohen once noticed one paving stone that sat differently from its fellows; before he could finish telling his friend, his soul left him, and they knew for certain that the Ark had been hidden underneath (Yoma 54a; Shekalim 6:2).", hint: "At the altar's southwestern corner, where the wine goes down and does not come back." },
+  { kind: "rimon", title: "שער המים — The Water Gate", text: "Middot 2:6 names the gates of the azarah, and through this one they carried up the golden flask drawn from the Shiloach for the water libation of Sukkot (Sukkah 48b). Its name, says the Talmud, is also a promise: from beneath this threshold the future water will come out (Yechezkel 47:1). What was carried in each dawn will one day flow out on its own.", hint: "South of the inner court, where the flask was carried up each dawn of Sukkot." },
+  { kind: "rimon", title: "הר המוריה — Mount Moriah", text: "“And Shlomo began to build the House of Hashem in Jerusalem on Mount Moriah, where He appeared to David his father” (Divrei HaYamim II 3:1). Here Avraham bound Yitzchak and named the place “Hashem will see”; here Yaakov slept and saw the ladder; here, say Chazal, the dust of Adam was taken from the very ground of his atonement (Bereishit Rabbah 14:8). The mountain was chosen long before the first stone was cut.", hint: "From the eastern stairs, turn and look back at the mountain itself." },
+  { kind: "rimon", title: "שלוש רגלים — Three Times a Year", text: "“Three times a year all your males shall appear before Hashem your G-d in the place He will choose” (Devarim 16:16). The roads and the mikvaot were repaired in Adar for the pilgrims (Shekalim 1:1); Jerusalem's houses were never rented out, because the city belonged to everyone who came; and for the days of the festival all of Israel counted as chaverim, trusted as pure (Chagigah 26a). A city that grew to fit whoever arrived.", hint: "On the broad southern stairs, worn smooth by the feet of three festivals." },
+  { kind: "wonder", title: "מוכני בן קטין — The Wheel of the Laver", text: "Yoma 37a: Ben Katin made a wheel for the kiyor, so that it could be lowered into its well overnight — water left standing until morning would have been disqualified, and the kohanim would have had nothing to sanctify their hands with at dawn. He also made it twelve spouts, one for each kohen of the daily offering (Middot 3:6). A man is remembered forever in the Mishnah for a piece of hardware that let the work begin on time.", hint: "Beside the bronze laver, an axle and a wheel still remember one man's name." },
+  { kind: "wonder", title: "גפן של זהב — The Golden Vine", text: "Middot 3:8: a vine of gold stood over the entrance of the Heichal, trained upon posts. Whoever donated a leaf, a berry or a whole cluster brought it and hung it there, and the kohanim hammered it onto the vine. Josephus (War 5.210) says the clusters hung the height of a man. It grew the way nothing else grows — only by being given away.", hint: "Above the cedar doors of the House, something is growing that no rain ever fed." },
+  { kind: "wonder", title: "ערבה — The Willows of the Altar", text: "Sukkah 45a: they brought willow branches eleven amot tall from Motza in the valley below, and stood them upright against the sides of the altar with their tops bent over it, and circled the altar once on each day of Sukkot and seven times on the seventh. The willow has no taste and no fragrance — no Torah and no good deeds, says the Midrash — and it is the one branch that leans directly on the altar.", hint: "Tall branches lean against the altar: the plant with neither taste nor scent." },
+  { kind: "wonder", title: "חליל — The Flute of the Water-Drawing", text: "Sukkah 51a: whoever has not seen the rejoicing of Beit HaSho'evah has never seen rejoicing in his life. The flute was played for five and six days together; golden lamps with four bowls each lit the courtyards of Jerusalem until there was no courtyard without light; pious men danced with burning torches, juggling them; and the Levites stood on the fifteen steps with harps, lyres, cymbals and every instrument of song. They did not sleep for the whole festival.", hint: "By the fifteen steps a flute is waiting for a night nobody sleeps through." },
+  { kind: "wonder", title: "עלהו לתרופה — Leaves for Healing", text: "Yechezkel 47:12: on both banks of the river every tree of food will grow; its leaf will not wither and its fruit will not fail; each month it bears new fruit, because its waters come out from the Mikdash — its fruit for food, and its leaf for healing. Chazal read לתרופה as two words: to unlock what is shut, and to loosen the tongue of the mute (Sanhedrin 100a).", hint: "At the river's edge, one tree whose leaf was never meant for eating." },
+  { kind: "wonder", title: "שולחן לחם הפנים — The Table Lifted Up", text: "Menachot 29a and Chagigah 26b: on each of the three festivals the kohanim lifted the golden Shulchan and showed the pilgrims the showbread upon it, saying — see how beloved you are before Hashem: it is taken up as warm as it was on the day it was set down. Twelve loaves, two stacks of six, and in all those years no week's bread ever went stale.", hint: "Before the House stands a golden table, raised so the crowd could see the bread." },
+  { kind: "wonder", title: "הקלפי — The Lottery", text: "Yoma 22a: at first, whoever wished simply ran up the ramp, and the swifter of the two won the service. Once two ran together, and one pushed the other, and he fell and broke his leg. When the court saw the danger, they instituted the lottery: the officer named a number, and they counted around the circle by raised fingers (Tamid 1:2). Even the eagerness to serve needed a fence around it.", hint: "In the court a wooden box holds the fairest way ever found to hand out honour." },
+  { kind: "wonder", title: "קרבן עצים — The Offering of Wood", text: "Ta'anit 26a lists the nine days on which named families brought wood for the altar. Ta'anit 28a tells why they were honoured: an enemy government once posted watchmen on the roads so that no one could bring wood up to Jerusalem, and men hollowed logs into ladder-rungs and carried them past the guards, saying they were going to fetch chicks from a dovecote. The last of those days, the fifteenth of Av, is called one of the two happiest days Israel ever had (Ta'anit 30b).", hint: "Split fig-logs are stacked in the court, and every stack was carried by a family." },
+  { kind: "wonder", title: "פרה אדומה — The Red Heifer and the Causeway", text: "Bamidbar 19: the ashes of a heifer entirely red, that never bore a yoke, purify whoever touched the dead — and make impure the pure kohen who prepares them. Shlomo said: I thought I could become wise in it, but it is far from me (Yoma 14a). Parah 3:6: it was burned on Har HaMishcha, and a causeway was built from the Temple Mount across to it, arches upon arches, an arch above each pier, for fear of a grave hidden in the ground below.", hint: "East, beyond the sealed gate, a raised causeway crosses to something russet and red." },
+  { kind: "wonder", title: "הכותל המערבי — The Wall That Remained", text: "Shemot Rabbah 2:2: the Shechinah has never departed from the Western Wall. Shir HaShirim Rabbah 2:9 reads “behold, He stands behind our wall” — behind the western wall of the Mikdash — because Hashem swore to it that it would never be destroyed. Herod's great courses are still standing at the western retaining wall, and the notes pressed into their joints are still being written today.", hint: "Outside the western retaining wall, great courses still stand — and people still write to them." },
 ];
 
-// Eight kohanim, each at a station of the morning avodah, and four Levites on
-// the steps. Every line carries its source, like every dimension does.
+// Eighteen who answer — twelve kohanim at the stations of the morning avodah
+// and six Levites on the steps. Every line carries its source, like every
+// dimension does.
 const KOHEN_VOICES = [
   { name: "תרומת הדשן", role: "The lifting of the ashes",
     text: "Before first light I went up in linen and lifted one shovelful of ash from the fire, and set it down beside the altar. Vayikra 6:3–4. The day's first act is to carry away what yesterday burned.", src: "Vayikra 6:3–4 · Tamid 1:2" },
@@ -66,6 +90,14 @@ const KOHEN_VOICES = [
     text: "Twelve loaves set out each Shabbat and lifted the next — and they came away as warm as the hour they were baked. That warmth was the sign, week after week, that the House was not empty.", src: "Vayikra 24:5–9 · Chagigah 26b · Menachot 29a" },
   { name: "ברכת כהנים", role: "The priestly blessing",
     text: "We stand on the steps of the Ulam, hands lifted and fingers parted, and say the Name as it is written. Not our blessing — we are only the hands. וְשָׂמוּ אֶת שְׁמִי, and I shall bless them.", src: "Bamidbar 6:23–27 · Sotah 38a" },
+  { name: "פתיחת השערים", role: "The opening of the gates",
+    text: "It takes several of us to draw back the great door, and they say the sound of it carries as far as Jericho. Nothing about this House was built to be done quietly, or alone.", src: "Tamid 3:7–8 · Yoma 39b" },
+  { name: "הטבת הנרות", role: "The trimming of the lamps",
+    text: "I clean the cups and lay fresh wicks and oil, the same measure in each. And still the westernmost lamp is burning when I come back at dusk — from it I kindle all the rest.", src: "Tamid 3:9 · Shabbat 22b" },
+  { name: "בגדי כהונה", role: "The garments",
+    text: "Four garments of white linen, and nothing on me that is my own — not my family's wealth, not my name. While the garments are upon us the priesthood is upon us; without them, we are ordinary men.", src: "Shemot 28:2 · Zevachim 17b" },
+  { name: "ביכורים", role: "The first fruits",
+    text: "They come up with the ox before them, its horns overlaid with gold and an olive wreath on its head, and a flute playing all the way. The craftsmen of Jerusalem stand up as they pass — work stops for farmers carrying figs.", src: "Bikkurim 3:2–4" },
 ];
 
 const LEVI_VOICES = [
@@ -77,17 +109,34 @@ const LEVI_VOICES = [
     text: "Every day has its psalm, sung over the wine libation, and the trumpets sound between its parts while all Israel bows. Today is not the same song as yesterday.", src: "Tamid 7:3–4" },
   { name: "אין שירה", role: "No song without an offering",
     text: "There is no song except over a sacrifice, and no sacrifice complete without song. The two were never meant to stand apart.", src: "Arachin 11a" },
+  { name: "מעמדות", role: "The men who stand by",
+    text: "A person's offering cannot be brought while he is not standing over it — so all Israel was divided into watches, and while one watch served here the rest read the account of Creation at home. Nobody was meant to be absent from this.", src: "Ta'anit 26a · Ta'anit 27b" },
+  { name: "המגרפה", role: "The instrument no one could speak over",
+    text: "When it sounded, no one in Jerusalem could hear his fellow speak. Three things it announced: a kohen entering to burn the ketoret, his brothers coming to bow, and the Levites rising to sing.", src: "Tamid 3:8 · Arachin 10b–11a" },
 ];
 
+// Eighteen rimonim of silver — chai. Each carries the id of its teaching in
+// DISCOVERIES, because the ten deeper ones were appended after the wonders and
+// their ids are not their place in this list.
 const RIMON_POS = [
-  [HALF - 18, 4.2, 0],
-  [150, 2.8, 26],
-  [-4, 12.6, 30],
-  [-40, 15.4, -HALF + 34],
-  [-HALF + 14, 2.6, -70],
-  [-165, 82, 10],
-  [-HALF + 30, 2.6, HALF - 30],
-  [40, 26, HALF - 58],
+  { id: 0, pos: [HALF - 18, 4.2, 0] },
+  { id: 1, pos: [150, 2.8, 26] },
+  { id: 2, pos: [-4, 12.6, 30] },
+  { id: 3, pos: [-40, 15.4, -HALF + 34] },
+  { id: 4, pos: [-HALF + 14, 2.6, -70] },
+  { id: 5, pos: [-165, 82, 10] },
+  { id: 6, pos: [-HALF + 30, 2.6, HALF - 30] },
+  { id: 7, pos: [40, 26, HALF - 58] },
+  { id: 16, pos: [40, 46, HALF - 58] },       // above the ridge of the Royal Stoa
+  { id: 17, pos: [-90, 8, -HALF + 36] },      // the northern colonnade
+  { id: 18, pos: [HALF - 30, 5, -HALF + 30] },// the northeastern kitchen court
+  { id: 19, pos: [200, 5, -40] },             // the eastern pavement
+  { id: 20, pos: [-40, 16, 97] },             // southern edge of the azarah
+  { id: 21, pos: [28, 17, 8] },               // the foot of the altar ramp
+  { id: 22, pos: [-28, 13, 20] },             // the altar's southwestern corner
+  { id: 23, pos: [-20, 12, 116] },            // south of the inner court
+  { id: 24, pos: [300, 2, -34] },             // the eastern stairs
+  { id: 25, pos: [30, 2, HALF + 50] },        // the southern pilgrim stairs
 ];
 
 // ────────────────────────── procedural textures ──────────────────────────
@@ -1282,12 +1331,14 @@ export default function Mikdash() {
       [[-90, 40], [-60, 75], [0, 80], [40, 60], [10, 30], [-50, 10]],
       [[50, -80], [20, -95], [-30, -80], [-60, -40], [-30, -20], [20, -45]],
       [[-100, -30], [-80, -70], [-40, -90], [-10, -60], [-50, -35], [-85, -5]],
+      [[-120, 62], [-152, 30], [-124, -18], [-92, -52], [-126, -78], [-158, -40]],
+      [[58, -18], [40, 22], [0, 62], [-40, 88], [8, 70], [48, 30]],
     ];
     KOHEN_PATHS.forEach((path, pi) => {
       for (let k = 0; k < 2; k++) {
         const f = makeFigure(0xf3efe2, 0x3a5f9e);
         f.userData.path = path;
-        f.userData.t = (pi * 2 + k) / 8;
+        f.userData.t = (pi * 2 + k) / (KOHEN_PATHS.length * 2);
         f.userData.speed = rnd(0.016, 0.026);
         f.userData.kind = "kohen";
         f.userData.voice = KOHEN_VOICES[(pi * 2 + k) % KOHEN_VOICES.length];
@@ -1296,12 +1347,12 @@ export default function Mikdash() {
       }
     });
     // Levites: standing on the fifteen steps, swaying in song (white with gold sash)
-    for (let l = 0; l < 8; l++) {
+    for (let l = 0; l < 6; l++) {
       const f = makeFigure(0xefe9d6, 0xb8912f);
-      const step = 2 + l;
+      const step = 2 + l * 2;
       const sx = IC_E + (14 - step) * 2.6;
       const sy = IC_H - (step + 1) * (IC_H / 15);
-      f.position.set(sx, sy + 0.6, -28 + l * 8);
+      f.position.set(sx, sy + 0.6, -30 + l * 12);
       f.rotation.y = Math.PI; // facing west, toward the House
       f.userData.kind = "levi";
       f.userData.voice = LEVI_VOICES[l % LEVI_VOICES.length];
@@ -1310,7 +1361,7 @@ export default function Mikdash() {
       figures.push(f);
     }
 
-    // ═══════════ SIXTEEN WONDERS ═══════════
+    // ═══════════ THIRTY-SIX NISTAROT ═══════════
     const clickables = [];
     clickables.push(...stepMeshes);
     clickables.push(...figures);   // the kohanim and Levites will answer
@@ -1318,7 +1369,7 @@ export default function Mikdash() {
     veiledSilver.transparent = true;
     veiledSilver.opacity = 0.28;
 
-    const rimonim = RIMON_POS.map((pos, i) => {
+    const rimonim = RIMON_POS.map(({ id, pos }) => {
       const g = new THREE.Group();
       const already = false;
       const bodyMat = silver.clone();
@@ -1334,7 +1385,7 @@ export default function Mikdash() {
         g.add(spike);
       }
       g.position.set(pos[0], pos[1], pos[2]);
-      g.userData = { id: i, baseY: pos[1] };
+      g.userData = { id, baseY: pos[1] };
       scene.add(g);
       const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.1, 8, 26), new THREE.MeshBasicMaterial({ color: 0xf0f4f9, transparent: true, opacity: 0.45 }));
       ring.rotation.x = Math.PI / 2;
@@ -1345,6 +1396,9 @@ export default function Mikdash() {
       void already;
       return g;
     });
+    // Ids are not indices any more — the deeper rimonim carry ids 16–25.
+    const rimonById = {};
+    rimonim.forEach((g) => { rimonById[g.userData.id] = g; });
 
     const fox = new THREE.Group();
     const foxFur = new THREE.MeshStandardMaterial({ color: 0xc4622d, roughness: 0.85 });
@@ -1467,14 +1521,307 @@ export default function Mikdash() {
     scene.add(plaqueGrp);
     clickables.push(plaqueGrp);
 
+
+    // ═══════════ The ten deeper wonders (ids 26–35) ═══════════
+    // Each one stands beside the thing it teaches about: the laver, the facade,
+    // the altar, the river, the western retaining wall. Measurements carry
+    // their source in a comment, like every other dimension in this House.
+
+    // 26 · מוכני בן קטין — the wheel that lowered the kiyor into its well each
+    // night, so that morning water would not be pasul (Yoma 37a; Middot 3:6).
+    const mukhani = new THREE.Group();
+    mukhani.position.set(-20, IC_H, IC / 2 - 14);
+    for (const s2 of [-1, 1]) box(1.1, 8, 1.1, cedar, s2 * 3.6, 4, 0, mukhani);
+    box(9, 1, 1.2, cedar, 0, 8.4, 0, mukhani);
+    const wheelRim = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.3, 8, 22), bronze);
+    wheelRim.rotation.y = Math.PI / 2;
+    wheelRim.position.y = 6.4;
+    mukhani.add(wheelRim);
+    for (let sp = 0; sp < 6; sp++) {
+      const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 5, 5), bronze);
+      spoke.position.y = 6.4;
+      spoke.rotation.x = (sp / 6) * Math.PI;
+      mukhani.add(spoke);
+    }
+    const axle = cyl(0.3, 0.3, 8.4, 8, bronze, 0, 6.4, 0, mukhani);
+    axle.rotation.z = Math.PI / 2;
+    const crank = cyl(0.24, 0.24, 2.2, 6, bronze, 3.1, 5.1, 0, mukhani);
+    crank.rotation.z = Math.PI / 2;
+    cyl(0.13, 0.13, 5.6, 5, bronze, 0, 3.5, 1.9, mukhani);   // the rope, gone slack
+    cyl(2.6, 2.9, 1.4, 12, stoneDarkM, 0, 0.7, 0, mukhani);  // the mouth of its well
+    mukhani.userData = { id: 26 };
+    scene.add(mukhani);
+    clickables.push(mukhani);
+
+    // 27 · גפן של זהב — the golden vine over the entrance of the Heichal, grown
+    // only by donation: a leaf, a berry, a whole cluster (Middot 3:8;
+    // Josephus, War 5.210 — clusters the height of a man). Hung on the House
+    // itself, so it rides in the temple group T.
+    const vine = new THREE.Group();
+    vine.position.set(24.4, 6 + 41, 0);
+    box(0.9, 0.9, 26, gold, 0, 0, 0, vine);              // the pole it was trained on
+    for (let v = -3; v <= 3; v++) {
+      const stem = cyl(0.16, 0.22, 3.4, 5, gold, 0, -1.7, v * 3.8, vine);
+      stem.rotation.x = v * 0.06;
+      for (let lf = 0; lf < 3; lf++) {                    // leaves, hammered on
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.62, 6, 5), gold);
+        leaf.scale.set(1, 0.18, 1.3);
+        leaf.rotation.y = lf * 1.1 + v;
+        leaf.position.set(0, -0.6 - lf * 1.1, v * 3.8 + (lf % 2 ? 0.7 : -0.7));
+        vine.add(leaf);
+      }
+      if (v % 2 === 0) {                                  // a cluster, man-high
+        for (let b = 0; b < 9; b++) {
+          const berry = new THREE.Mesh(new THREE.SphereGeometry(0.42, 6, 5), gold);
+          const rowY = Math.floor(b / 3);
+          berry.position.set((b % 3 - 1) * 0.55 * (1 - rowY * 0.25), -3.6 - rowY * 0.8, v * 3.8 + (rowY % 2 ? 0.3 : -0.3));
+          vine.add(berry);
+        }
+      }
+    }
+    vine.userData = { id: 27 };
+    T.add(vine);
+    clickables.push(vine);
+
+    // 28 · ערבה — willow branches eleven amot tall from Motza, stood against the
+    // sides of the altar with their heads bent over it (Sukkah 45a).
+    const willowMat = new THREE.MeshStandardMaterial({ color: 0x7f9159, roughness: 0.95 });
+    const aravah = new THREE.Group();
+    aravah.position.set(AX, TOP, 18.6);
+    for (let b = 0; b < 7; b++) {
+      const bx = -12 + b * 4;
+      const branch = cyl(0.14, 0.3, 11, 5, willowMat, bx, 5.4, 0, aravah);   // eleven amot
+      branch.rotation.x = 0.26;
+      for (let lf = 0; lf < 5; lf++) {
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 5, 4), willowMat);
+        leaf.scale.set(0.35, 1.5, 0.35);
+        leaf.rotation.z = (lf % 2 ? 1 : -1) * 0.5;
+        leaf.position.set(bx + (lf % 2 ? 0.6 : -0.6), 3 + lf * 1.7, -0.7 - lf * 0.45);
+        aravah.add(leaf);
+      }
+    }
+    aravah.userData = { id: 28 };
+    scene.add(aravah);
+    clickables.push(aravah);
+
+    // 29 · חליל — the flute of the Simchat Beit HaSho'evah, left at the foot of
+    // the fifteen steps with a torch beside it (Sukkah 51a).
+    const chalil = new THREE.Group();
+    chalil.position.set(IC_E + 40, 0, -30);
+    box(11, 1.2, 4.4, marble, 0, 3.2, 0, chalil);
+    for (const s2 of [-1, 1]) box(1.6, 2.6, 3.6, marble, s2 * 4, 1.3, 0, chalil);
+    const flutePipe = cyl(0.42, 0.46, 7.4, 9, cedar, 0.6, 4.1, 0, chalil);
+    flutePipe.rotation.x = Math.PI / 2;
+    for (let hI = 0; hI < 6; hI++) {
+      const hole = new THREE.Mesh(new THREE.SphereGeometry(0.13, 5, 4), stoneDarkM);
+      hole.position.set(0.6, 4.5, -2.2 + hI * 0.9);
+      chalil.add(hole);
+    }
+    cyl(0.3, 0.36, 6.5, 6, cedar, -3.4, 7, 1.4, chalil);            // the torch they juggled
+    const torchHead = cyl(0.9, 0.5, 1.5, 8, bronze, -3.4, 10.6, 1.4, chalil);
+    void torchHead;
+    chalil.userData = { id: 29 };
+    scene.add(chalil);
+    clickables.push(chalil);
+
+    // 30 · עלהו לתרופה — one of the trees of Yechezkel 47:12, whose leaf is not
+    // for eating: new fruit every month, and the leaf for healing.
+    const healTree = new THREE.Group();
+    healTree.position.set(240, 0, 46);
+    cyl(1.2, 2, 12, 8, cedar, 0, 6, 0, healTree);
+    const crownH = new THREE.Mesh(new THREE.SphereGeometry(7.4, 10, 8), leafMat);
+    crownH.position.y = 15;
+    crownH.castShadow = true;
+    healTree.add(crownH);
+    for (let f2 = 0; f2 < 12; f2++) {
+      const a2 = (f2 / 12) * Math.PI * 2;
+      const fr = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6, 5), fruitMat);
+      fr.position.set(Math.cos(a2) * 6, 13 + (f2 % 3) * 2.2, Math.sin(a2) * 6);
+      healTree.add(fr);
+    }
+    const healLeafMat = new THREE.MeshStandardMaterial({ color: 0x9fd48a, emissive: 0x2e5a22, emissiveIntensity: 0.5, roughness: 0.8 });
+    for (let lf = 0; lf < 9; lf++) {
+      const a2 = (lf / 9) * Math.PI * 2;
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(1.1, 6, 5), healLeafMat);
+      leaf.scale.set(1, 0.2, 1.5);
+      leaf.rotation.y = a2;
+      leaf.position.set(Math.cos(a2) * 8.2, 17.5 + Math.sin(a2 * 2) * 1.2, Math.sin(a2) * 8.2);
+      healTree.add(leaf);
+    }
+    healTree.userData = { id: 30 };
+    scene.add(healTree);
+    clickables.push(healTree);
+
+    // 31 · שולחן לחם הפנים — the Shulchan lifted up on the festivals so the
+    // pilgrims could see the bread (Menachot 29a; Chagigah 26b). Twelve loaves
+    // in two stacks of six (Vayikra 24:6), on the platform before the Ulam.
+    const shulchan = new THREE.Group();
+    shulchan.position.set(-114, IC_H + 6, -26);
+    box(10, 0.9, 5.5, goldPlate, 0, 4.6, 0, shulchan);
+    box(10.6, 0.5, 6.1, gold, 0, 5.1, 0, shulchan);            // the zer, the crown around it
+    for (const hx of [-1, 1]) for (const hz of [-1, 1]) box(0.7, 4.6, 0.7, gold, hx * 4.2, 2.3, hz * 2.1, shulchan);
+    for (const st of [-1, 1]) for (let lo = 0; lo < 6; lo++)
+      box(2.4, 0.55, 3.6, marble, st * 2.7, 5.7 + lo * 0.6, 0, shulchan);   // six and six
+    for (const st of [-1, 1]) {
+      const bowl = cyl(0.7, 0.5, 0.7, 8, gold, st * 2.7, 9.6, 0, shulchan); // the two bowls of levonah
+      void bowl;
+    }
+    shulchan.userData = { id: 31 };
+    scene.add(shulchan);
+    clickables.push(shulchan);
+
+    // 32 · הקלפי — the lottery box that replaced the race up the ramp
+    // (Yoma 22a; Tamid 1:2).
+    const kalpi = new THREE.Group();
+    kalpi.position.set(26, IC_H, -46);
+    box(5, 3.4, 5, stoneDarkM, 0, 1.7, 0, kalpi);
+    box(3.6, 2.8, 3.6, cedar, 0, 4.8, 0, kalpi);
+    const lid = box(4.2, 0.5, 4.2, cedar, 0, 6.4, 0, kalpi);
+    lid.rotation.z = 0.12;
+    cyl(0.4, 0.4, 0.5, 8, gold, 0, 6.8, 0, kalpi);
+    kalpi.userData = { id: 32 };
+    scene.add(kalpi);
+    clickables.push(kalpi);
+
+    // 33 · קרבן עצים — the wood the families carried up, split fig-logs for the
+    // ma'aracha (Ta'anit 26a, 28a; Tamid 2:3 — fig, because it does not smoke).
+    const etzim = new THREE.Group();
+    etzim.position.set(-14, IC_H, -64);
+    for (let row = 0; row < 3; row++) {
+      for (let lg = 0; lg < 4 - row; lg++) {
+        const log = cyl(0.85, 0.95, 9, 7, cedar, 0, 0.9 + row * 1.7, -2.4 + lg * 1.7 + row * 0.85, etzim);
+        log.rotation.z = Math.PI / 2;
+      }
+    }
+    const leaning = cyl(0.8, 0.9, 9, 7, cedar, 3.4, 2.6, 3.4, etzim);
+    leaning.rotation.set(0, 0.4, 1.2);
+    etzim.userData = { id: 33 };
+    scene.add(etzim);
+    clickables.push(etzim);
+
+    // 34 · פרה אדומה — burned on Har HaMishcha, reached by a causeway of arches
+    // upon arches, an arch above each pier, against a grave in the depths
+    // (Parah 3:6; Bamidbar 19).
+    const CWAY_Z = -74, CWAY_Y = LAND_Y + 21;
+    for (let a2 = 0; a2 < 6; a2++) {
+      const px = 330 + a2 * 30;
+      box(6, 21, 6, mega, px, LAND_Y + 10.5, CWAY_Z);        // pier, up to the deck
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(12, 1.5, 6, 14, Math.PI), mega);
+      arch.position.set(px + 15, LAND_Y + 6.5, CWAY_Z);      // an arch above each pier
+      scene.add(arch);
+    }
+    box(200, 3, 14, marble, 425, CWAY_Y, CWAY_Z);
+    for (let r2 = -6; r2 <= 6; r2++) box(4, 2.4, 1.2, white, 425 + r2 * 15, CWAY_Y + 2.7, CWAY_Z + 7);
+    const mound = new THREE.Mesh(new THREE.SphereGeometry(70, 14, 9), new THREE.MeshStandardMaterial({ color: 0xa89769, roughness: 1 }));
+    mound.scale.y = 0.22;
+    mound.position.set(560, LAND_Y - 5, CWAY_Z);
+    mound.receiveShadow = true;
+    scene.add(mound);
+    const parah = new THREE.Group();
+    parah.position.set(536, LAND_Y + 9, CWAY_Z);
+    const redHide = new THREE.MeshStandardMaterial({ color: 0x9c3b22, roughness: 0.9 });
+    const pBody = new THREE.Mesh(new THREE.SphereGeometry(3.2, 10, 8), redHide);
+    pBody.scale.set(1.75, 1, 1); pBody.position.y = 6.4; pBody.castShadow = true; parah.add(pBody);
+    const pNeck = cyl(1.5, 1.9, 3, 8, redHide, 4.9, 6.6, 0, parah);
+    pNeck.rotation.z = -0.5;
+    const pHead = new THREE.Mesh(new THREE.SphereGeometry(1.5, 9, 7), redHide);
+    pHead.scale.set(1.5, 1, 0.95); pHead.position.set(7.4, 6.2, 0); parah.add(pHead);
+    for (const s2 of [-1, 1]) {
+      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 5), redHide);
+      ear.scale.set(0.5, 0.6, 1.5);
+      ear.position.set(6.6, 7, s2 * 1.5);
+      parah.add(ear);
+      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.34, 2.2, 6), redHide);
+      horn.position.set(7, 7.9, s2 * 0.9);
+      horn.rotation.z = -s2 * 0.15;
+      horn.rotation.x = -s2 * 0.5;
+      parah.add(horn);
+    }
+    for (let l2 = 0; l2 < 4; l2++)
+      cyl(0.55, 0.6, 6.4, 6, redHide, -2.8 + (l2 % 2) * 5.4, 3.2, l2 < 2 ? -1.6 : 1.6, parah);
+    const pTail = cyl(0.3, 0.12, 4, 5, redHide, -5.9, 5.6, 0, parah);
+    pTail.rotation.z = 0.5;
+    parah.rotation.y = -2.3;
+    parah.scale.set(1.8, 1.8, 1.8);   // she has to read as a heifer from the Mount
+    parah.userData = { id: 34 };
+    scene.add(parah);
+    clickables.push(parah);
+
+    // 35 · הכותל המערבי — the western retaining wall, whose courses are still
+    // standing, with notes pressed into the joints (Shemot Rabbah 2:2).
+    const kotel = new THREE.Group();
+    kotel.position.set(-(HALF + 46), LAND_Y, 0);
+    for (let course = 0; course < 6; course++) {
+      const ch = course < 2 ? 5.2 : 4.2;
+      const cy2 = course < 2 ? 2.6 + course * 5.2 : 10.4 + (course - 2) * 4.2 + 2.1;
+      for (let blk = -2; blk <= 2; blk++)
+        box(7, ch - 0.35, 26 - course * 1.2, mega, (course % 2) * 0.6, cy2, blk * 26.6 + (course % 2 ? 4 : 0), kotel);
+    }
+    // notes, pressed into the joints — still being written
+    const noteMat = new THREE.MeshStandardMaterial({ color: 0xf7f2e2, roughness: 0.95 });
+    for (let n2 = 0; n2 < 24; n2++) {
+      const note = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.45), noteMat);
+      note.position.set(-3.7, 3.4 + (n2 % 6) * 4.4, -32 + (n2 % 12) * 5.6 + (n2 % 3));
+      note.rotation.x = rnd(-0.3, 0.3);
+      kotel.add(note);
+    }
+    box(30, 1, 120, marble, -18, 0.5, 0, kotel);   // the pavement people stand on
+    kotel.userData = { id: 35 };
+    scene.add(kotel);
+    clickables.push(kotel);
+    addCollider(-(HALF + 50), -(HALF + 42), -66, 66);
+
+    // The cedar doors of the Heichal are shut — and now they say so when they
+    // are struck, instead of leaving a visitor pressing at a wall. The inside
+    // of the House is the next thing being built; see the roadmap in README.
+    dL.userData.sealed = true;
+    dR.userData.sealed = true;
+    clickables.push(dL, dR);
+
+    // ═══════════ Halos ═══════════
+    // The pesichah promises that every hidden thing floats inside a slowly
+    // turning ring of gold light. The rimonim carry their own ring; the
+    // wonders are architecture and cannot float, so the ring is laid at their
+    // feet instead — same promise, same colour, sized to whatever it marks.
+    const halos = [];
+    const addHalo = (obj, radius, yOff = 0.6) => {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(radius, Math.max(0.13, radius * 0.04), 8, 30),
+        new THREE.MeshBasicMaterial({ color: 0xffd97a, transparent: true, opacity: 0.36, depthWrite: false })
+      );
+      ring.rotation.x = Math.PI / 2;
+      const wp = obj.getWorldPosition(new THREE.Vector3());
+      ring.position.set(wp.x, wp.y + yOff, wp.z);
+      scene.add(ring);
+      halos.push({ ring, id: obj.userData.id, base: ring.position.y });
+    };
+    addHalo(fox, 8, 0.4);
+    addHalo(harp, 7, -2.2);
+    addHalo(shofar, 7, 0.4);
+    addHalo(shetiya, 9, 1.2);
+    addHalo(men, 13, 0.4);
+    addHalo(ketoret, 6, 0.4);
+    addHalo(nicanor, 24, 0.5);
+    addHalo(plaqueGrp, 7, 0.4);
+    addHalo(mukhani, 5.5);
+    addHalo(vine, 6, -5.5);
+    addHalo(aravah, 9, 6.6);
+    addHalo(chalil, 6);
+    addHalo(healTree, 9);
+    addHalo(shulchan, 6);
+    addHalo(kalpi, 4.5);
+    addHalo(etzim, 7);
+    addHalo(parah, 12, -0.6);
+    addHalo(kotel, 13, 1.2);
+
     const doves = [];
-    for (let d = 0; d < 8; d++) {
+    for (let d = 0; d < 18; d++) {
       const dove = new THREE.Group();
       const body = new THREE.Mesh(new THREE.SphereGeometry(1.3, 8, 6), marble);
       body.scale.set(1.7, 0.8, 0.8); dove.add(body);
       const wing = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.14, 4.6), marble);
       dove.add(wing);
-      dove.userData = { a: (d / 8) * Math.PI * 2, r: 155 + d * 26, h: 118 + d * 8, sp: 0.13 + d * 0.018, wing };
+      dove.userData = { a: (d / 18) * Math.PI * 2, r: 150 + d * 13, h: 112 + d * 4, sp: 0.13 + d * 0.008, wing };
       scene.add(dove);
       doves.push(dove);
     }
@@ -1559,6 +1906,32 @@ export default function Mikdash() {
         g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2);
         o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 2.1);
+      });
+    };
+
+    // The chalil of the water-drawing: a breathy pipe, ornamented, over a drone.
+    const playFlute = () => {
+      if (!amb.on) return;
+      const ctx = ensureAudio();
+      const drone = ctx.createOscillator(), dg = ctx.createGain();
+      drone.type = "sine"; drone.frequency.value = 146.83;
+      dg.gain.setValueAtTime(0.0001, ctx.currentTime);
+      dg.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 0.3);
+      dg.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.4);
+      drone.connect(dg); dg.connect(ctx.destination);
+      drone.start(); drone.stop(ctx.currentTime + 3.5);
+      const tune = [587.33, 523.25, 466.16, 523.25, 587.33, 698.46, 587.33, 523.25, 440.0, 466.16, 523.25];
+      tune.forEach((f, i) => {
+        const t0 = ctx.currentTime + i * 0.23 + (i > 5 ? 0.1 : 0);
+        const o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter();
+        fl.type = "lowpass"; fl.frequency.value = 2200;
+        o.type = "sine"; o.frequency.setValueAtTime(f * 0.985, t0);
+        o.frequency.linearRampToValueAtTime(f, t0 + 0.05);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.16, t0 + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.42);
+        o.connect(fl); fl.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0 + 0.45);
       });
     };
 
@@ -1934,15 +2307,19 @@ export default function Mikdash() {
         }
         return;
       }
+      if (hits[0].object.userData.sealed) {
+        apiRef.current.toast?.("הַהֵיכָל סָגוּר — the Heichal is still shut. Its inside is not built yet.");
+        return;
+      }
       const voice = findVoice(hits[0].object);
       if (voice) { apiRef.current.speak?.(voice); return; }
       const holder = findId(hits[0].object);
       if (!holder) return;
       const id = holder.userData.id;
       if (!collect(id)) return;
-      if (id <= 7) {
-        rimonim[id].traverse((o) => { if (o.isMesh) o.material = foundGold; });
-        if (rimonim[id].userData.ring) rimonim[id].userData.ring.material.color.set(0xffd24a);
+      if (rimonById[id]) {
+        rimonById[id].traverse((o) => { if (o.isMesh) o.material = foundGold; });
+        if (rimonById[id].userData.ring) rimonById[id].userData.ring.material.color.set(0xffd24a);
       }
       if (id === 9) playHarp();
       if (id === 10) playShofar();
@@ -1950,6 +2327,10 @@ export default function Mikdash() {
       if (id === 13) { ketoretState.active = true; playChime(); }
       if (id === 14) nicanor.userData.target = 1;
       if (id === 15) playTrumpet();
+      if (id === 26) playChime();
+      if (id === 29) playFlute();
+      if (id === 31) playChime();
+      if (id === 35) playShofar();
       // every wonder found throws gold dust
       burst(holder.getWorldPosition(new THREE.Vector3()), { count: 30, speed: 15 });
       apiRef.current.openFact?.(id);
@@ -1983,9 +2364,9 @@ export default function Mikdash() {
     };
     apiRef.current.markFound = (arr) => {
       arr.forEach((id) => {
-        if (id <= 7) {
-          rimonim[id].traverse((o) => { if (o.isMesh) o.material = foundGold; });
-          if (rimonim[id].userData.ring) rimonim[id].userData.ring.material.color.set(0xffd24a);
+        if (rimonById[id]) {
+          rimonById[id].traverse((o) => { if (o.isMesh) o.material = foundGold; });
+          if (rimonById[id].userData.ring) rimonById[id].userData.ring.material.color.set(0xffd24a);
         }
         if (id === 12) { flameTips.forEach((f) => { f.material.opacity = 0.95; }); menLight.intensity = 1.1; }
         if (id === 13) ketoretState.active = true;
@@ -2181,8 +2562,9 @@ export default function Mikdash() {
       // ── wonders idle ──
       const nxt = nextRef.current;
       rimonim.forEach((g, i) => {
-        const isFound = foundRef.current.includes(i);
-        const isNext = i === nxt;
+        const rid = g.userData.id;
+        const isFound = foundRef.current.includes(rid);
+        const isNext = rid === nxt;
         // in quest mode, unfound rimonim beyond the current target are veiled
         const veil = questRef.current && !isFound && !isNext;
         g.traverse((o) => {
@@ -2203,6 +2585,21 @@ export default function Mikdash() {
           r.material.opacity = isNext && !isFound ? 0.75 : 0.45;
         }
       });
+
+      // the ring of light at the foot of every wonder still unfound
+      halos.forEach((h, i) => {
+        const isFound = foundRef.current.includes(h.id);
+        h.ring.visible = !isFound;
+        if (isFound) return;
+        const isNext = h.id === nxt;
+        h.ring.rotation.z = t * 0.6 + i;
+        h.ring.position.y = h.base + Math.sin(t * 1.5 + i) * 0.5;
+        const pulse = isNext ? 1 + Math.sin(t * 4) * 0.07 : 1;
+        h.ring.scale.set(pulse, pulse, pulse);
+        h.ring.material.opacity = isNext ? 0.8 : 0.3;
+      });
+
+      aravah.rotation.z = Math.sin(t * 0.9) * 0.012;   // the willows, moving a little
 
       streams.forEach((s, i) => { s.material.opacity = 0.6 + Math.sin(t * 2 + i) * 0.11; });
       sparks.material.opacity = 0.5 + Math.sin(t * 3) * 0.3;
@@ -2381,6 +2778,54 @@ export default function Mikdash() {
         @media (prefers-reduced-motion: reduce) {
           .gleam, .pesichah-veil, .pesichah, .pesichah-line { animation: none !important; }
         }
+
+        /* ─── The seal ─── an arched gate-tablet, not a disc: the same profile
+           as the openings of Yechezkel's gatehouse, struck in gold or silver
+           and standing on a threshold stone. */
+        .seal { position:absolute; top:-32px; left:50%; transform:translateX(-50%);
+          width:52px; height:62px; border-radius:26px 26px 6px 6px;
+          display:flex; align-items:center; justify-content:center;
+          font-size:19px; color:#5a4718; text-shadow:0 1px 0 rgba(255,255,255,.6);
+          background:linear-gradient(158deg,#fff6d8 0%,#f2d68f 20%,#d9ac41 52%,#b3841f 76%,#eccb79 100%);
+          box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 0 1px rgba(110,84,26,.45),
+                     inset 0 1px 0 rgba(255,255,255,.9), inset 0 -3px 6px rgba(120,88,20,.35);
+          z-index:2; }
+        .seal::before { content:""; position:absolute; inset:4px; border-radius:22px 22px 3px 3px;
+          border:1px solid rgba(96,70,16,.34); box-shadow:inset 0 1px 0 rgba(255,255,255,.45); }
+        .seal::after { content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%);
+          width:76px; height:7px; border-radius:2px;
+          background:linear-gradient(90deg,transparent,rgba(190,152,68,.9) 16%,rgba(255,238,190,.95) 50%,rgba(190,152,68,.9) 84%,transparent);
+          box-shadow:0 2px 7px rgba(0,0,0,.28); }
+        .seal-silver { color:#465060;
+          background:linear-gradient(158deg,#ffffff 0%,#eef1f5 20%,#c2c9d3 52%,#939cab 76%,#e2e7ee 100%);
+          box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 0 1px rgba(90,100,115,.4),
+                     inset 0 1px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(80,92,108,.32); }
+        .seal-silver::before { border-radius:22px 22px 3px 3px; border-color:rgba(80,92,108,.35); }
+        .seal-silver::after { background:linear-gradient(90deg,transparent,rgba(150,160,174,.9) 16%,rgba(244,247,251,.95) 50%,rgba(150,160,174,.9) 84%,transparent); }
+
+        /* ─── Framed cards ─── parchment grain, an inner rule, and reinforced
+           corners, so a card reads as a plaque rather than a rounded box. */
+        .card-frame { position:relative; }
+        .card-frame::before { content:""; position:absolute; inset:0; border-radius:inherit;
+          pointer-events:none; opacity:.5; mix-blend-mode:multiply;
+          background:repeating-linear-gradient(112deg, rgba(140,110,50,.038) 0 2px, transparent 2px 9px); }
+        .card-frame::after { content:""; position:absolute; inset:11px; border-radius:10px;
+          pointer-events:none; border:1px solid rgba(140,110,50,.2);
+          background-image:
+            linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)), linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)),
+            linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)), linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)),
+            linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)), linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)),
+            linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55)), linear-gradient(rgba(150,118,52,.55),rgba(150,118,52,.55));
+          background-size:18px 1.5px, 1.5px 18px, 18px 1.5px, 1.5px 18px, 18px 1.5px, 1.5px 18px, 18px 1.5px, 1.5px 18px;
+          background-position:left top, left top, right top, right top, left bottom, left bottom, right bottom, right bottom;
+          background-repeat:no-repeat; }
+
+        /* the little arched tiles that carry the pesichah's three teachings */
+        .glyph-tile { flex:0 0 28px; height:31px; border-radius:14px 14px 4px 4px;
+          display:flex; align-items:center; justify-content:center; font-size:13.5px; color:#8a6d24;
+          background:linear-gradient(160deg, rgba(255,246,217,.95), rgba(228,207,152,.8));
+          border:1px solid rgba(140,110,50,.42);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 1px 3px rgba(90,70,20,.18); }
       `}</style>
 
       <div ref={mountRef} style={{ position: "absolute", inset: 0, cursor: walkMode ? "crosshair" : "grab" }} />
@@ -2410,7 +2855,7 @@ export default function Mikdash() {
       {questMode && nextTarget >= 0 && (
         <div style={{ position: "absolute", top: 88, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", background: "rgba(30,24,12,.78)", backdropFilter: "blur(6px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 22px", color: "#eaddb4", fontSize: 14.5, fontStyle: "italic", maxWidth: "82vw", textAlign: "center", boxShadow: "0 4px 18px rgba(0,0,0,.3)" }}>
           <span style={{ fontFamily: "'Frank Ruhl Libre', serif", fontStyle: "normal", fontWeight: 700, marginRight: 8, color: "#ffd97a" }}>
-            {found.length + 1} / 16
+            {found.length + 1} / {DISCOVERIES.length}
           </span>
           {DISCOVERIES[nextTarget].hint}
           <button
@@ -2475,8 +2920,8 @@ export default function Mikdash() {
 
       {hints && (
         <div className="panel" style={{ position: "absolute", top: 230, right: 16, width: 285, maxHeight: "48vh", overflowY: "auto", background: "rgba(28,22,10,.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 16, padding: "16px 18px", color: "#e8dcba", boxShadow: "0 12px 40px rgba(0,0,0,.4)" }}>
-          <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15, marginBottom: 4 }}>שש עשרה נסתרות</div>
-          <div style={{ fontSize: 12.5, fontStyle: "italic", opacity: 0.75, marginBottom: 10 }}>Eight silver rimonim, eight living wonders{questMode ? " — revealed in order" : ""}.</div>
+          <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15, marginBottom: 4 }}>שלושים ושש נסתרות</div>
+          <div style={{ fontSize: 12.5, fontStyle: "italic", opacity: 0.75, marginBottom: 10 }}>Eighteen silver rimonim, eighteen living wonders — chai, twice over{questMode ? ", revealed in order" : ""}.</div>
           {DISCOVERIES.map((d, i) => {
             const done = found.includes(i);
             const lockedAhead = questMode && !done && i !== nextTarget;
@@ -2499,7 +2944,7 @@ export default function Mikdash() {
       <div style={{ position: "absolute", bottom: 14, left: 0, right: 0, textAlign: "center", pointerEvents: "none", color: night ? "#bfb391" : "#5b4e33", fontSize: 13.5, fontStyle: "italic", textShadow: night ? "0 1px 8px rgba(0,0,0,.7)" : "0 1px 10px rgba(255,255,255,.8)" }}>
         {walkMode
           ? "WASD / arrows to walk · Shift to run · drag to look (mobile: left thumb walks, right thumb looks) · click wonders to collect"
-          : "Drag to orbit · scroll to zoom · click a kohen and he will answer · sixteen wonders hide in the white stone"}
+          : "Drag to orbit · scroll to zoom · click a kohen and he will answer · thirty-six wonders hide in the white stone"}
       </div>
 
       {toast && (
@@ -2510,7 +2955,7 @@ export default function Mikdash() {
 
       {allFound && fact === null && (
         <div className="panel" style={{ position: "absolute", bottom: 56, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, rgba(45,35,14,.95), rgba(76,58,20,.95))", border: "1px solid #d4a437", borderRadius: 16, padding: "18px 28px", color: "#ffe9ad", textAlign: "center", maxWidth: 500, boxShadow: "0 12px 44px rgba(0,0,0,.45)" }}>
-          <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21, fontWeight: 700 }}>כל הכבוד — all sixteen wonders found.</div>
+          <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21, fontWeight: 700 }}>כל הכבוד — all thirty-six found. חי, twice over.</div>
           <div style={{ fontSize: 15.5, marginTop: 6, fontStyle: "italic", lineHeight: 1.5 }}>
             “Out of Zion, the perfection of beauty, G-d shone forth” (Tehillim 50:2) · “Greater shall be the glory of this latter House than the former, and in this place I will grant peace” (Chaggai 2:9)
           </div>
@@ -2519,13 +2964,14 @@ export default function Mikdash() {
 
       {fact !== null && (
         <div className="panel" onClick={closeFact} style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(14,11,5,.5)", backdropFilter: "blur(4px)", cursor: "pointer", zIndex: 5 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ cursor: "default", maxWidth: 550, margin: 20, background: "linear-gradient(160deg, #fbf6e8, #efe3c4)", borderRadius: 20, border: "1px solid rgba(140,110,50,.5)", boxShadow: "0 28px 80px rgba(0,0,0,.5)", padding: "30px 34px", position: "relative" }}>
-            <div style={{ position: "absolute", top: -18, left: "50%", transform: "translateX(-50%)", width: 44, height: 44, borderRadius: "50%", background: DISCOVERIES[fact].kind === "rimon" ? "linear-gradient(145deg, #f5f7fa, #b6bcc6)" : "radial-gradient(circle at 35% 30%, #ffe9ad, #d4a437)", boxShadow: "0 6px 18px rgba(0,0,0,.35), inset 0 2px 5px rgba(255,255,255,.8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, color: "#5a4718" }}>
+          <div className="card-frame" onClick={(e) => e.stopPropagation()} style={{ cursor: "default", maxWidth: 550, margin: 20, background: "linear-gradient(160deg, #fbf6e8, #efe3c4)", borderRadius: 20, border: "1px solid rgba(140,110,50,.5)", boxShadow: "0 28px 80px rgba(0,0,0,.5)", padding: "30px 34px", position: "relative" }}>
+            <div className={DISCOVERIES[fact].kind === "rimon" ? "seal seal-silver" : "seal"}>
               {DISCOVERIES[fact].kind === "rimon" ? "◉" : "✦"}
             </div>
-            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21.5, fontWeight: 700, color: "#4a3a18", marginTop: 10, marginBottom: 11, lineHeight: 1.3 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21.5, fontWeight: 700, color: "#4a3a18", marginTop: 20, marginBottom: 9, lineHeight: 1.3, textAlign: "center" }}>
               {DISCOVERIES[fact].title}
             </div>
+            <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(140,110,50,.5), transparent)", margin: "0 auto 13px", maxWidth: 300 }} />
             <div style={{ fontSize: 17.5, lineHeight: 1.66, color: "#544729" }}>{DISCOVERIES[fact].text}</div>
             <button onClick={closeFact} style={{ marginTop: 20, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13.5, letterSpacing: ".13em", textTransform: "uppercase", background: "#4a3a18", color: "#f5e9c8", border: "none", borderRadius: 999, padding: "11px 28px", cursor: "pointer" }}>
               Continue the journey
@@ -2536,7 +2982,7 @@ export default function Mikdash() {
 
       {/* A kohen or a Levite, answering */}
       {speech && (
-        <div className="panel" style={{ position: "absolute", left: "50%", bottom: 96, transform: "translateX(-50%)", width: "min(560px, 88vw)", background: "linear-gradient(160deg, rgba(251,246,232,.97), rgba(238,226,196,.97))", border: "1px solid rgba(140,110,50,.5)", borderRadius: 18, boxShadow: "0 22px 60px rgba(0,0,0,.45)", padding: "18px 22px 16px", zIndex: 6, animation: "rise .28s ease" }}>
+        <div className="panel card-frame" style={{ position: "absolute", left: "50%", bottom: 96, transform: "translateX(-50%)", width: "min(560px, 88vw)", background: "linear-gradient(160deg, rgba(251,246,232,.97), rgba(238,226,196,.97))", border: "1px solid rgba(140,110,50,.5)", borderRadius: 18, boxShadow: "0 22px 60px rgba(0,0,0,.45)", padding: "18px 22px 16px", zIndex: 6, animation: "rise .28s ease" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 7 }}>
             <span style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 18, fontWeight: 700, color: "#4a3a18" }}>{speech.name}</span>
             <span style={{ fontSize: 13, fontStyle: "italic", color: "#7a6634" }}>{speech.role}</span>
@@ -2553,12 +2999,7 @@ export default function Mikdash() {
         <div className="pesichah-veil" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(ellipse at 50% 45%, rgba(20,15,6,.42), rgba(8,6,2,.78))", backdropFilter: "blur(3px)", zIndex: 7, padding: "36px 18px 22px" }}>
           <div className="pesichah" style={{ width: "min(560px, 92vw)", maxHeight: "88vh", overflowY: "auto", background: "linear-gradient(160deg, #fbf6e8, #efe3c4)", borderRadius: 22, border: "1px solid rgba(140,110,50,.5)", boxShadow: "0 30px 90px rgba(0,0,0,.55), 0 0 90px rgba(212,164,55,.22)", padding: "clamp(24px, 5vw, 34px) clamp(20px, 5vw, 34px) clamp(20px, 4vw, 26px)", textAlign: "center", position: "relative" }}>
 
-            {/* a rimon of silver, floating in its ring — the thing to look for */}
-            <div style={{ position: "absolute", top: -24, left: "50%", transform: "translateX(-50%)", width: 48, height: 48, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, #ffe9ad, #d4a437)", boxShadow: "0 8px 22px rgba(0,0,0,.4), inset 0 2px 6px rgba(255,255,255,.8), 0 0 0 6px rgba(212,164,55,.16)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, color: "#5a4718" }}>
-              ◉
-            </div>
-
-            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: "clamp(23px, 6vw, 31px)", fontWeight: 900, color: "#4a3a18", marginTop: 12, lineHeight: 1.25 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: "clamp(23px, 6vw, 31px)", fontWeight: 900, color: "#4a3a18", lineHeight: 1.25 }}>
               בֹּאוּ שְׁעָרָיו בְּתוֹדָה
             </div>
             <div style={{ fontSize: "clamp(13.5px, 3.5vw, 15px)", fontStyle: "italic", color: "#7a6634", marginTop: 5 }}>
@@ -2569,9 +3010,10 @@ export default function Mikdash() {
             <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(140,110,50,.28), transparent)", marginBottom: "clamp(14px, 3vw, 18px)" }} />
 
             <div style={{ fontSize: "clamp(15px, 4vw, 17px)", lineHeight: 1.55, color: "#544729", fontStyle: "italic" }}>
-              Sixteen things are hidden in this House — eight <span style={{ fontStyle: "normal" }}>רימונים</span> of
-              silver and eight wonders of gold, each one a teaching from Tanach, Talmud, or the
-              spade of the archaeologist.
+              Thirty-six things are hidden in this House — eighteen <span style={{ fontStyle: "normal" }}>רימונים</span> of
+              silver and eighteen wonders of gold, each one a teaching from Tanach, Talmud, or the
+              spade of the archaeologist. Eighteen is <span style={{ fontStyle: "normal" }}>חי</span>, life;
+              thirty-six is life twice, and the number of the hidden righteous.
             </div>
 
             <div style={{ textAlign: "left", margin: "clamp(15px, 3.5vw, 20px) auto 4px", maxWidth: 430, display: "flex", flexDirection: "column", gap: "clamp(10px, 2.5vw, 13px)" }}>
@@ -2581,7 +3023,7 @@ export default function Mikdash() {
                 ["⌖", <>The banner above always whispers where the next one waits. If it stays hidden, press <b style={{ fontWeight: 600 }}>הראה לי · Show me</b> — a pillar of light will rise over it.</>],
               ].map(([glyph, text], i) => (
                 <div key={i} className="pesichah-line" style={{ display: "flex", gap: 12, alignItems: "flex-start", animationDelay: `${0.45 + i * 0.13}s` }}>
-                  <span style={{ flex: "0 0 26px", height: 26, borderRadius: "50%", background: "rgba(212,164,55,.16)", border: "1px solid rgba(140,110,50,.35)", color: "#8a6d24", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginTop: 1 }}>{glyph}</span>
+                  <span className="glyph-tile">{glyph}</span>
                   <span style={{ fontSize: "clamp(14px, 3.8vw, 15.5px)", lineHeight: 1.5, color: "#544729" }}>{text}</span>
                 </div>
               ))}

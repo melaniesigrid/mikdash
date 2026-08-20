@@ -1,5 +1,33 @@
 # Changelog
 
+## v3.5 — "Thirty-Six" (0.3.5)
+
+- **Thirty-six nistarot.** Twice chai, and the count of the hidden righteous.
+  Twenty new teachings join the sixteen: ten more rimonim of silver (the ten
+  miracles of Avot 5:5, the thirteen shofar-shaped chests, the Chamber of the
+  Discreet, the Claimant's Stone, the Chamber of Hewn Stone, the ramp that is
+  not steps, the shitin that descend to the deep, the Water Gate, Mount
+  Moriah, the three festivals) and ten more wonders you can stand in front
+  of — Ben Katin's wheel beside the laver, the golden vine over the doors of
+  the House, the willows leaning on the altar, the flute of the water-drawing,
+  a tree of Yechezkel 47 whose leaf is for healing, the Shulchan lifted up so
+  the pilgrims could see the bread, the lottery box, the families' fig-wood,
+  the red heifer at the far end of a causeway of arches, and the Western Wall
+  that never fell, with notes still pressed into its joints.
+- **Every number in the House is now a multiple of 18.** 36 hidden things, 18
+  who answer when you click them (twelve kohanim at the stations of the
+  morning avodah, six Levites on the steps — six new voices among them), 18
+  doves overhead. The fifteen steps and the eleven spices keep their numbers:
+  a source outranks a pattern.
+- **A ring of light on every hidden thing.** The opening card always promised
+  it; the wonders never had one, because architecture cannot float. Now the
+  ring is laid at their feet instead, turning and pulsing brighter on the one
+  the quest is asking for, and gone the moment it is found.
+- **The Heichal answers.** Striking the cedar doors used to do nothing, so
+  visitors pressed at them and concluded the House was broken. It says now:
+  הַהֵיכָל סָגוּר — the Heichal is still shut, its inside is not built yet.
+  Opening it is the top of the v4 roadmap, broken into real steps in README.
+
 ## v3.4 — "The Opening" (0.3.4)
 
 - **The first step is given, not hidden.** A visitor who never finds wonder #1
