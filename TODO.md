@@ -42,13 +42,15 @@ preferences.
       couched below the southern stairs. Same chapter as the cypress.
 - [x] **River banks planted only with food trees** — Yechezkel 47:12 says
       כָּל־עֵץ מַאֲכָל specifically. Eighteen, nine a side.
-- [ ] **Wind.** Nothing in this landscape moves except the doves and the fire.
-      Palm fronds especially should sway — they are the most flexible thing on
-      screen and currently the most rigid. Cheap version: per-frond sine on
-      rotation.z, phase from world position so the gust crosses the grove.
-- [ ] **Ground cover.** The transition from dust to stone is a hard line
-      everywhere. Scatter low scrub, thistle and stones along the plaza edge and
-      the stair flanks to break it.
+- [x] **Wind.** Vertex-shader sway on the merged grove, weight baked per vertex
+      at merge time, amplitude per species. The cheap per-frond rotation this
+      entry originally proposed was no longer possible once the grove merged —
+      which is the better outcome.
+- [ ] **Wind should move the shadows too.** The depth material is unpatched, so
+      a swaying tree casts a still shadow. Needs `customDepthMaterial` carrying
+      the same displacement.
+- [x] **Ground cover.** 216 bushes biased toward the precinct, a 108-bush fringe
+      spilling over the paving edge, 108 half-buried stones. Merged and swayed.
 - [ ] **Birds beyond the doves.** Swifts over the walls at dusk. Jerusalem's
       swifts are a real and famous thing, and they are cheap: instanced quads on
       curved paths, only visible near sunset.

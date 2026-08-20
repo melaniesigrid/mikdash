@@ -1,5 +1,41 @@
 # Changelog
 
+## v3.11 — "A Wind Over the Grove" (0.3.11)
+
+- **The trees move.** Nothing in this landscape did except the doves and the
+  fire, and the palms were the worst offender: the most flexible thing on
+  screen and the most rigid in fact. But the grove is merged — one buffer per
+  material for the whole ring — so there is no per-tree object left to rotate.
+  The motion happens in the vertex shader instead, which is where foliage wind
+  belongs anyway. `mergeByMaterial()` now bakes an `aSway` weight per vertex at
+  merge time, because that is the last moment a vertex still knows which tree it
+  came off; the weight is height above that tree's own foot, **squared**, so the
+  first few amot stay near-still and a canopy does not shear off the trunk it
+  sits on while the frond tips get the whole amplitude. Two sines at
+  incommensurate rates, phased by world position, so the gust crosses the grove
+  as a front and never visibly loops. Amplitude is per species: a frond is a
+  sail at 1.5 amot, a cypress barely gives at 0.22.
+  - `customProgramCacheKey` is set per amplitude. Without it three reuses one
+    compiled program across all seven materials and the entire grove bends like
+    a palm.
+  - Known limit, written in the source: the depth material used for shadow
+    casting is not patched, so a tree's shadow stays put while the tree moves.
+    Invisible from the orbit camera at this sun angle; it would show from
+    directly beneath one.
+- **Ground cover, for two problems at once.** The dust met the plaza at a drawn
+  line — stone stopped, ground started, nothing between — which is the reliable
+  giveaway that a thing was modelled rather than built somewhere. And the plain
+  between the trees was empty in a way the Judean hills are not; they are
+  covered in low grey-green scrub and loose limestone right up to whatever has
+  been built on them. So: 216 bushes (חי times twelve) with `r` drawn from a
+  square root, which biases them hard toward the precinct instead of letting the
+  ring's area spread them evenly and leave the near ground as bare as the far;
+  108 more as a deliberate fringe spilling over the edge of the paving, which is
+  what stops the join reading as a line; and 108 half-buried stones. All merged,
+  and swayed over a 2.2-amah span so a knee-high bush trembles rather than
+  leans.
+
+
 ## v3.10 — "Every Tree of Food" (0.3.10)
 
 - **Seven species of tree, each one because a source puts it here.** Seventy

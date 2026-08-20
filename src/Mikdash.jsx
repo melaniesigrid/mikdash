@@ -1279,16 +1279,37 @@ export default function Mikdash() {
     // The trade is frustum culling: one merged mesh spanning the whole ring is
     // never culled, so it is always submitted. For static scenery at this count
     // that is still overwhelmingly the better side of the bargain.
-    const mergeByMaterial = (root) => {
+    // `sway` bakes a per-vertex weight for the wind shader below. It has to
+    // happen here, at merge time, because this is the last moment each vertex
+    // still knows which tree it came off — afterwards it is one anonymous
+    // buffer spanning the whole ring. Weight is height above that tree's own
+    // foot, squared: the squaring keeps the first few amot almost still, so a
+    // canopy does not shear away from the trunk it is sitting on, while the
+    // frond tips get the whole amplitude.
+    const mergeByMaterial = (root, { sway = false, swaySpan = 15 } = {}) => {
       root.updateMatrixWorld(true);
       const buckets = new Map();
-      root.traverse((o) => {
-        if (!o.isMesh) return;
-        const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
-        g.applyMatrix4(o.matrixWorld);   // also runs the normal matrix
-        if (!buckets.has(o.material)) buckets.set(o.material, []);
-        buckets.get(o.material).push(g);
-      });
+      const foot = new THREE.Vector3();
+      for (const cluster of root.children) {
+        cluster.getWorldPosition(foot);
+        const y0 = foot.y;
+        cluster.traverse((o) => {
+          if (!o.isMesh) return;
+          const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
+          g.applyMatrix4(o.matrixWorld);   // also runs the normal matrix
+          if (sway) {
+            const pos = g.attributes.position;
+            const w = new Float32Array(pos.count);
+            for (let i = 0; i < pos.count; i++) {
+              const t = Math.min(1, Math.max(0, (pos.getY(i) - y0) / swaySpan));
+              w[i] = t * t;
+            }
+            g.setAttribute("aSway", new THREE.BufferAttribute(w, 1));
+          }
+          if (!buckets.has(o.material)) buckets.set(o.material, []);
+          buckets.get(o.material).push(g);
+        });
+      }
       const out = new THREE.Group();
       for (const [mat, geos] of buckets) {
         let total = 0;
@@ -1296,19 +1317,22 @@ export default function Mikdash() {
         const pos = new Float32Array(total * 3);
         const nor = new Float32Array(total * 3);
         const uv = new Float32Array(total * 2);
-        let o3 = 0, o2 = 0;
+        const sw = sway ? new Float32Array(total) : null;
+        let o3 = 0, o2 = 0, o1 = 0;
         for (const g of geos) {
           const n = g.attributes.position.count;
           pos.set(g.attributes.position.array, o3);
           if (g.attributes.normal) nor.set(g.attributes.normal.array, o3);
           if (g.attributes.uv) uv.set(g.attributes.uv.array, o2);
-          o3 += n * 3; o2 += n * 2;
+          if (sw && g.attributes.aSway) sw.set(g.attributes.aSway.array, o1);
+          o3 += n * 3; o2 += n * 2; o1 += n;
           g.dispose();
         }
         const merged = new THREE.BufferGeometry();
         merged.setAttribute("position", new THREE.BufferAttribute(pos, 3));
         merged.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
         merged.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+        if (sw) merged.setAttribute("aSway", new THREE.BufferAttribute(sw, 1));
         merged.computeBoundingSphere();
         const m = new THREE.Mesh(merged, mat);
         m.castShadow = m.receiveShadow = true;
@@ -1316,6 +1340,57 @@ export default function Mikdash() {
       }
       return out;
     };
+
+    // ── רוּחַ — wind ──────────────────────────────────────────────────────
+    //
+    // Nothing in this landscape moved except the doves and the fire, and the
+    // palms were the worst of it: the most flexible thing on screen and the
+    // most rigid in fact. But the grove is merged now — one buffer per material
+    // for the whole ring — so there is no per-tree object left to rotate. The
+    // motion has to happen in the vertex shader, which is where foliage wind
+    // belongs anyway.
+    //
+    // Two sines at incommensurate rates so the gust never visibly loops, phased
+    // by world position so it crosses the grove as a front rather than pulsing
+    // everywhere at once. Amplitude is the baked aSway weight, so a trunk
+    // stands still and a frond tip travels.
+    //
+    // Known limit: the depth material used for shadow casting is not patched,
+    // so a tree's shadow stays put while the tree moves. Invisible from the
+    // orbit camera at this sun angle; it would show from directly beneath one.
+    const windU = { value: 0 };
+    const windward = (mat, amp) => {
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.uWind = windU;
+        shader.uniforms.uAmp = { value: amp };
+        shader.vertexShader = shader.vertexShader
+          .replace("#include <common>", `#include <common>
+            attribute float aSway;
+            uniform float uWind;
+            uniform float uAmp;`)
+          .replace("#include <begin_vertex>", `#include <begin_vertex>
+            {
+              float ph = transformed.x * 0.021 + transformed.z * 0.016;
+              float gust = sin(uWind * 0.85 + ph) * 0.62
+                         + sin(uWind * 1.63 + ph * 2.3) * 0.38;
+              transformed.x += gust * aSway * uAmp;
+              transformed.z += gust * aSway * uAmp * 0.55;
+              transformed.y -= abs(gust) * aSway * uAmp * 0.12;
+            }`);
+      };
+      // Distinct cache keys, or three reuses one compiled program for every
+      // amplitude and the whole grove bends like a palm.
+      mat.customProgramCacheKey = () => "wind" + amp;
+      return mat;
+    };
+    // A frond is a sail; a cypress barely gives. Amplitudes are in amot.
+    windward(foliage.palm, 1.5);
+    windward(foliage.almond, 0.62);
+    windward(foliage.fig, 0.55);
+    windward(foliage.olive, 0.48);
+    windward(foliage.rimon, 0.45);
+    windward(foliage.carob, 0.38);
+    windward(foliage.cypress, 0.22);
 
     // Devarim 16:21 in code. Nothing may be planted inside the precinct, so the
     // whole plaza footprint plus its stairs is refused outright.
@@ -1351,7 +1426,84 @@ export default function Mikdash() {
         if (plant(kind, x, z, LAND_Y, rnd(0.85, 1.2))) placed++;
       }
     }
-    scene.add(mergeByMaterial(grove));
+    scene.add(mergeByMaterial(grove, { sway: true }));
+
+    // ── Ground cover ─────────────────────────────────────────────────────
+    //
+    // Two problems, one fix. The dust met the plaza at a drawn line — stone
+    // stopped, ground started, nothing in between — which is the giveaway that
+    // a thing was modelled rather than built somewhere. And the plain between
+    // the trees was empty in a way the Judean hills are not: they are covered
+    // in low grey-green scrub and loose limestone, right up to whatever has
+    // been built on them.
+    //
+    // So: a band that thickens as it approaches the precinct and spills over
+    // the edge of the paving, which is what makes the join stop reading as a
+    // line. Merged like the grove, and swayed like it too — over a much shorter
+    // span, so a knee-high bush trembles instead of leaning.
+    const scrubMat = new THREE.MeshStandardMaterial({ color: 0x38401f, roughness: 0.98 });
+    const sageMat = new THREE.MeshStandardMaterial({ color: 0x4a4c34, roughness: 0.98 });
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x9c8f74, roughness: 0.95 });
+    windward(scrubMat, 0.3);
+    windward(sageMat, 0.26);
+
+    const scrub = new THREE.Group();
+    const bush = (x, z, sc, mat) => {
+      const g = new THREE.Group();
+      const lobes = 2 + (Math.random() < 0.6 ? 1 : 0);
+      for (let i = 0; i < lobes; i++) {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(rnd(0.7, 1.35) * sc, 6, 5), mat);
+        b.position.set(rnd(-0.8, 0.8) * sc, rnd(0.35, 0.8) * sc, rnd(-0.8, 0.8) * sc);
+        b.scale.set(1, rnd(0.45, 0.7), 1);          // wind-pruned: wider than tall
+        b.castShadow = true;
+        g.add(b);
+      }
+      g.position.set(x, LAND_Y, z);
+      scrub.add(g);
+    };
+    const rock = (x, z, sc) => {
+      const g = new THREE.Group();
+      const r = new THREE.Mesh(new THREE.DodecahedronGeometry(rnd(0.6, 1.5) * sc, 0), rockMat);
+      r.rotation.set(rnd(0, 3), rnd(0, 3), rnd(0, 3));
+      r.scale.set(1, rnd(0.5, 0.8), rnd(0.8, 1.2));
+      r.position.y = rnd(0.1, 0.4) * sc;            // half-buried, not resting on top
+      r.castShadow = true;
+      g.add(r);
+      g.position.set(x, LAND_Y, z);
+      scrub.add(g);
+    };
+
+    // 216 bushes — חי times twelve. Biased hard toward the precinct: r is
+    // drawn from a square root so the ring's area does not spread them evenly,
+    // which would leave the near ground as bare as the far.
+    for (let i = 0; i < 216; i++) {
+      const a = rnd(0, Math.PI * 2);
+      const u = Math.random();
+      const r = 300 + (1 - Math.sqrt(u)) * 820;
+      const x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (!plantable(x, z)) continue;
+      bush(x, z, rnd(0.7, 1.5), Math.random() < 0.45 ? sageMat : scrubMat);
+    }
+    // A deliberate fringe hugging the paving, inside the tree exclusion but
+    // outside the stone, so the edge is broken rather than drawn.
+    for (let i = 0; i < 108; i++) {
+      const side = i % 4, t2 = rnd(-1, 1);
+      const off = rnd(4, 34);
+      const near = HALF + 46 + off;
+      const [x, z] = side === 0 ? [t2 * near, near] : side === 1 ? [t2 * near, -near]
+                   : side === 2 ? [near, t2 * near] : [-near, t2 * near];
+      bush(x, z, rnd(0.5, 1.05), Math.random() < 0.5 ? sageMat : scrubMat);
+    }
+    // 108 stones, thickest where the ground has been walked and scuffed.
+    for (let i = 0; i < 108; i++) {
+      const a = rnd(0, Math.PI * 2);
+      const r = 300 + (1 - Math.sqrt(Math.random())) * 700;
+      const x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (!plantable(x, z)) continue;
+      rock(x, z, rnd(0.6, 1.6));
+    }
+    // Short span: a bush is one amah of stem, not fifteen of trunk.
+    scene.add(mergeByMaterial(scrub, { sway: true, swaySpan: 2.2 }));
 
     const SKIRT = 14;
     const skirt = (w, d, x, z) => box(w, SKIRT, d, mega, x, LAND_Y + SKIRT / 2, z);
@@ -2023,7 +2175,7 @@ export default function Mikdash() {
         riverGrove.add(tr);
       }
     }
-    scene.add(mergeByMaterial(riverGrove));
+    scene.add(mergeByMaterial(riverGrove, { sway: true }));
 
     // ═══════════ FIGURES: kohanim + Levites ═══════════
     const figures = [];
@@ -3385,6 +3537,7 @@ export default function Mikdash() {
       const t = (now - t0) / 1000;
       nowT = t;
       skyUniforms.uTime.value = t;
+      windU.value = t;
 
       // Frame-rate independent. A fixed 0.022 per frame meant the sun set
       // two and a half times faster on a 144Hz laptop than on a 60Hz one, and
