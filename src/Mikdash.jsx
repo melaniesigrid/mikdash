@@ -3610,8 +3610,13 @@ export default function Mikdash() {
             const done = found.includes(i);
             const lockedAhead = questMode && !done && i !== nextTarget;
             return (
-              <div key={i} style={{ fontSize: 14, fontStyle: "italic", padding: "5px 0", opacity: done ? 0.42 : lockedAhead ? 0.35 : 1, textDecoration: done ? "line-through" : "none", borderBottom: i < DISCOVERIES.length - 1 ? "1px solid rgba(212,164,55,.14)" : "none" }}>
-                {done ? "✓ " : `${i + 1}. `}{lockedAhead ? "· · · still veiled · · ·" : d.hint}
+              <div key={i} style={{ fontSize: 14, fontStyle: "italic", padding: "5px 0", opacity: lockedAhead ? 0.35 : 1, borderBottom: i < DISCOVERIES.length - 1 ? "1px solid rgba(212,164,55,.14)" : "none" }}>
+                {/* the mark stays lit and unstruck — it is the trophy; only the
+                    hint it replaces gets crossed out */}
+                <span style={{ fontStyle: "normal", marginRight: 5, opacity: done ? 1 : 0.85 }}>{done ? d.emoji : `${i + 1}.`}</span>
+                <span style={{ opacity: done ? 0.42 : 1, textDecoration: done ? "line-through" : "none" }}>
+                  {lockedAhead ? "· · · still veiled · · ·" : d.hint}
+                </span>
                 {!lockedAhead && !done && (
                   <button
                     onClick={() => apiRef.current.guideTo?.(i)}
