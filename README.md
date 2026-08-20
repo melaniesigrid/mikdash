@@ -14,7 +14,7 @@ and the roadmap toward a full game.
 
 ---
 
-## Current state (v3.1 — "The Sound of the Courts")
+## Current state (v3.2 — "Fire and Daylight")
 
 One self-contained React component: `Mikdash.jsx` (React 18 + Three.js r128,
 no other dependencies, no assets — every texture is generated procedurally at
@@ -28,7 +28,8 @@ and fire are GLSL shaders).
 | Yechezkel floor plan (1 unit = 1 amah) | ✅ | 500×500 court, 3 gates, no west gate, sealed east gate |
 | Monumental styling | ✅ | Drafted-margin ashlar, Royal Stoa, Hulda-style stairs, pilastered retaining walls, gold-plated Ulam facade, sea-wave marble, kalya orev spikes |
 | GLSL sky (day ⇄ night timelapse) | ✅ | Sun/moon arcs, hashed twinkling stars, milky band, dithering |
-| GLSL fire (altar) | ✅ | fbm-noise vertex displacement + scrolling body turbulence, additive particles, smoke sprites, decay-2 point light |
+| GLSL fire (altar) | ✅ | Four nested cones — an amber solid body, a blue heart, two additive glow shells — plus embers, blue sparks, smoke, and warm + blue point lights |
+| Daylight contrast | ✅ | ACES tone mapping, a stronger sun against less ambient fill, stone mixed below white so the courses survive direct sun |
 | First-person walk mode | ✅ | WASD/arrows + drag-look, Shift to run, mobile dual-thumb controls, AABB collision, terrain height function |
 | Animated figures | ✅ | 8 kohanim walking waypoint loops in the azarah; 8 Levites swaying on the fifteen steps |
 | Sixteen wonders quest | ✅ | Sequential unlock with toast guidance + free-explore toggle |
@@ -48,6 +49,11 @@ and fire are GLSL shaders).
   below the southern stairs.
 - Ground levels: surrounding land `LAND_Y = −14`; plaza `0`; Royal Stoa
   stylobate `2.4`; inner court (azarah) `IC_H = 10`; Temple platform `IC_H + 6`.
+- **Light levels.** `renderer.toneMapping = ACESFilmic`, exposure `0.98`. Every
+  stone texture is mixed a few percent below white (`ashlar` base `218,211,194`,
+  marble `#e7e1d0`): with no headroom above 1.0 the drafted margins and courses
+  clip into a flat sheet under a real sun. Day is a strong sun (2.35) against
+  low ambient fill (0.46) so form reads; night is 0.26 / 0.17.
 - `groundHeight(x, z)` in the component is the single source of truth for
   walkable elevation (includes all four stair ramps). `colliders[]` holds
   world-space AABBs; `resolveCollisions` pushes the player out along the axis
@@ -96,12 +102,23 @@ next tier would be 24).
    `uMoonDir`. Day/night is a single scalar eased in the render loop
    (`env.cur → env.target`), driving *every* light, fog, emissive and sprite
    tint. Never toggle instantaneously — always animate `env.target`.
-6. **Fire** — `makeFlame(radius, height)` returns a noise-displaced open cone
-   with additive fragment shading (white-yellow core → orange → red tips,
-   scrolling fbm body). The altar uses two nested flames + 34 fire sprites +
-   16 smoke sprites. Torches are single sprites via `addTorch`. Point lights
-   use `decay = 2` and short range — this is what fixed the earlier
-   "sun inside the House" (over-bright emissive gold + un-decayed lights).
+6. **Fire** — `makeFlame(radius, height, { solid, blue, heartOnly })` returns a
+   noise-displaced open cone. The altar stacks four of them, and the stack is
+   the whole trick to a fire that works in both lights:
+
+   | Cone | Blending | Role |
+   |---|---|---|
+   | `flameCore` | normal | saturated amber body — the silhouette that reads against sunlit stone |
+   | `flameHeart` | normal, `heartOnly` | the blue heart: alpha exists only where it burns blue, drawn **last** so additive tongues cannot add white back into it |
+   | `flameInner` / `flameOuter` | additive | the glow and the licking tongues |
+
+   `uDay` (= `1 - e2`) drives the balance. **Additive light fades as the day
+   comes up** — adding white to sunlit white stone yields white, so by day the
+   fire must read as saturated body colour and by night as glow. The same
+   scalar lifts the solid cone's opacity from 0.34 to 1.0. Embers and blue
+   sparks follow the same rule. Point lights (warm above, blue at the hearth)
+   use `decay = 2` and short range — this is what fixed the earlier "sun inside
+   the House" (over-bright emissive gold + un-decayed lights).
 7. **Architecture** — land → skirt walls → plaza → stairs → outer walls →
    gates → Royal Stoa → colonnades → kitchens → inner court → Nicanor →
    altar → the House → river. Colliders are registered inline beside the

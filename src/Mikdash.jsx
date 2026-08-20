@@ -4,10 +4,11 @@ import * as THREE from "three";
 /*
   ═══════════════════════════════════════════════════════════════════════════
    בֵּית הַמִּקְדָּשׁ — MIKDASH: an explorable Temple
-   v3.1 — "The Sound of the Courts"
+   v3.2 — "Fire and Daylight"
 
    · Yechezkel 40–48 floor plan at 1 unit = 1 amah, in monumental white stone
    · GLSL sky (day ⇄ night timelapse), GLSL noise-displaced altar fire
+     with a blue heart, built to read against sunlit stone as well as night
    · First-person walk mode with collision + ground-height terrain
    · Kohanim walking the inner court, Levites swaying on the fifteen steps
    · Sixteen hidden wonders (8 silver rimonim + 8 living wonders) that
@@ -64,7 +65,7 @@ function makeCanvas(w, h, draw) {
 }
 const rnd = (a, b) => a + Math.random() * (b - a);
 
-function ashlar({ base = [236, 230, 216], courses = 5, cols = 4, margin = true } = {}) {
+function ashlar({ base = [218, 211, 194], courses = 5, cols = 4, margin = true } = {}) {
   return makeCanvas(512, 512, (ctx, w, h) => {
     const ch = h / courses;
     for (let r = 0; r < courses; r++) {
@@ -131,7 +132,7 @@ function seaWaveMarble() {
 function marbleTex() {
   return makeCanvas(512, 512, (ctx, w, h) => {
     const g = ctx.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, "#faf7ee"); g.addColorStop(0.5, "#f1ecdd"); g.addColorStop(1, "#f7f3e6");
+    g.addColorStop(0, "#e7e1d0"); g.addColorStop(0.5, "#ddd6c2"); g.addColorStop(1, "#e3ddcb");
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
     for (let v = 0; v < 24; v++) {
       ctx.strokeStyle = `rgba(${rnd(160, 190) | 0},${rnd(150, 178) | 0},${rnd(125, 150) | 0},${rnd(0.1, 0.26)})`;
@@ -193,7 +194,7 @@ function pavingTex() {
     const n = 8, s = w / n;
     for (let r = 0; r < n; r++) for (let c2 = 0; c2 < n; c2++) {
       const j = rnd(-6, 6);
-      ctx.fillStyle = `rgb(${234 + j | 0},${228 + j | 0},${210 + j | 0})`;
+      ctx.fillStyle = `rgb(${216 + j | 0},${210 + j | 0},${192 + j | 0})`;
       ctx.fillRect(c2 * s + 1.5, r * s + 1.5, s - 3, s - 3);
     }
     ctx.fillStyle = "rgba(140,128,100,0.5)";
@@ -229,12 +230,23 @@ function fireSpriteTex() {
   });
 }
 
+function blueSpriteTex() {
+  return makeCanvas(64, 64, (ctx, w, h) => {
+    const g = ctx.createRadialGradient(w / 2, h / 2, 1, w / 2, h / 2, w / 2);
+    g.addColorStop(0, "rgba(232,250,255,1)");
+    g.addColorStop(0.28, "rgba(120,200,255,0.85)");
+    g.addColorStop(0.65, "rgba(40,110,255,0.32)");
+    g.addColorStop(1, "rgba(10,40,180,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  });
+}
+
 function smokeSpriteTex() {
   return makeCanvas(64, 64, (ctx, w, h) => {
     const g = ctx.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2);
-    g.addColorStop(0, "rgba(200,196,188,0.55)");
-    g.addColorStop(0.6, "rgba(180,176,168,0.25)");
-    g.addColorStop(1, "rgba(160,156,148,0)");
+    g.addColorStop(0, "rgba(150,146,140,0.62)");
+    g.addColorStop(0.6, "rgba(120,117,112,0.3)");
+    g.addColorStop(1, "rgba(96,94,90,0)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
   });
 }
@@ -332,6 +344,13 @@ export default function Mikdash() {
     let renderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true });
+      // Without a tone curve, sunlit white stone runs past 1.0 and clips to a
+      // flat white sheet — no ashlar, no drafted margins, and an additive
+      // flame in front of it has nothing left to add to. ACES rolls the
+      // highlights off instead, so the stone keeps its courses and the fire
+      // keeps its hue over them.
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.98;
     } catch (err) {
       // No WebGL: an old device, a disabled setting, a headless browser. The
       // House cannot be drawn — say so rather than leaving a white page.
@@ -346,7 +365,7 @@ export default function Mikdash() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, mount.clientWidth / mount.clientHeight, 0.5, 5000);
-    scene.fog = new THREE.Fog(0xdde8ef, 850, 2100);
+    scene.fog = new THREE.Fog(0xbfd2e2, 980, 2400);
 
     // ═══════════ SKY (GLSL) ═══════════
     const skyUniforms = {
@@ -422,7 +441,7 @@ export default function Mikdash() {
     // ═══════════ Materials ═══════════
     const whiteMap = ashlar(); whiteMap.repeat.set(3, 1.4);
     const white = new THREE.MeshStandardMaterial({ map: whiteMap, roughness: 0.8 });
-    const megaMap2 = ashlar({ base: [228, 222, 206], cols: 3, courses: 3 });
+    const megaMap2 = ashlar({ base: [211, 205, 189], cols: 3, courses: 3 });
     megaMap2.repeat.set(4, 2);
     const mega = new THREE.MeshStandardMaterial({ map: megaMap2, roughness: 0.85 });
     const waveMap = seaWaveMarble(); waveMap.repeat.set(1.6, 1);
@@ -554,13 +573,21 @@ export default function Mikdash() {
     // ═══════════ Fire system (shader flames + particle sprites) ═══════════
     const fireTex = fireSpriteTex();
     const smokeTex = smokeSpriteTex();
-    const makeFlame = (radius, height, segments = 20) => {
-      const uniforms = { uTime: { value: 0 }, uIntensity: { value: 1 } };
+    // A flame is built from three nested cones. `solid` swaps additive
+    // blending for normal blending: additive light can only ever brighten what
+    // is behind it, so over sunlit white stone it disappears — the solid cone
+    // is what gives the fire a silhouette in daylight. `blue` sets how much of
+    // the base burns blue, which is where a real flame is hottest.
+    const makeFlame = (radius, height, { segments = 20, solid = false, blue = 0, heartOnly = false } = {}) => {
+      const uniforms = {
+        uTime: { value: 0 }, uIntensity: { value: 1 },
+        uDay: { value: 1 }, uBlue: { value: blue },
+      };
       const mat = new THREE.ShaderMaterial({
         uniforms,
         transparent: true,
         depthWrite: false,
-        blending: THREE.AdditiveBlending,
+        blending: solid ? THREE.NormalBlending : THREE.AdditiveBlending,
         side: THREE.DoubleSide,
         vertexShader: `
           uniform float uTime;
@@ -581,7 +608,7 @@ export default function Mikdash() {
             gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
           }`,
         fragmentShader: `
-          uniform float uTime; uniform float uIntensity;
+          uniform float uTime; uniform float uIntensity; uniform float uDay; uniform float uBlue;
           varying float vH; varying vec2 vP;
           ${NOISE_GLSL}
           void main(){
@@ -591,11 +618,42 @@ export default function Mikdash() {
             a = a * a * (0.55 + body * 0.9);
             a *= smoothstep(0.0, 0.12, vH) + 0.55;      // soften the very base
             a *= uIntensity;
-            vec3 col = mix(vec3(1.0, 0.93, 0.55),        // white-yellow core
-                           vec3(1.0, 0.45, 0.08), vH);   // orange mids
-            col = mix(col, vec3(0.75, 0.12, 0.01), smoothstep(0.62, 1.0, vH)); // red tips
-            col += body * 0.25;
-            gl_FragColor = vec4(col * 1.35, clamp(a, 0.0, 1.0));
+
+            ${solid
+              ? `// the solid body carries saturated amber, not white: over sunlit
+                 // stone it is colour, not brightness, that reads
+                 vec3 col = mix(vec3(1.00, 0.74, 0.24), vec3(0.98, 0.34, 0.04), smoothstep(0.10, 0.55, vH));
+                 col = mix(col, vec3(0.60, 0.07, 0.01), smoothstep(0.55, 1.0, vH));
+                 float heartSpan = 0.62;`
+              : `// the glow keeps the white-yellow core → orange mids → red tips,
+                 // and warms toward saturated orange as the day comes up
+                 vec3 col = mix(mix(vec3(1.0, 0.93, 0.55), vec3(1.0, 0.60, 0.14), uDay),
+                                vec3(1.0, 0.45, 0.08), smoothstep(0.06, 0.60, vH));
+                 col = mix(col, vec3(0.78, 0.11, 0.01), smoothstep(0.60, 1.0, vH));
+                 float heartSpan = 0.40;`}
+
+            // the blue heart: hottest, breathing with the turbulence. The heart
+            // cone carries it as a band that clears the woodpile — at the very
+            // foot of the flame the logs would hide it.
+            ${heartOnly
+              ? `float heart = uBlue * smoothstep(0.04, 0.30, vH) * (1.0 - smoothstep(0.46, 0.88, vH)) * (0.82 + body * 0.5);`
+              : `float heart = uBlue * pow(1.0 - smoothstep(0.0, heartSpan, vH), 1.4) * (0.72 + body * 0.55);`}
+            heart = clamp(heart, 0.0, 1.0);
+            vec3 hot = mix(vec3(0.42, 0.88, 1.26), vec3(0.10, 0.38, 1.32), smoothstep(0.25, 0.95, heart));
+            col = mix(col, hot, heart);
+            // a thin blue-white lip where the heart gives way to the warm body
+            col += vec3(0.16, 0.38, 0.66) * uBlue
+                 * smoothstep(heartSpan * 0.72, heartSpan, vH)
+                 * (1.0 - smoothstep(heartSpan, heartSpan + 0.16, vH)) * 0.85;
+            col += body * 0.18;
+
+            ${solid
+              ? `a = pow(1.0 - vH, 1.6) * (0.62 + body * 0.5);
+                 a *= smoothstep(0.0, 0.10, vH) + 0.40;
+                 ${heartOnly ? "a *= clamp(heart * 1.15, 0.0, 1.0) * (0.5 + body * 0.75);" : ""}
+                 gl_FragColor = vec4(col * mix(1.0, 0.9, uDay),
+                   clamp(a * uIntensity, 0.0, 1.0) * mix(${heartOnly ? "0.74" : "0.34"}, 1.0, uDay));`
+              : `gl_FragColor = vec4(col * mix(1.15, 0.5, uDay), clamp(a * mix(1.0, 0.38, uDay), 0.0, 1.0));`}
           }`,
       });
       const mesh = new THREE.Mesh(new THREE.ConeGeometry(radius, height, segments, 12, true), mat);
@@ -607,13 +665,30 @@ export default function Mikdash() {
     const AX = -8;
     const IC = 210, IC_H = 10;
     const TOP = IC_H;
-    const flameOuter = makeFlame(5.6, 13);
-    flameOuter.mesh.position.set(AX, TOP + 20.5, 0);
-    scene.add(flameOuter.mesh);
-    const flameInner = makeFlame(3.1, 10);
-    flameInner.mesh.position.set(AX, TOP + 19.4, 0);
+    // renderOrder is explicit: three cones share a centre, and distance
+    // sorting alone would let them swap places as the camera turns.
+    const flameCore = makeFlame(4.0, 11.5, { solid: true, blue: 0.2 });
+    flameCore.mesh.position.set(AX, TOP + 20.0, 0);
+    flameCore.mesh.renderOrder = 1;
+    scene.add(flameCore.mesh);
+    // narrow and tall: a blue spire standing inside the amber body reads as a
+    // heart, where a wide blue cone only reads as a pool at the flame's foot
+    const flameHeart = makeFlame(1.95, 13.5, { segments: 16, solid: true, blue: 1, heartOnly: true });
+    flameHeart.uniforms.uIntensity.value = 1.3;
+    flameHeart.mesh.position.set(AX, TOP + 21.2, 0);
+    // drawn last: additive tongues painted over the heart would add white to
+    // it and the blue would be gone by night
+    flameHeart.mesh.renderOrder = 5;
+    scene.add(flameHeart.mesh);
+    const flameInner = makeFlame(3.7, 12.5, { blue: 0.55 });
+    flameInner.mesh.position.set(AX, TOP + 20.6, 0);
     flameInner.uniforms.uIntensity.value = 1.5;
+    flameInner.mesh.renderOrder = 2;
     scene.add(flameInner.mesh);
+    const flameOuter = makeFlame(6.6, 16.5, { blue: 0.2 });
+    flameOuter.mesh.position.set(AX, TOP + 22.2, 0);
+    flameOuter.mesh.renderOrder = 3;
+    scene.add(flameOuter.mesh);
 
     const fireParticles = [];
     for (let i = 0; i < 34; i++) {
@@ -623,6 +698,17 @@ export default function Mikdash() {
       scene.add(sp);
       fireParticles.push(sp);
     }
+    // sparks off the blue heart: short-lived, low, and cooler than the embers
+    const blueTex = blueSpriteTex();
+    const blueSparks = [];
+    for (let i = 0; i < 14; i++) {
+      const m = new THREE.SpriteMaterial({ map: blueTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
+      const sp = new THREE.Sprite(m);
+      sp.userData = { ph: rnd(0, 1), sp: rnd(0.7, 1.35), a: rnd(0, 6.28), r: rnd(0.3, 2.1) };
+      scene.add(sp);
+      blueSparks.push(sp);
+    }
+
     const smokeParticles = [];
     for (let i = 0; i < 16; i++) {
       const m = new THREE.SpriteMaterial({ map: smokeTex, depthWrite: false, transparent: true });
@@ -635,6 +721,10 @@ export default function Mikdash() {
     const fireLight = new THREE.PointLight(0xff8c33, 1.0, 130, 2);
     fireLight.position.set(AX, TOP + 22, 0);
     scene.add(fireLight);
+    // the heart throws its own colour onto the hearth stones
+    const fireBlueLight = new THREE.PointLight(0x3f7dff, 0.7, 62, 2);
+    fireBlueLight.position.set(AX, TOP + 16.4, 0);
+    scene.add(fireBlueLight);
 
     // small torch flames reuse the sprite system
     const torchFires = [];
@@ -1622,7 +1712,7 @@ export default function Mikdash() {
       });
     };
     const lerp = (a, b, t) => a + (b - a) * t;
-    const dayFog = new THREE.Color(0xdde8ef), nightFog = new THREE.Color(0x0a1122);
+    const dayFog = new THREE.Color(0xbfd2e2), nightFog = new THREE.Color(0x0a1122);
     const dayHemiSky = new THREE.Color(0xcfe0ff), nightHemiSky = new THREE.Color(0x33405f);
     const dayHemiGnd = new THREE.Color(0xc4b18a), nightHemiGnd = new THREE.Color(0x191510);
     const daySunCol = new THREE.Color(0xfff0d2), nightSunCol = new THREE.Color(0x9fb2dd);
@@ -1645,9 +1735,9 @@ export default function Mikdash() {
       const moonDir = new THREE.Vector3(lerp(-0.9, -0.5, e2), lerp(-0.2, 0.55, e2), lerp(0.2, 0.45, e2)).normalize();
       skyUniforms.uMoonDir.value.copy(moonDir);
       sun.position.copy(e2 < 0.5 ? sunDir : moonDir).multiplyScalar(900);
-      sun.intensity = lerp(1.55, 0.26, e2);
+      sun.intensity = lerp(2.35, 0.26, e2);
       sun.color.copy(daySunCol).lerp(nightSunCol, e2);
-      hemi.intensity = lerp(0.85, 0.2, e2);
+      hemi.intensity = lerp(0.46, 0.17, e2);
       hemi.color.copy(dayHemiSky).lerp(nightHemiSky, e2);
       hemi.groundColor.copy(dayHemiGnd).lerp(nightHemiGnd, e2);
       scene.fog.color.copy(dayFog).lerp(nightFog, e2);
@@ -1655,7 +1745,8 @@ export default function Mikdash() {
       doorGlow.intensity = e2 * 1.5;
       goldPlate.emissiveIntensity = e2 * 0.18;
       shetiyaLight.intensity = lerp(0.9, 1.6, e2);
-      fireLight.intensity = lerp(1.0, 2.2, e2) + Math.sin(t * 13) * 0.12 + (vnoiseJS(t * 7) - 0.5) * 0.3;
+      fireLight.intensity = lerp(1.3, 2.4, e2) + Math.sin(t * 13) * 0.12 + (vnoiseJS(t * 7) - 0.5) * 0.3;
+      fireBlueLight.intensity = lerp(0.85, 1.45, e2) + (vnoiseJS(t * 11 + 40) - 0.5) * 0.35;
       torchFires.forEach(({ light, flame }, ti) => {
         light.intensity = e2 * 1.1 + Math.sin(t * 9 + ti * 2.4) * 0.1 * e2;
         const fs = 0.3 + e2 * 0.8 + Math.sin(t * 11 + ti * 3.1) * 0.12 + (vnoiseJS(t * 5 + ti) - 0.5) * 0.2;
@@ -1702,10 +1793,32 @@ export default function Mikdash() {
       applyCamera();
 
       // ── fire ──
+      const day = 1 - e2;
       flameOuter.uniforms.uTime.value = t;
       flameInner.uniforms.uTime.value = t * 1.25;
+      flameCore.uniforms.uTime.value = t * 1.1;
+      flameHeart.uniforms.uTime.value = t * 1.6;
+      flameOuter.uniforms.uDay.value = day;
+      flameInner.uniforms.uDay.value = day;
+      flameCore.uniforms.uDay.value = day;
+      flameHeart.uniforms.uDay.value = day;
       flameOuter.mesh.rotation.y = t * 0.4;
       flameInner.mesh.rotation.y = -t * 0.55;
+      flameCore.mesh.rotation.y = t * 0.72;
+      flameHeart.mesh.rotation.y = -t * 0.95;
+      blueSparks.forEach((sp) => {
+        const u = sp.userData;
+        const life = (t * u.sp + u.ph) % 1;
+        const r = u.r * (1 - life * 0.55);
+        sp.position.set(
+          AX + Math.cos(u.a + t * 1.6) * r,
+          TOP + 15.8 + life * 7.5,
+          Math.sin(u.a + t * 1.6) * r
+        );
+        const sc = (1 - life * 0.8) * 1.5 + 0.25;
+        sp.scale.set(sc, sc * 1.5, 1);
+        sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.34, 0.9, e2);
+      });
       fireParticles.forEach((sp) => {
         const u = sp.userData;
         const life = ((t * u.sp + u.ph) % 1);
@@ -1717,7 +1830,7 @@ export default function Mikdash() {
         );
         const sc = (1 - life) * rndCache(u.ph) * 3.4 + 0.5;
         sp.scale.set(sc, sc * 1.35, 1);
-        sp.material.opacity = Math.sin(life * Math.PI) * 0.75;
+        sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.2, 0.78, e2);
       });
       smokeParticles.forEach((sp) => {
         const u = sp.userData;
@@ -1729,7 +1842,7 @@ export default function Mikdash() {
         );
         const sc = 4 + life * 16;
         sp.scale.set(sc, sc, 1);
-        sp.material.opacity = Math.sin(life * Math.PI) * 0.24 * (1 - e2 * 0.4);
+        sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.42, 0.16, e2);
       });
       kitchenSmokes.forEach((sm) => {
         const cyc = (t * 0.14 + sm.userData.ph) % 1;
