@@ -38,7 +38,7 @@ footnoted to a pasuk, a daf of gemara, Josephus, or a catalogued artifact.
 **Nothing is downloaded but the code.** Every stone texture, every flame, the
 sky, the marble, the gold, the shofar, the Levites' song — all of it is
 computed on the visitor's machine at load. The entire experience ships as one
-216 KB gzipped JavaScript file.
+229 KB gzipped JavaScript file.
 
 ---
 
@@ -47,12 +47,12 @@ computed on the visitor's machine at load. The entire experience ships as one
 | | |
 |---|---|
 | **Live** | [melaniesigrid.github.io/mikdash](https://melaniesigrid.github.io/mikdash/) |
-| **Version** | v3.13 — "The Levites' Steps Can Be Played" ([CHANGELOG](CHANGELOG.md)) · backlog in [TODO.md](TODO.md) |
+| **Version** | v3.15 — "The Pillar of Light" ([CHANGELOG](CHANGELOG.md)) · backlog in [TODO.md](TODO.md) |
 | **Runtime dependencies** | 3 — `react`, `react-dom`, `three`. That's the whole list. |
-| **Source** | 3,114 lines in one component, [`src/Mikdash.jsx`](src/Mikdash.jsx) |
+| **Source** | 5,003 lines in one component, [`src/Mikdash.jsx`](src/Mikdash.jsx) |
 | **Art assets shipped** | **0** — 14 canvas texture generators, 14 derived normal maps, 10 derived roughness maps, 2 GLSL shaders |
 | **Audio files shipped** | **0** — 6 synthesized instruments, a 3-layer ambient bed, and 4 melodies as note data |
-| **Bundle** | 780 KB raw / **218 KB gzipped**, single chunk, no CSS file |
+| **Bundle** | 810 KB raw / **229 KB gzipped**, single chunk, no CSS file |
 | **Findable content** | 36 sourced teachings across 40 cited primary sources |
 | **Planting** | 7 tree species, 108 in the grove + 18 on the river banks, none inside the courts (Devarim 16:21) |
 | **Persistence** | `window.storage`, with a `localStorage` shim for the open web |
@@ -232,7 +232,7 @@ run; mobile gets dual-thumb controls.
 
 ---
 
-## Current state (v3.13 — "The Levites' Steps Can Be Played")
+## Current state (v3.15 — "The Pillar of Light")
 
 | System | Status | Notes |
 |---|---|---|
@@ -250,7 +250,9 @@ run; mobile gets dual-thumb controls.
 | Ground cover | ✅ | 216 bushes biased toward the precinct, a 108-bush fringe spilling over the paving edge to break the join, 108 half-buried stones — all merged and swayed |
 | A paved azarah | ✅ | Its own plane at ~26 amot per tile. It had been the block's top face, carrying the wall's `repeat(1.6, 1)` across 260 amot |
 | Dust in the air | ✅ | 18 drifting depth-tested sprites, peaking when the sun rakes low |
-| Melodies on the steps | ✅ | Four public-domain melodies scheduled on the audio clock; the sounding note lights a key strip and its own tread in the courts. Copyrighted songs are deliberately excluded, and unverified transcriptions say so in the UI |
+| Swifts at dusk | ✅ | 18 סִיס around the walls, wings swept hard back because the scythe outline is the whole identification at that distance. Their visibility is a parabola on the day/night ease — they peak as the light goes and are absent at noon and at midnight, which is what swifts do |
+| One wind, heard and seen | ✅ | `gustAt(x, z, t)` is the JS twin of the sky shader's two sines, sampled where the camera stands. The fronds and the ambient bed ran on unrelated clocks before, so a visitor could hear a lull at the moment the palms threw themselves over |
+| Melodies on the steps | ✅ | Four public-domain melodies scheduled on the audio clock; the sounding note lights a key strip and its own tread in the courts. Each run owns a gain bus, so ■ can stop a tune already scheduled into the future and a second melody cannot lie on top of the first. Copyrighted songs are deliberately excluded; Hatikvah and Ma'oz Tzur are read off engraved scores, and the one still set down by ear says so in the UI |
 | A panel for the peace | ✅ | Yeshayahu 2:4 and 56:7, Micah 4:4, Rambam Hilchot Melachim 12:5, Tehillim 122:6 |
 | Merged static geometry | ✅ | `mergeByMaterial()` bakes world transforms and concatenates by material — the grove drops from ~1300 draw calls to one per material, with no `examples/jsm` import |
 | GLSL sky (day ⇄ night timelapse) | ✅ | Sun/moon arcs, hashed twinkling stars, milky band, dithering |
@@ -264,6 +266,8 @@ run; mobile gets dual-thumb controls.
 | Animated figures | ✅ | 12 kohanim walking waypoint loops in the azarah; 6 Levites swaying on the fifteen steps — eighteen who answer when clicked |
 | Thirty-six nistarot quest | ✅ | 18 rimonim + 18 wonders, sequential unlock with toast guidance + free-explore toggle |
 | A ring of light on everything | ✅ | The rimonim float in one; the wonders, which are architecture and cannot float, carry one at their feet. Both hide once found |
+| A pillar of light that survives noon | ✅ | Two shells: an additive glow that blooms at night, and a normally-blended amber core that *tints* the stone behind it. Added light cannot brighten sunlit marble — the single additive beam this replaced was invisible everywhere except where it crossed a dark roof |
+| Built for a thumb | ✅ | Touch gets 16 px of drag tolerance instead of 7, and a tap that finds nothing whatsoever re-casts around a 22 px circle. Architecture too thin to hit — Nicanor's doors are slabs 1.2 amot thick — carries an unseen hit pane sized to its opening |
 | The Heichal is shut, and says so | ✅ | Striking the cedar doors answers — הַהֵיכָל סָגוּר — instead of leaving a visitor pressing at a wall |
 | The pesichah (opening) | ✅ | A first-visit card that teaches the ring-of-light affordance and names where wonder #1 waits. Shown once, ever |
 | First-step rescue | ✅ | 40s with nothing found and the beacon rises over wonder #1 unasked |
@@ -271,7 +275,7 @@ run; mobile gets dual-thumb controls.
 | WebAudio events | ✅ | Shofar tekiah, freygish harp arpeggio, Shabbat trumpet fanfare, ketoret chime, flute, step tones |
 | Ambient bed | ✅ | Wind, fire, Levites' ascent — mixed per frame, one ♪ / ⃠ switch silences everything |
 | Search + sharing surface | ✅ | Canonical URL, OG/Twitter cards, JSON-LD, sitemap, real prose inside `#root` for crawlers |
-| Frame-rate independent easing | ✅ | The day/night ramp is time-based, so the sun sets at one speed on every machine |
+| Frame-rate independent easing | ✅ | The day/night ramp is time-based, so the sun sets at one speed on every machine. An audit of the whole loop found one straggler — the doves, on a hard-coded `0.016` — which circled half again as fast on a 144 Hz panel; everything else is driven from absolute `t`, which is inherently safe |
 | Graceful no-WebGL | ✅ | A device that cannot open a GL context gets a Hebrew notice, not a white page |
 
 ---
@@ -422,6 +426,20 @@ lookup instead of indexing the array.
    Quest gating lives in `collect(id)`. The fifteen steps are also in
    `clickables`, carrying `userData.step`. `burst(pos, opts)` drives one shared
    sprite pool for both.
+   **Anything built before `clickables` exists must be pushed to it by hand
+   further down.** Nicanor's doors were not, and they carried a halo and a hint
+   with nothing to strike — a dead end at the top of the fifteen steps, and
+   `guideTo()` scans the same list, so *Show me* had no beacon to raise either.
+   **9b. Picking on a thumb** — `onUp` casts dead centre first, and only if
+   that finds *nothing at all* does it re-cast around a 22 px circle and take
+   the nearest hit. Because it runs only on a clean miss, a deliberate tap on a
+   step or a kohen still lands exactly where it was aimed. Geometry too thin to
+   aim at gets an explicit hit volume instead: `nicanorHit` is a pane filling
+   the gateway's opening at `opacity: 0` — **not** `visible = false`, which
+   three.js skips during raycasting — kept as thin as the doors and lifted two
+   amot off the threshold so a steep ray meant for the fifteenth step still
+   reaches the marble. It hides itself once the doors swing, so an open gateway
+   stops swallowing taps aimed through it.
 10. **Audio** — lazy `AudioContext`; the six instruments, then `buildAmbience()`
     (persistent graph) and `mixAmbience(t, dt, nightAmt)` (per-frame gains from
     camera position). `amb.on` is the single mute.
@@ -448,6 +466,15 @@ than the last:
 3. **The unasked rescue** — a `setTimeout` that fires `guideTo(0)` after 40s of
    quest mode with nothing found. It is cleared the moment anything is found, so
    it can only ever fire for the first wonder.
+
+Every rung of that ladder ends in the same beacon, so the beacon has to be
+*visible*. It was not: a lone additive beam at 0.2 opacity over sunlit marble
+adds nothing, because the stone is already at the top of the tone curve. It is
+two shells now — the additive one for night, and a normally-blended amber core
+that tints whatever stands behind it — and it holds for 16 seconds rather than
+11. All four callers test `guideTo`'s return value, and the hints panel says so
+out loud when it comes back `false`; a button that looks pressed and does
+nothing is how the missing registration above stayed hidden.
 
 Everything here keys off `found.length === 0`. Do not extend the ladder to
 later wonders: by then the hint line and *Show me* are enough, and being led by
@@ -554,10 +581,16 @@ real-money anything.
   dimension you add — the codebase should read like a sourced sefer.
 - **Multiples of 18** for any new collection — see "The number rule" above.
 - **Append, never insert**, into `DISCOVERIES`. Ids are persisted.
-- Every new wonder needs: geometry, a `DISCOVERIES` entry (title in Hebrew +
-  English, teaching text with source, hint), optional sound/animation payload in
-  the `onUp` switch, and — if state must persist — handling in `markFound`.
-- Test both modes (orbit + walk), both times of day, desktop + touch.
+- Every new wonder needs: geometry, **a push into `clickables`**, a
+  `DISCOVERIES` entry (title in Hebrew + English, teaching text with source,
+  hint), optional sound/animation payload in the `onUp` switch, and — if state
+  must persist — handling in `markFound`. Miss the push and it still gets a
+  halo, a hint and a place in the counter, and cannot be collected at all.
+- **Aim at it with a thumb before you call it done.** If the thing is thinner
+  than a hand's breadth or stands where something else will catch the miss,
+  give it a hit volume of its own rather than trusting the mesh.
+- Test both modes (orbit + walk), both times of day, desktop + touch — and test
+  a new light against the white courts at noon, not only against the night sky.
 
 ---
 
