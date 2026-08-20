@@ -94,9 +94,12 @@ preferences.
 
 - [x] **Melodies on the fifteen steps**, with the sounding note lit on a key
       strip and on the tread itself. Public domain only.
-- [ ] **Verify the three transcriptions.** Hatikvah, Shalom Aleichem and Ma'oz
-      Tzur were written from memory and are flagged unverified in the UI. They
-      need a musician's ear, or a score. Each is one line in `MELODIES`.
+- [ ] **Verify the last transcription.** Hatikvah and Ma'oz Tzur have been
+      re-entered note for note off the engraved scores in their Wikipedia
+      articles and now carry `verified: true`. Shalom Aleichem is still from
+      memory: Goldfarb's 1918 setting is public domain but no engraving of it
+      has turned up to read from, so it stays flagged unverified in the UI.
+      It is one line in `MELODIES`.
 - [ ] **More melodies.** Eliyahu HaNavi, Adon Olam, Lecha Dodi (Alkabetz, Tzfat
       1540s) and Hava Nagila (Sadigura nigun via Idelsohn, ~1918) are all public
       domain and all fit the House.

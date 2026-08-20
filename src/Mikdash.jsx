@@ -173,7 +173,10 @@ const MELODIES = [
     blurb: "The one song here that asks for this House by name: תִּכּוֹן בֵּית תְּפִלָּתִי — let my house of prayer be established — and there we will bring the thanksgiving offering. The poem is thirteenth century, signed by an acrostic reading Mordechai. The melody is a German folk tune of the fifteenth or sixteenth century that Ashkenazi Jewry took up and kept.",
     source: "Text: 13th c., acrostic 'Mordechai' · Melody: German folk, 15th–16th c. (public domain). Notes read off the engraved 'traditional version' in the Wikipedia article, written there in C and moved here to D so the whole House stays in one key.",
     // Two strains and their answers: A A' B C C'. The old line here climbed
-    // D–G–A where the tune goes D–A–B♭, which is why it never quite landed.
+    // D–D–G–G–A where the tune falls away from its opening D to the A below
+    // it and comes back up — D–A–D–G–F#–E–D — which is why it never landed.
+    // There is no B♭ anywhere in this tune; the whole of it sits in D major
+    // against Hatikvah's D minor.
     notes: [[62,1],[57,1],[62,1],[67,1],[66,1],[64,1],[62,1.5],[69,0.5],
             [69,1],[71,1],[64,1],[66,0.5],[67,0.5],[66,1],[64,1],[62,2],
             [62,1],[57,1],[62,1],[67,1],[66,1],[64,1],[62,1.5],[69,0.5],
