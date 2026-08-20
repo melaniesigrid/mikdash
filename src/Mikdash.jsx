@@ -126,7 +126,7 @@ const RIMON_POS = [
   { id: 4, pos: [-HALF + 14, 2.6, -70] },
   { id: 5, pos: [-165, 82, 10] },
   { id: 6, pos: [-HALF + 30, 2.6, HALF - 30] },
-  { id: 7, pos: [40, 26, HALF - 58] },
+  { id: 7, pos: [36, 6, HALF - 35] },        // in the porch's outer aisle — the roof deck fills 25.5–27.7
   { id: 16, pos: [40, 46, HALF - 58] },       // above the ridge of the Royal Stoa
   { id: 17, pos: [-90, 8, -HALF + 36] },      // the northern colonnade
   { id: 18, pos: [HALF - 30, 5, -HALF + 30] },// the northeastern kitchen court

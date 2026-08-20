@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.8 — "Out of the Roof" (0.3.8)
+
+- **Wonder 8 was inside the roof.** The eighth rimon — גלי הים, "within the
+  royal porch of a hundred columns" — sat at `[40, 26, HALF - 58]`, and the
+  Royal Stoa's cedar roof deck fills y 25.5–27.7 across that whole footprint.
+  The rimon was embedded in the slab: nothing to see, nothing to aim at, and
+  in quest mode nothing after it could be collected either, because the quest
+  gates on the next one in sequence. It now stands at `[36, 6, HALF - 35]` —
+  in the outer aisle of the porch, centred between two columns, 3.6 above the
+  stylobate so a walker meets it at head height, and low enough that the
+  sightline under the roof edge clears at the default orbit elevation.
+
 ## v3.7 — "Findable From the Road" (0.3.7)
 
 - **The House can be found by someone not already looking for it.** `index.html`
