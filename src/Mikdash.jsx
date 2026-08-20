@@ -91,11 +91,14 @@ const DISCOVERIES = [
 // into this array.
 //
 // ─── On accuracy ───
-// `nigun` is composed for this House, so it is right by definition. The other
-// three are transcribed by ear from memory and want a musician's check — a
-// wrong note in Hatikvah is worse than no Hatikvah. Each is one line of data;
-// fixing a note is editing a number. `verified: false` says nobody has
-// confirmed it yet.
+// `nigun` is composed for this House, so it is right by definition. The three
+// borrowed tunes were first written down here by ear, and they were wrong —
+// outlines with the right shape and the wrong notes. Hatikvah and Ma'oz Tzur
+// have since been read note for note off the engraved scores in their
+// Wikipedia articles and carry `verified: true`. Shalom Aleichem is still by
+// ear: Goldfarb's 1918 setting is public domain but no engraving of it turned
+// up to read from, so it keeps `verified: false` and says so in the panel.
+// Each melody is one line of data; fixing a note is editing a number.
 const NOTE_HZ = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // Step index → MIDI, matching STEP_SCALE exactly. Used to light the tread a
 // note is standing on.
@@ -121,16 +124,32 @@ const MELODIES = [
     id: "hatikvah",
     heb: "הַתִּקְוָה",
     title: "Hatikvah — The Hope",
-    verified: false,
-    bpm: 76,
+    verified: true,
+    bpm: 72,
     blurb: "The tune is far older than the words and was never Jewish to begin with: it descends from \"La Mantovana,\" printed by Giuseppe Cenci around 1600, a wandering European melody that also surfaces in Smetana's Vltava. Samuel Cohen set it to Naftali Herz Imber's poem Tikvatenu in 1888. Imber's hope was two thousand years old when he wrote it down; the melody had been drifting for three hundred.",
-    source: "Melody: Cenci, c. 1600, via Samuel Cohen 1888 · Text: N. H. Imber, 1878 — all public domain",
-    notes: [[62,1],[64,1],[65,1],[67,1],[69,1.5],[69,0.5],[70,1],[69,1],
-            [67,1.5],[65,0.5],[64,1],[62,2],[0,1],
-            [62,1],[64,1],[65,1],[67,1],[69,1.5],[69,0.5],[70,1],[69,1],
-            [67,1.5],[65,0.5],[64,1],[62,2],[0,1],
-            [69,1],[69,1],[70,1],[72,1],[74,1.5],[74,0.5],[72,1],[70,1],[69,2],[0,1],
-            [69,1],[67,1],[65,1],[67,1],[69,1],[67,1],[65,1],[64,1],[62,3]],
+    source: "Melody: Cenci, c. 1600, via Samuel Cohen 1888 · Text: N. H. Imber, 1878 — all public domain. Notes read off the engraved score in the Wikipedia article, D minor, 4/4.",
+    // Sixteen bars, and the last four sung twice — the anthem as engraved, not
+    // the flattened outline that used to stand here.
+    notes: [[62,0.5],[64,0.5],[65,0.5],[67,0.5],[69,1],[69,1],
+            [70,0.5],[69,0.5],[70,0.5],[74,0.5],[69,2],
+            [67,1],[67,0.5],[67,0.5],[65,1],[65,1],
+            [64,0.5],[62,0.5],[64,0.5],[65,0.5],[62,1.5],[57,0.5],
+            [62,0.5],[64,0.5],[65,0.5],[67,0.5],[69,1],[69,1],
+            [70,0.5],[69,0.5],[70,0.5],[74,0.5],[69,2],
+            [67,1],[67,0.5],[67,0.5],[65,1],[65,1],
+            [64,0.5],[62,0.5],[64,0.5],[65,0.5],[62,2],
+            [62,1],[74,1],[74,1],[74,1],
+            [72,0.5],[74,0.5],[72,0.5],[70,0.5],[69,2],
+            [62,1],[74,1],[74,1],[74,1],
+            [72,0.5],[74,0.5],[72,0.5],[70,0.5],[69,2],
+            [72,1],[72,0.5],[72,0.5],[65,1],[65,1],
+            [67,0.5],[69,0.5],[70,0.5],[72,0.5],[69,1],[67,0.5],[65,0.5],
+            [67,1],[67,1],[65,1],[65,0.5],[65,0.5],
+            [64,0.5],[62,0.5],[64,0.5],[65,0.5],[62,2],
+            [72,1],[72,0.5],[72,0.5],[65,1],[65,1],
+            [67,0.5],[69,0.5],[70,0.5],[72,0.5],[69,1],[67,0.5],[65,0.5],
+            [67,1],[67,1],[65,1],[65,0.5],[65,0.5],
+            [64,0.5],[62,0.5],[64,0.5],[65,0.5],[62,2]],
   },
   {
     id: "shalom",
@@ -149,14 +168,22 @@ const MELODIES = [
     id: "maoz",
     heb: "מָעוֹז צוּר",
     title: "Ma'oz Tzur — Rock of Ages",
-    verified: false,
+    verified: true,
     bpm: 92,
     blurb: "The one song here that asks for this House by name: תִּכּוֹן בֵּית תְּפִלָּתִי — let my house of prayer be established — and there we will bring the thanksgiving offering. The poem is thirteenth century, signed by an acrostic reading Mordechai. The melody is a German folk tune of the fifteenth or sixteenth century that Ashkenazi Jewry took up and kept.",
-    source: "Text: 13th c., acrostic 'Mordechai' · Melody: German folk, 15th–16th c. (public domain)",
-    notes: [[62,1],[62,1],[67,1],[67,1],[69,1],[69,1],[67,2],
-            [66,1],[66,1],[65,1],[65,1],[64,1],[64,1],[62,2],[0,0.5],
-            [67,1],[67,1],[65,1],[65,1],[64,1],[64,1],[62,2],
-            [67,1],[67,1],[65,1],[65,1],[64,1],[64,1],[62,2]],
+    source: "Text: 13th c., acrostic 'Mordechai' · Melody: German folk, 15th–16th c. (public domain). Notes read off the engraved 'traditional version' in the Wikipedia article, written there in C and moved here to D so the whole House stays in one key.",
+    // Two strains and their answers: A A' B C C'. The old line here climbed
+    // D–G–A where the tune goes D–A–B♭, which is why it never quite landed.
+    notes: [[62,1],[57,1],[62,1],[67,1],[66,1],[64,1],[62,1.5],[69,0.5],
+            [69,1],[71,1],[64,1],[66,0.5],[67,0.5],[66,1],[64,1],[62,2],
+            [62,1],[57,1],[62,1],[67,1],[66,1],[64,1],[62,1.5],[69,0.5],
+            [69,1],[71,1],[64,1],[66,0.5],[67,0.5],[66,1],[64,1],[62,1.5],[69,0.5],
+            [69,1.5],[69,0.5],[71,1],[73,1],[74,2],[69,2],
+            [74,1],[73,1],[71,1],[69,1],[69,0.5],[67,0.5],[66,0.5],[67,0.5],[64,2],
+            [66,1.5],[67,0.5],[69,1.5],[71,0.5],[64,1.5],[66,0.5],[67,2],
+            [66,1],[62,1],[71,1],[69,0.5],[67,0.5],[66,1],[67,1],[69,2],
+            [66,1.5],[67,0.5],[69,1.5],[71,0.5],[64,1.5],[66,0.5],[67,2],
+            [66,1],[62,1],[71,1],[69,0.5],[67,0.5],[66,1],[64,1],[62,2]],
   },
 ];
 
@@ -3036,6 +3063,33 @@ export default function Mikdash() {
     dR.userData.sealed = true;
     clickables.push(dL, dR);
 
+    // Nicanor's doors are wonder 14 themselves. They were built long before
+    // `clickables` exists, so the registration has to happen down here — and
+    // when it was missing they carried a halo and a hint but nothing to strike,
+    // which dead-ended the quest at the top of the fifteen steps (guideTo()
+    // scans this same list, so "Show me" found no beacon to raise either).
+    clickables.push(nicanor);
+
+    // Two bronze slabs 1.2 amot thick are a fair target with a mouse and a
+    // cruel one with a thumb: from any oblique angle they read as a line, and
+    // the top step waits directly under them to catch the miss with a note.
+    // So the target is the gateway rather than the leaves — an unseen pane
+    // filling the aperture between the posts, threshold to lintel. opacity 0
+    // and not visible=false, because three.js skips invisible objects in the
+    // raycast, and this one has to stay hittable while staying unseen.
+    // Kept as thin as the leaves themselves and lifted two amot clear of the
+    // threshold, so that a steeply overhead ray aimed at the fifteenth step
+    // still reaches the marble and sounds its note instead of being caught by
+    // a pane of nothing hanging above it.
+    const nicanorHit = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 22, 40),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false })
+    );
+    nicanorHit.position.set(NIC_X, IC_H + 13, 0);
+    nicanorHit.userData = { id: 14 };
+    scene.add(nicanorHit);
+    clickables.push(nicanorHit);
+
     // ═══════════ Halos ═══════════
     // The pesichah promises that every hidden thing floats inside a slowly
     // turning ring of gold light. The rimonim carry their own ring; the
@@ -3338,7 +3392,14 @@ export default function Mikdash() {
     // Visuals are driven separately, off requestAnimationFrame against the
     // same audio clock, so a stalled frame delays the light and never the note.
     let melodyStop = null;
-    const playPitch = (midi, at, dur) => {
+    // Every note of a melody is scheduled on the audio clock the instant play is
+    // pressed, so "stop" cannot mean "stop scheduling" — the whole tune is
+    // already in the future. Each run therefore gets its own bus and keeps its
+    // oscillators, and stopping ducks the bus and stops the voices. Without
+    // that, ■ only put the lights out while the tune played on, and starting a
+    // second melody laid it on top of the first: two songs at once, which is
+    // what a wrong melody actually sounded like.
+    const playPitch = (midi, at, dur, dest, voices) => {
       const ctx = ensureAudio();
       const f = NOTE_HZ(midi);
       [[1, "triangle", 0.19], [2, "sine", 0.06], [3, "sine", 0.022], [4, "sine", 0.008]]
@@ -3348,8 +3409,9 @@ export default function Mikdash() {
           g.gain.setValueAtTime(0.0001, at);
           g.gain.exponentialRampToValueAtTime(peak, at + 0.014);
           g.gain.exponentialRampToValueAtTime(0.0001, at + dur + 0.5);
-          o.connect(g); g.connect(amb.master || ctx.destination);
+          o.connect(g); g.connect(dest);
           o.start(at); o.stop(at + dur + 0.6);
+          voices.push(o);
         });
     };
     // Nearest tread to a pitch, so the ascent lights under the melody even when
@@ -3368,18 +3430,36 @@ export default function Mikdash() {
       const ctx = ensureAudio();
       const spb = 60 / mel.bpm;
       const start = ctx.currentTime + 0.25;
+      const bus = ctx.createGain();
+      bus.gain.value = 1;
+      bus.connect(amb.master || ctx.destination);
+      const voices = [];
       const timeline = [];
       let cursor = 0;
       for (const [midi, beats] of mel.notes) {
         if (midi > 0) {
           const dur = beats * spb * 0.92;
-          playPitch(midi, start + cursor, dur);
+          playPitch(midi, start + cursor, dur, bus, voices);
           timeline.push({ at: start + cursor, midi });
         }
         cursor += beats * spb;
       }
       const total = cursor;
       let idx = 0, raf = 0, live = true;
+      // One teardown for both endings — the tune running out and the button
+      // being pressed — so a melody can never leave its bus hanging on the mix.
+      const teardown = (fade) => {
+        live = false;
+        cancelAnimationFrame(raf);
+        const now = ctx.currentTime;
+        bus.gain.cancelScheduledValues(now);
+        bus.gain.setValueAtTime(Math.max(0.0001, bus.gain.value), now);
+        bus.gain.exponentialRampToValueAtTime(0.0001, now + fade);
+        // stop() before start() simply means the voice never sounds, which is
+        // exactly right for the notes still waiting in the future.
+        voices.forEach((o) => { try { o.stop(now + fade); } catch { /* already done */ } });
+        setTimeout(() => { try { bus.disconnect(); } catch { /* already gone */ } }, (fade + 0.3) * 1000);
+      };
       const tick = () => {
         if (!live) return;
         const now = ctx.currentTime;
@@ -3390,11 +3470,20 @@ export default function Mikdash() {
           if (stepMeshes[st]) stepMeshes[st].material.emissiveIntensity = 0.85;
           idx++;
         }
-        if (now >= start + total + 0.4) { live = false; onEnd?.(); return; }
+        // The last note is still ringing out here, so let it decay on its own
+        // rather than ducking it: only the bookkeeping ends.
+        if (now >= start + total + 0.4) {
+          teardown(1.2);
+          melodyStop = null;
+          onEnd?.();
+          return;
+        }
         raf = requestAnimationFrame(tick);
       };
       raf = requestAnimationFrame(tick);
-      melodyStop = () => { live = false; cancelAnimationFrame(raf); };
+      // Pressed stop: a short duck, fast enough to feel like a stop and slow
+      // enough not to click.
+      melodyStop = () => teardown(0.08);
       return true;
     };
     apiRef.current.stopMelody = () => { melodyStop?.(); melodyStop = null; };
@@ -3575,18 +3664,33 @@ export default function Mikdash() {
     // mode — a camera that swings over to it. The beacon only ever marks the
     // wonder you are already being asked to find, so it gives nothing away.
     const beacon = new THREE.Group();
+    // Added light cannot brighten sunlit marble. The stone is already at the
+    // top of the tone curve, so a single 0.2 additive beam laid over the
+    // courts added nothing the eye could find: the pillar only ever showed
+    // where it happened to cross a dark roof or the hills, and over the House
+    // itself — which is where the quest keeps pointing — it was not there at
+    // all. The column is two shells now. The additive one still blooms at
+    // night; a normally-blended amber core *tints* whatever stands behind it,
+    // so the pillar reads against white stone at noon.
     const beaconBeam = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.6, 3.6, 150, 14, 1, true),
+      new THREE.CylinderGeometry(2.8, 6.4, 150, 16, 1, true),
       new THREE.MeshBasicMaterial({ color: 0xffc14a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, side: THREE.DoubleSide, fog: false })
     );
     beaconBeam.position.y = 75;
     beaconBeam.renderOrder = 20;
     beacon.add(beaconBeam);
-    const beaconRing = new THREE.Mesh(
-      new THREE.TorusGeometry(5.5, 0.45, 8, 30),
-      new THREE.MeshBasicMaterial({ color: 0xffd97a, transparent: true, opacity: 0, depthWrite: false, depthTest: false, fog: false })
+    const beaconCore = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.1, 2.6, 150, 16, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xe08c18, transparent: true, opacity: 0, depthWrite: false, depthTest: false, side: THREE.DoubleSide, fog: false })
     );
-    beaconRing.renderOrder = 21;
+    beaconCore.position.y = 75;
+    beaconCore.renderOrder = 21;
+    beacon.add(beaconCore);
+    const beaconRing = new THREE.Mesh(
+      new THREE.TorusGeometry(7.5, 0.7, 8, 36),
+      new THREE.MeshBasicMaterial({ color: 0xd9860f, transparent: true, opacity: 0, depthWrite: false, depthTest: false, fog: false })
+    );
+    beaconRing.renderOrder = 22;
     beaconRing.rotation.x = Math.PI / 2;
     beaconRing.position.y = 0.8;
     beacon.add(beaconRing);
@@ -3631,7 +3735,7 @@ export default function Mikdash() {
       const p = obj.getWorldPosition(new THREE.Vector3());
       beacon.position.set(p.x, p.y - 8, p.z);
       beacon.visible = true;
-      guide.until = nowT + 11;
+      guide.until = nowT + 16;
       if (!walkRef.current) {
         guide.active = true; guide.t = 0;
         guide.from.copy(orbit.target); guide.to.copy(p);
@@ -3672,7 +3776,16 @@ export default function Mikdash() {
     const raycaster = new THREE.Raycaster();
     const mv = new THREE.Vector2();
     let moved = 0;
-    const pxOf = (e) => (e.touches ? e.touches[0] : e.changedTouches ? e.changedTouches[0] : e);
+    // A touchend arrives with an EMPTY e.touches — the finger that just lifted
+    // lives only in changedTouches. Testing the list for truthiness instead of
+    // length handed back undefined here, and onUp threw on p.clientX before it
+    // could ever raycast: on a phone nothing on the whole map could be tapped.
+    // Length, not existence.
+    const pxOf = (e) => {
+      if (e.touches && e.touches.length) return e.touches[0];
+      if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0];
+      return e;
+    };
 
     const onKey = (e, down) => {
       if (down && amb.on) buildAmbience();
@@ -3751,20 +3864,50 @@ export default function Mikdash() {
       }
       return true;
     };
+    // A phone fires a compatibility mouse event after every tap. While the
+    // touch path was broken that duplicate was the only thing collecting
+    // anything; now that both work, an unguarded tap would take the same wonder
+    // twice — two fact cards, two bursts, two shofar blasts. Ignore a mouse
+    // event that treads on the heels of a touch.
+    let lastTouchUp = -1e4;
     const onUp = (e) => {
       orbit.dragging = false;
+      if (e.changedTouches) lastTouchUp = performance.now();
+      else if (performance.now() - lastTouchUp < 700) return;
       if (walkRef.current && e.changedTouches) {
         for (const t of e.changedTouches) {
           if (player.touchMove && t.identifier === player.touchMove.id) { player.touchMove = null; player.moveVec.f = 0; player.moveVec.s = 0; }
           if (player.touchLook && t.identifier === player.touchLook.id) player.touchLook = null;
         }
       }
-      if (moved > 7) return;
+      // A thumb is not a mouse pointer. It lands a little away from where the
+      // eye aimed and it wobbles on the way up, so both allowances below are
+      // granted to touch alone — clicking with a mouse behaves exactly as it
+      // always did.
+      const byTouch = !!(e.changedTouches || e.touches);
+      if (moved > (byTouch ? 16 : 7)) return;
       const rect = renderer.domElement.getBoundingClientRect();
       const p = pxOf(e);
-      mv.set(((p.clientX - rect.left) / rect.width) * 2 - 1, -((p.clientY - rect.top) / rect.height) * 2 + 1);
-      raycaster.setFromCamera(mv, camera);
-      const hits = raycaster.intersectObjects(clickables, true);
+      const castAt = (dx, dy) => {
+        mv.set(((p.clientX + dx - rect.left) / rect.width) * 2 - 1,
+               -((p.clientY + dy - rect.top) / rect.height) * 2 + 1);
+        raycaster.setFromCamera(mv, camera);
+        return raycaster.intersectObjects(clickables, true);
+      };
+      let hits = castAt(0, 0);
+      if (!hits.length && byTouch) {
+        // Dead centre found nothing whatsoever, so widen the tap to the size
+        // of a fingertip: eight rays around a 22px circle, nearest hit wins.
+        // This runs only on a clean miss, so a deliberate tap on a step or on
+        // a kohen still lands precisely where it was aimed and nothing that
+        // already worked can be stolen by something beside it.
+        const R = 22;
+        for (let a = 0; a < 8; a++) {
+          const ang = (a / 8) * Math.PI * 2;
+          const near = castAt(Math.cos(ang) * R, Math.sin(ang) * R);
+          if (near.length && (!hits.length || near[0].distance < hits[0].distance)) hits = near;
+        }
+      }
       if (!hits.length) return;
       const struck = hits[0].object.userData.step;
       if (struck !== undefined) {
@@ -4001,9 +4144,10 @@ export default function Mikdash() {
         const left = guide.until - t;
         if (left <= 0) beacon.visible = false;
         else {
-          const fade = Math.min(1, left / 1.6) * (0.55 + 0.45 * Math.sin(t * 4.2));
-          beaconBeam.material.opacity = 0.2 * fade;
-          beaconRing.material.opacity = 0.8 * fade;
+          const fade = Math.min(1, left / 1.6) * (0.72 + 0.28 * Math.sin(t * 4.2));
+          beaconBeam.material.opacity = 0.32 * fade;
+          beaconCore.material.opacity = 0.5 * fade;
+          beaconRing.material.opacity = 0.9 * fade;
           const rs = 1 + 0.22 * Math.sin(t * 3.1);
           beaconRing.scale.set(rs, rs, 1);
           beacon.rotation.y = t * 0.55;
@@ -4207,6 +4351,9 @@ export default function Mikdash() {
       nu.open += (nu.target - nu.open) * 0.03;
       nicL.rotation.y = -nu.open * 1.75;
       nicR.rotation.y = nu.open * 1.75;
+      // Open, the aperture is a doorway again and must stop swallowing taps
+      // aimed through it at the altar and the House beyond.
+      nicanorHit.visible = nu.open < 0.02;
 
       if (ketoretState.active) {
         ketoretPuffs.forEach((p) => {
@@ -4584,7 +4731,10 @@ export default function Mikdash() {
                 </span>
                 {!lockedAhead && !done && (
                   <button
-                    onClick={() => apiRef.current.guideTo?.(i)}
+                    onClick={() => {
+                      if (apiRef.current.guideTo?.(i)) showToast(walkMode ? "Follow the pillar of light." : "There — where the light stands.");
+                      else showToast("אֵין אוֹר — nothing to mark there yet. Walk the courts and look for it.");
+                    }}
                     title="Mark it with a pillar of light"
                     style={{ marginLeft: 8, fontStyle: "normal", fontSize: 11.5, background: "rgba(212,164,55,.18)", color: "#ffd97a", border: "1px solid rgba(212,164,55,.45)", borderRadius: 999, padding: "2px 9px", cursor: "pointer" }}
                   >⌖ show me</button>

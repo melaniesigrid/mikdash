@@ -1,5 +1,42 @@
 # Changelog
 
+## v3.15 — "The Pillar of Light" (0.3.15)
+
+- **The fifteenth nistar could not be taken on a phone.** שערי ניקנור, the
+  bronze doors at the top of the fifteen steps, are two slabs 1.2 amot thick.
+  Against a mouse pointer that is a fair target; against a thumb on a 390px
+  screen it is a line, with the fifteenth step waiting directly underneath to
+  swallow the miss with a note. The gateway is now the target rather than the
+  leaves — an unseen pane filling the aperture between the posts, threshold to
+  lintel, so the seam between the doors and the whole opening answer a tap. It
+  is kept as thin as the leaves and lifted two amot clear of the threshold, so
+  a steeply overhead ray aimed at the fifteenth step still reaches the marble
+  and sounds it; and it withdraws the moment the doors begin to swing, so an
+  open gateway stops swallowing taps aimed through it at the House beyond.
+- **A tap is not a click.** A thumb lands a little away from where the eye
+  aimed and it wobbles on the way up. Touch now gets sixteen pixels of wobble
+  instead of seven before a tap is read as a drag, and a tap that finds nothing
+  whatsoever widens to the size of a fingertip: eight rays around a 22px
+  circle, nearest hit wins. It runs only on a clean miss, so a deliberate tap
+  on a step or on a kohen still lands exactly where it was aimed and nothing
+  that already worked can be stolen by something standing beside it.
+- **The pillar of light was never there in daylight.** הראה לי raised a beam
+  of additive light over the thing being asked for — and added light cannot
+  brighten sunlit marble, which is already at the top of the tone curve. At
+  0.2 opacity over the courts it added nothing the eye could find; the pillar
+  showed only where it happened to cross a dark roof or the hills, and over the
+  House itself, which is exactly where the quest keeps pointing, it was not
+  there at all. The column is two shells now: the additive one still blooms at
+  night, and a normally-blended amber core *tints* whatever stands behind it,
+  so the pillar reads against white stone at noon. Its ring at the foot is
+  wider and deeper in colour for the same reason, and it stands for sixteen
+  seconds instead of eleven — long enough to look up from the hints and find
+  it.
+- **הראה לי now says when it has nothing to show.** The button in the hints
+  panel called `guideTo` and ignored the answer. When the target was not
+  registered the button looked pressed, no light came, and nothing said why —
+  which is precisely what hid the fifteenth nistar. It answers either way now.
+
 ## v3.14 — "Swifts at Dusk" (0.3.14)
 
 - **The doves were flying at whatever speed the display ran at.** The exact bug
