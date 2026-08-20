@@ -73,6 +73,93 @@ const DISCOVERIES = [
 // Eighteen who answer — twelve kohanim at the stations of the morning avodah
 // and six Levites on the steps. Every line carries its source, like every
 // dimension does.
+// ═══════════ נְגִינוֹת — melodies ═══════════
+//
+// The fifteen steps are already an instrument: STEP_SCALE tunes them to D
+// Ahava Rabbah (freygish) — D Eb F# G A Bb C — which is the mode most of
+// Ashkenazi liturgical song lives in. So a melody played here can light the
+// steps it is climbing, which is the whole point of putting music in a House
+// whose Levites stood on those steps and played (Middot 2:5; Sukkah 51b).
+//
+// ─── On what is and is not here ───
+// Everything below is public domain. Two melodies that would fit this House
+// beautifully are deliberately absent, because they are protected works and
+// this site is public: Naomi Shemer's "Yerushalayim shel Zahav" (1967; Shemer
+// d. 2004) and Leonard Cohen's "Dance Me to the End of Love" (1984; Cohen
+// d. 2016). Encoding a melody is reproducing the musical work even with no
+// lyric and no recording. If a licence is ever obtained they drop straight
+// into this array.
+//
+// ─── On accuracy ───
+// `nigun` is composed for this House, so it is right by definition. The other
+// three are transcribed by ear from memory and want a musician's check — a
+// wrong note in Hatikvah is worse than no Hatikvah. Each is one line of data;
+// fixing a note is editing a number. `verified: false` says nobody has
+// confirmed it yet.
+const NOTE_HZ = (m) => 440 * Math.pow(2, (m - 69) / 12);
+// Step index → MIDI, matching STEP_SCALE exactly. Used to light the tread a
+// note is standing on.
+const STEP_MIDI = [50, 51, 54, 55, 57, 58, 60, 62, 63, 66, 67, 69, 70, 72, 74];
+
+const MELODIES = [
+  {
+    id: "nigun",
+    heb: "נִגּוּן הַמַּעֲלוֹת",
+    title: "A Nigun of Ascent",
+    verified: true,
+    bpm: 84,
+    blurb: "Wordless, and composed for this House rather than borrowed. It is built only from the fifteen notes the steps are tuned to — D Ahava Rabbah, the mode of the ba'al tefillah — and it climbs, because a Song of Ascent should.",
+    source: "Mode: Ahava Rabbah · the steps: Middot 2:5; Sukkah 51b",
+    // Rises the full two octaves of the ascent, then settles home.
+    notes: [[50,1],[51,1],[54,1],[55,1],[57,2],[55,1],[54,1],[51,2],[50,2],[0,1],
+            [57,1],[58,1],[60,1],[62,2],[60,1],[58,1],[57,2],[0,1],
+            [55,1],[57,1],[58,1],[57,1],[55,3],[0,1],
+            [62,1],[63,1],[66,1],[67,1],[69,2],[67,1],[66,1],[63,2],[62,2],[0,1],
+            [60,1],[58,1],[57,1],[55,1],[54,1],[51,1],[50,4]],
+  },
+  {
+    id: "hatikvah",
+    heb: "הַתִּקְוָה",
+    title: "Hatikvah — The Hope",
+    verified: false,
+    bpm: 76,
+    blurb: "The tune is far older than the words and was never Jewish to begin with: it descends from \"La Mantovana,\" printed by Giuseppe Cenci around 1600, a wandering European melody that also surfaces in Smetana's Vltava. Samuel Cohen set it to Naftali Herz Imber's poem Tikvatenu in 1888. Imber's hope was two thousand years old when he wrote it down; the melody had been drifting for three hundred.",
+    source: "Melody: Cenci, c. 1600, via Samuel Cohen 1888 · Text: N. H. Imber, 1878 — all public domain",
+    notes: [[62,1],[64,1],[65,1],[67,1],[69,1.5],[69,0.5],[70,1],[69,1],
+            [67,1.5],[65,0.5],[64,1],[62,2],[0,1],
+            [62,1],[64,1],[65,1],[67,1],[69,1.5],[69,0.5],[70,1],[69,1],
+            [67,1.5],[65,0.5],[64,1],[62,2],[0,1],
+            [69,1],[69,1],[70,1],[72,1],[74,1.5],[74,0.5],[72,1],[70,1],[69,2],[0,1],
+            [69,1],[67,1],[65,1],[67,1],[69,1],[67,1],[65,1],[64,1],[62,3]],
+  },
+  {
+    id: "shalom",
+    heb: "שָׁלוֹם עֲלֵיכֶם",
+    title: "Shalom Aleichem — Peace Be Upon You",
+    verified: false,
+    bpm: 66,
+    blurb: "Peace greeted at the door. The words come from the kabbalists of Tzfat and were first printed in Tikkunei Shabbat (Prague, 1641), built on Shabbat 119b: two angels walk a person home on Shabbat eve. The melody almost everyone sings is Israel Goldfarb's, written in 1918 — by his own account sitting near the Statue of Liberty at Columbia University, which is a strange and lovely place for a Shabbat hymn to have been born.",
+    source: "Text: Tzfat, printed Prague 1641 · Shabbat 119b · Melody: Israel Goldfarb, 1918 (public domain)",
+    notes: [[69,1],[69,1],[70,1],[69,1],[67,1],[65,2],[0,0.5],
+            [65,1],[67,1],[69,1],[70,1],[69,2],[0,0.5],
+            [69,1],[70,1],[72,1],[70,1],[69,1],[67,2],[0,0.5],
+            [67,1],[65,1],[64,1],[65,1],[62,3]],
+  },
+  {
+    id: "maoz",
+    heb: "מָעוֹז צוּר",
+    title: "Ma'oz Tzur — Rock of Ages",
+    verified: false,
+    bpm: 92,
+    blurb: "The one song here that asks for this House by name: תִּכּוֹן בֵּית תְּפִלָּתִי — let my house of prayer be established — and there we will bring the thanksgiving offering. The poem is thirteenth century, signed by an acrostic reading Mordechai. The melody is a German folk tune of the fifteenth or sixteenth century that Ashkenazi Jewry took up and kept.",
+    source: "Text: 13th c., acrostic 'Mordechai' · Melody: German folk, 15th–16th c. (public domain)",
+    notes: [[62,1],[62,1],[67,1],[67,1],[69,1],[69,1],[67,2],
+            [66,1],[66,1],[65,1],[65,1],[64,1],[64,1],[62,2],[0,0.5],
+            [67,1],[67,1],[65,1],[65,1],[64,1],[64,1],[62,2],
+            [67,1],[67,1],[65,1],[65,1],[64,1],[64,1],[62,2]],
+  },
+];
+
 const KOHEN_VOICES = [
   { name: "תרומת הדשן", role: "The lifting of the ashes",
     text: "Before first light I went up in linen and lifted one shovelful of ash from the fire, and set it down beside the altar. Vayikra 6:3–4. The day's first act is to carry away what yesterday burned.", src: "Vayikra 6:3–4 · Tamid 1:2" },
@@ -710,6 +797,13 @@ export default function Mikdash() {
   const [night, setNight] = useState(false);
   const [sound, setSound] = useState(true);
   const [hints, setHints] = useState(false);
+  const [music, setMusic] = useState(false);
+  const [peace, setPeace] = useState(false);
+  const [nowPlaying, setNowPlaying] = useState(null);
+  // The pitch currently sounding, so the key strip can light it. Held in React
+  // rather than the scene because the strip is DOM — the scene lights its own
+  // fifteen treads from the same callback.
+  const [activeNote, setActiveNote] = useState(null);
   const [questMode, setQuestMode] = useState(true);
   const [walkMode, setWalkMode] = useState(false);
   const [toast, setToast] = useState(null);
@@ -3184,6 +3278,79 @@ export default function Mikdash() {
       });
     };
 
+    // ═══════════ Playing the steps ═══════════
+    //
+    // One voice, plucked: a triangle fundamental with two quiet partials and a
+    // fast decay, which is close enough to a struck string to sit beside the
+    // kinnor without pretending to be a piano. Scheduling is done against
+    // `ctx.currentTime` in one pass rather than a timer per note — the audio
+    // clock does not drift and setTimeout does, and a melody is exactly the
+    // thing where drift is audible.
+    //
+    // Visuals are driven separately, off requestAnimationFrame against the
+    // same audio clock, so a stalled frame delays the light and never the note.
+    let melodyStop = null;
+    const playPitch = (midi, at, dur) => {
+      const ctx = ensureAudio();
+      const f = NOTE_HZ(midi);
+      [[1, "triangle", 0.19], [2, "sine", 0.06], [3, "sine", 0.022], [4, "sine", 0.008]]
+        .forEach(([mul, type, peak]) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = type; o.frequency.value = f * mul;
+          g.gain.setValueAtTime(0.0001, at);
+          g.gain.exponentialRampToValueAtTime(peak, at + 0.014);
+          g.gain.exponentialRampToValueAtTime(0.0001, at + dur + 0.5);
+          o.connect(g); g.connect(amb.master || ctx.destination);
+          o.start(at); o.stop(at + dur + 0.6);
+        });
+    };
+    // Nearest tread to a pitch, so the ascent lights under the melody even when
+    // the melody is not in the steps' own mode.
+    const nearestStep = (midi) => {
+      let best = 0, bestD = 1e9;
+      for (let i = 0; i < STEP_MIDI.length; i++) {
+        const d = Math.abs(STEP_MIDI[i] - midi);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best;
+    };
+    apiRef.current.playMelody = (mel, onNote, onEnd) => {
+      apiRef.current.stopMelody?.();
+      if (!amb.on) return false;
+      const ctx = ensureAudio();
+      const spb = 60 / mel.bpm;
+      const start = ctx.currentTime + 0.25;
+      const timeline = [];
+      let cursor = 0;
+      for (const [midi, beats] of mel.notes) {
+        if (midi > 0) {
+          const dur = beats * spb * 0.92;
+          playPitch(midi, start + cursor, dur);
+          timeline.push({ at: start + cursor, midi });
+        }
+        cursor += beats * spb;
+      }
+      const total = cursor;
+      let idx = 0, raf = 0, live = true;
+      const tick = () => {
+        if (!live) return;
+        const now = ctx.currentTime;
+        while (idx < timeline.length && now >= timeline[idx].at) {
+          const { midi } = timeline[idx];
+          onNote?.(midi);
+          const st = nearestStep(midi);
+          if (stepMeshes[st]) stepMeshes[st].material.emissiveIntensity = 0.85;
+          idx++;
+        }
+        if (now >= start + total + 0.4) { live = false; onEnd?.(); return; }
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      melodyStop = () => { live = false; cancelAnimationFrame(raf); };
+      return true;
+    };
+    apiRef.current.stopMelody = () => { melodyStop?.(); melodyStop = null; };
+
     // ═══════════ Ambient bed: wind, the ma'aracha, the Levites' song ═══════════
     // Three synthesized voices mixed every frame by where the eye stands: wind
     // over the mountain (everywhere, stronger high up and at night), the fire
@@ -4257,6 +4424,12 @@ export default function Mikdash() {
         <button className="chip" onClick={() => setQuestMode((q) => !q)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {questMode ? "מסע · Quest ✓" : "Free explore"}
         </button>
+        <button className="chip" onClick={() => { setMusic((m) => !m); setPeace(false); }} title="Play the fifteen steps" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: music ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: music ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+          ♪ נְגִינוֹת
+        </button>
+        <button className="chip" onClick={() => { setPeace((p) => !p); setMusic(false); }} title="A house of prayer for all peoples" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: peace ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: peace ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+          שָׁלוֹם
+        </button>
         <button className="chip" onClick={() => setHints((h) => !h)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {hints ? "Hide hints" : "רמזים"}
         </button>
@@ -4319,6 +4492,133 @@ export default function Mikdash() {
           })}
         </div>
       )}
+
+      {/* ═══ נְגִינוֹת — the melody panel ═══
+          The strip is the fifteen steps laid flat: same span, D3 to D5, same
+          tuning. A note lights its key here and its tread out in the courts at
+          the same instant, off one callback, so the two never disagree. */}
+      {music && (
+        <div className="panel" style={{ position: "absolute", top: 296, right: 16, width: "min(330px, calc(100vw - 32px))", boxSizing: "border-box",
+          background: "linear-gradient(160deg,#fdf8ec,#f2e7ce)", color: "#3a2f16", borderRadius: 16, padding: "16px 18px",
+          border: "1px solid rgba(150,120,50,.3)", boxShadow: "0 16px 44px rgba(0,0,0,.35)", maxHeight: "min(62vh, 560px)", overflowY: "auto", zIndex: 30 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>נְגִינוֹת · Melodies</div>
+            <button onClick={() => { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); setMusic(false); }}
+              aria-label="Close" style={{ background: "none", border: "none", color: "#7a6634", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>×</button>
+          </div>
+          <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "#6d5c30", margin: "6px 0 12px" }}>
+            The Levites stood on these fifteen steps and played (Middot 2:5; Sukkah 51b). The steps are tuned to D Ahava Rabbah — watch them light in the courts as each melody climbs.
+          </div>
+          {MELODIES.map((mel) => (
+            <div key={mel.id} style={{ borderTop: "1px solid rgba(150,120,50,.22)", padding: "11px 0 12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                <button
+                  onClick={() => {
+                    if (nowPlaying === mel.id) { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); return; }
+                    const ok = apiRef.current.playMelody?.(mel, (m) => setActiveNote(m),
+                      () => { setNowPlaying(null); setActiveNote(null); });
+                    if (ok) setNowPlaying(mel.id);
+                    else showToast("קוֹל — turn the sound on first, and the steps will answer.");
+                  }}
+                  style={{ flex: "0 0 auto", width: 30, height: 30, borderRadius: 999, cursor: "pointer",
+                    background: nowPlaying === mel.id ? "#4a3a18" : "rgba(74,58,24,.12)", color: nowPlaying === mel.id ? "#f5e9c8" : "#4a3a18",
+                    border: "1px solid rgba(150,120,50,.4)", fontSize: 12, lineHeight: 1 }}
+                  aria-label={nowPlaying === mel.id ? "Stop" : "Play " + mel.title}>
+                  {nowPlaying === mel.id ? "■" : "▶"}
+                </button>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 14 }}>{mel.heb}</div>
+                  <div style={{ fontSize: 11.5, color: "#6d5c30" }}>{mel.title}</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 11.5, lineHeight: 1.6, marginTop: 8 }}>{mel.blurb}</div>
+              <div style={{ fontSize: 10.5, color: "#8a7440", marginTop: 6, fontStyle: "italic" }}>{mel.source}</div>
+              {!mel.verified && (
+                <div style={{ fontSize: 10.5, color: "#8a5a2a", marginTop: 4 }}>
+                  ♪ Transcribed by ear — not yet checked against a score.
+                </div>
+              )}
+            </div>
+          ))}
+          <div style={{ borderTop: "1px solid rgba(150,120,50,.22)", paddingTop: 10, fontSize: 10.5, lineHeight: 1.55, color: "#6d5c30" }}>
+            Only public-domain melodies are here. <i>Yerushalayim shel Zahav</i> (Naomi Shemer, 1967) and <i>Dance Me to the End of Love</i> (Leonard Cohen, 1984) are still in copyright, and encoding a melody reproduces the work even without its words.
+          </div>
+        </div>
+      )}
+
+      {/* The strip only appears while something is playing, so it never sits
+          over the House doing nothing. */}
+      {nowPlaying && (
+        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 34, zIndex: 30,
+          display: "flex", alignItems: "flex-end", padding: "9px 11px", borderRadius: 12,
+          background: "rgba(24,19,9,.82)", border: "1px solid rgba(212,164,55,.35)", boxShadow: "0 12px 36px rgba(0,0,0,.45)" }}>
+          {(() => {
+            const LO = 50, HI = 74;                       // D3..D5, the ascent's own span
+            const BLACK = [1, 3, 6, 8, 10];
+            const keys = [];
+            for (let m = LO; m <= HI; m++) {
+              const pc = ((m % 12) + 12) % 12;
+              const isBlack = BLACK.includes(pc);
+              const on = activeNote === m;
+              if (!isBlack) {
+                keys.push(
+                  <div key={m} style={{ position: "relative", width: 15, height: 52, marginRight: 2, borderRadius: "2px 2px 3px 3px",
+                    background: on ? "linear-gradient(180deg,#ffe9a8,#f0c96a)" : "linear-gradient(180deg,#f6f1e2,#ddd4bd)",
+                    boxShadow: on ? "0 0 14px rgba(255,206,92,.85)" : "inset 0 -2px 3px rgba(0,0,0,.18)",
+                    transition: "background .07s linear, box-shadow .07s linear" }} />
+                );
+              } else {
+                keys.push(
+                  <div key={m} style={{ position: "relative", width: 0, marginRight: 0, zIndex: 2 }}>
+                    <div style={{ position: "absolute", left: -7, bottom: 20, width: 11, height: 32, borderRadius: "2px 2px 3px 3px",
+                      background: on ? "linear-gradient(180deg,#ffd873,#e0a92e)" : "linear-gradient(180deg,#3a3020,#20190e)",
+                      boxShadow: on ? "0 0 12px rgba(255,196,64,.9)" : "0 2px 4px rgba(0,0,0,.5)",
+                      transition: "background .07s linear, box-shadow .07s linear" }} />
+                  </div>
+                );
+              }
+            }
+            return keys;
+          })()}
+        </div>
+      )}
+
+      {/* ═══ שָׁלוֹם — what the House is for ═══ */}
+      {peace && (
+        <div className="panel" style={{ position: "absolute", top: 296, right: 16, width: "min(330px, calc(100vw - 32px))", boxSizing: "border-box",
+          background: "linear-gradient(160deg,#fdf8ec,#f2e7ce)", color: "#3a2f16", borderRadius: 16, padding: "16px 18px",
+          border: "1px solid rgba(150,120,50,.3)", boxShadow: "0 16px 44px rgba(0,0,0,.35)", maxHeight: "min(62vh, 560px)", overflowY: "auto", zIndex: 30 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>שָׁלוֹם · The Peace This House Is For</div>
+            <button onClick={() => setPeace(false)} aria-label="Close"
+              style={{ background: "none", border: "none", color: "#7a6634", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>×</button>
+          </div>
+          <div style={{ fontSize: 12, lineHeight: 1.68, marginTop: 10 }}>
+            <p style={{ margin: "0 0 10px" }}>
+              This House is not built for its own sake. Every source that describes it standing again describes the same thing happening around it — the fighting stops.
+            </p>
+            <p style={{ margin: "0 0 4px", fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13.5, direction: "rtl" }}>
+              וְכִתְּתוּ חַרְבוֹתָם לְאִתִּים וַחֲנִיתוֹתֵיהֶם לְמַזְמֵרוֹת
+            </p>
+            <p style={{ margin: "0 0 10px" }}>
+              “They shall beat their swords into plowshares and their spears into pruning hooks; nation shall not lift up sword against nation, neither shall they learn war any more.” — Yeshayahu 2:4. The verses just before it are about this mountain, and this House on it.
+            </p>
+            <p style={{ margin: "0 0 10px" }}>
+              Micah 4:4 says the same and then adds what peace actually looks like when you are living in it: <i>each man under his vine and under his fig tree, and none shall make him afraid.</i> The fig trees on the hillside here are that pasuk.
+            </p>
+            <p style={{ margin: "0 0 10px" }}>
+              And the House is not meant to belong only to the people who built it — <span style={{ fontFamily: "'Frank Ruhl Libre', serif", direction: "rtl" }}>כִּי בֵיתִי בֵּית־תְּפִלָּה יִקָּרֵא לְכָל־הָעַמִּים</span>, “for My House shall be called a house of prayer for all peoples” (Yeshayahu 56:7).
+            </p>
+            <p style={{ margin: "0 0 10px" }}>
+              The Rambam ends the Mishneh Torah on it: in that time there will be neither famine nor war, neither envy nor rivalry, and the whole occupation of the world will be to know Hashem (Hilchot Melachim 12:5).
+            </p>
+            <p style={{ margin: "0 0 10px", fontStyle: "italic", color: "#6d5c30" }}>
+              שַׁאֲלוּ שְׁלוֹם יְרוּשָׁלִָם — pray for the peace of Jerusalem (Tehillim 122:6). That psalm is one of the fifteen Songs of Ascent, one for each of the steps outside. Whoever is reading this: may it come, and soon, and for everyone.
+            </p>
+          </div>
+        </div>
+      )}
+
 
       <div style={{ position: "absolute", bottom: 14, left: 0, right: 0, textAlign: "center", pointerEvents: "none", color: night ? "#bfb391" : "#5b4e33", fontSize: 13.5, fontStyle: "italic", textShadow: night ? "0 1px 8px rgba(0,0,0,.7)" : "0 1px 10px rgba(255,255,255,.8)" }}>
         {walkMode

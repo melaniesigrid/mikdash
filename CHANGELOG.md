@@ -1,5 +1,55 @@
 # Changelog
 
+## v3.13 — "The Levites' Steps Can Be Played" (0.3.13)
+
+- **Melodies, played on the fifteen steps.** The steps were already an
+  instrument — `STEP_SCALE` tunes them to D Ahava Rabbah (freygish), the mode
+  most Ashkenazi liturgical song lives in — and the Levites stood on exactly
+  these steps and played (Middot 2:5; Sukkah 51b). A new נְגִינוֹת panel plays
+  four melodies; a key strip appears at the foot of the screen with the
+  sounding note lit in gold, and the matching tread lights out in the courts at
+  the same instant, off one callback, so the two can never disagree.
+  - Scheduling is one pass against `ctx.currentTime`, not a timer per note. The
+    audio clock does not drift and `setTimeout` does, and a melody is precisely
+    the thing where drift is audible. Visuals run separately off rAF against
+    that same clock, so a stalled frame delays the light and never the note.
+  - `nearestStep()` maps any pitch to its closest tread, so the ascent lights
+    under a melody even when the melody is not in the steps' own mode.
+- **What is here, and what is deliberately not.** Every melody is public domain:
+  - **נִגּוּן הַמַּעֲלוֹת** — composed for this House, built only from the
+    fifteen notes the steps are tuned to, and it climbs, because a Song of
+    Ascent should. No provenance question, and it is the only one marked
+    verified.
+  - **הַתִּקְוָה** — the tune is older than the words and was not Jewish to
+    begin with: it descends from "La Mantovana", printed by Giuseppe Cenci
+    around 1600, which also surfaces in Smetana's Vltava. Samuel Cohen set it
+    to Imber's *Tikvatenu* in 1888.
+  - **שָׁלוֹם עֲלֵיכֶם** — text from the kabbalists of Tzfat, first printed in
+    Tikkunei Shabbat (Prague, 1641), built on Shabbat 119b. Israel Goldfarb's
+    1918 melody, written by his own account near the Statue of Liberty.
+  - **מָעוֹז צוּר** — the one that asks for this House by name,
+    תִּכּוֹן בֵּית תְּפִלָּתִי. Thirteenth-century text, acrostic "Mordechai";
+    fifteenth/sixteenth-century German folk melody.
+  - **Absent on purpose:** Naomi Shemer's *Yerushalayim shel Zahav* (1967) and
+    Leonard Cohen's *Dance Me to the End of Love* (1984) are both still in
+    copyright. Encoding a melody reproduces the musical work even with no lyric
+    and no recording, and this site is public. If a licence is ever obtained
+    they drop straight into the `MELODIES` array.
+  - Three of the four are transcribed by ear and are marked **unverified in the
+    UI itself**, because a wrong note in Hatikvah is worse than no Hatikvah.
+    Each melody is one line of data; correcting a note is editing a number.
+- **שָׁלוֹם — a panel for what the House is actually for.** Yeshayahu 2:4,
+  swords into plowshares, in the passage that is about this mountain and this
+  House on it. Micah 4:4, which says the same and then adds what peace looks
+  like from inside it — each man under his vine and under his fig tree, and
+  none shall make him afraid; the fig trees planted on the hillside in v3.10
+  are that pasuk. Yeshayahu 56:7, בֵּית־תְּפִלָּה יִקָּרֵא לְכָל־הָעַמִּים, a
+  house of prayer for all peoples. The Rambam's closing of the Mishneh Torah
+  (Hilchot Melachim 12:5): no famine, no war, no envy, no rivalry. And Tehillim
+  122:6 — pray for the peace of Jerusalem — which is itself one of the fifteen
+  Songs of Ascent, one for each step outside.
+
+
 ## v3.12 — "Dust and a Paved Court" (0.3.12)
 
 - **The azarah floor was a stretched texture, not a flat one.** It had been the

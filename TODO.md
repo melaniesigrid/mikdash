@@ -93,6 +93,19 @@ preferences.
 
 ## Sound
 
+- [x] **Melodies on the fifteen steps**, with the sounding note lit on a key
+      strip and on the tread itself. Public domain only.
+- [ ] **Verify the three transcriptions.** Hatikvah, Shalom Aleichem and Ma'oz
+      Tzur were written from memory and are flagged unverified in the UI. They
+      need a musician's ear, or a score. Each is one line in `MELODIES`.
+- [ ] **More melodies.** Eliyahu HaNavi, Adon Olam, Lecha Dodi (Alkabetz, Tzfat
+      1540s) and Hava Nagila (Sadigura nigun via Idelsohn, ~1918) are all public
+      domain and all fit the House.
+- [ ] **Licence the two that are missing.** *Yerushalayim shel Zahav* and
+      *Dance Me to the End of Love* would both belong here. They need a
+      mechanical/synchronisation licence from the publishers — ACUM for Shemer,
+      Sony/ATV for Cohen — not a code change.
+
 - [ ] **The camels.** One low grunt, rarely, when the camera is near.
 - [ ] **Footsteps in walk mode.** Different on marble, on paving, on dust — the
       surface is already known from `groundHeight()`.
