@@ -1040,20 +1040,318 @@ export default function Mikdash() {
       }
       return g;
     };
-    // Olive: grey-green, and dark. Authored by eye before the renderer encoded
-    // its output, so linearised here along with every other hand-picked colour
-    // that was reading a stop and a half too pale.
-    const oliveLeaf = new THREE.MeshStandardMaterial({ color: 0x283514, roughness: 0.95 });
-    for (let i = 0; i < 70; i++) {
-      const a = rnd(0, Math.PI * 2), r = rnd(460, 980);
-      const x = Math.cos(a) * r, z = Math.sin(a) * r;
-      if (Math.abs(x) < HALF + 90 && Math.abs(z) < HALF + 110) continue;
-      const trunk = cyl(0.8, 1.2, rnd(5, 8), 6, cedar, x, LAND_Y + 3, z);
-      trunk.rotation.z = rnd(-0.13, 0.13);   // nothing in a grove stands plumb
-      const cr = makeCanopy(rnd(3.4, 6), oliveLeaf);
-      cr.position.set(x, LAND_Y + rnd(8, 11), z);
-      scene.add(cr);
+    // ═══════════ עֵצִים — the trees of the House ═══════════
+    //
+    // Seventy identical grey-green lollipops stood here, which is not a
+    // landscape, it is one tree stamped seventy times. What follows is seven
+    // species, and each one is in this scene because a source puts it here.
+    //
+    //   תָּמָר   date palm — Yechezkel 40:16, 26, 31 carves תִּמֹרִים, palm
+    //            ornaments, onto the gates themselves, and 41:18 alternates
+    //            them with cherubim along the walls of the Heichal. The House
+    //            wears palms; the hillside should have the tree they are
+    //            carved from. Tehillim 92:13: צַדִּיק כַּתָּמָר יִפְרָח.
+    //   בְּרוֹשׁ  cypress — Yeshayahu 60:13, and the verse is explicit about
+    //            why it is planted: בְּרוֹשׁ תִּדְהָר וּתְאַשּׁוּר יַחְדָּו
+    //            לְפָאֵר מְקוֹם מִקְדָּשִׁי, "to beautify the place of My
+    //            sanctuary." Tidhar and te'ashur are not securely identified,
+    //            so only the berosh is drawn.
+    //   זַיִת    olive — Shemot 27:20, the beaten oil for the light;
+    //            Zechariah 4:3, two olive trees standing by the menorah.
+    //   רִמּוֹן   pomegranate — Shemot 28:33 on the hem of the me'il, and
+    //            Melachim I 7:20, two hundred of them on the capitals. The
+    //            eighteen hidden rimonim are this tree's fruit.
+    //   תְּאֵנָה  fig — Melachim I 5:5 and Micah 4:4, each man under his vine
+    //            and under his fig tree, with no one to make him afraid.
+    //   חָרוּב   carob — Ta'anit 23a. Choni asks the man planting one how long
+    //            until it bears; seventy years, he says; as my fathers planted
+    //            for me, I plant for my children.
+    //   שָׁקֵד   almond — Shemot 25:33, the menorah's cups are מְשֻׁקָּדִים,
+    //            almond-shaped, and Bamidbar 17:23, Aharon's staff put forth
+    //            buds and bore ripe almonds overnight. Drawn in blossom.
+    //
+    // Where they may stand is also a source, and a strict one. Devarim 16:21:
+    // לֹא־תִטַּע לְךָ אֲשֵׁרָה כָּל־עֵץ אֵצֶל מִזְבַּח ה' — you shall not
+    // plant an asherah, any tree, beside the altar of Hashem. Rambam (Hilchot
+    // Avodah Zarah 6:9) reads כל עץ at its word: a tree planted anywhere in the
+    // azarah incurs lashes, even for beauty, even for the House's honour. So
+    // not one of these stands inside the courts, and `plantable()` is what
+    // enforces it. Tehillim 92:14 — שְׁתוּלִים בְּבֵית ה' בְּחַצְרוֹת
+    // אֱלֹהֵינוּ יַפְרִיחוּ, planted in the House of Hashem, they flourish in
+    // the courts of our G-d — has to be read as metaphor for exactly this
+    // reason. The only planting in the azarah is people.
+    const bark = {
+      olive: new THREE.MeshStandardMaterial({ color: 0x3a3227, roughness: 0.95 }),
+      palm:  new THREE.MeshStandardMaterial({ color: 0x4a3a24, roughness: 0.92 }),
+      dark:  new THREE.MeshStandardMaterial({ color: 0x2b2318, roughness: 0.95 }),
+    };
+    const foliage = {
+      olive:  new THREE.MeshStandardMaterial({ color: 0x2c3a1c, roughness: 0.95 }),
+      cypress: new THREE.MeshStandardMaterial({ color: 0x11240f, roughness: 0.95 }),
+      palm:   new THREE.MeshStandardMaterial({ color: 0x1e3a12, roughness: 0.9, side: THREE.DoubleSide }),
+      rimon:  new THREE.MeshStandardMaterial({ color: 0x1b3a12, roughness: 0.9 }),
+      fig:    new THREE.MeshStandardMaterial({ color: 0x21400f, roughness: 0.92 }),
+      carob:  new THREE.MeshStandardMaterial({ color: 0x16290e, roughness: 0.95 }),
+      almond: new THREE.MeshStandardMaterial({ color: 0xd9b9c4, roughness: 0.9 }),
+    };
+    const fruit = {
+      date:   new THREE.MeshStandardMaterial({ color: 0x6b2a08, roughness: 0.7 }),
+      rimon:  new THREE.MeshStandardMaterial({ color: 0x8e1408, roughness: 0.55 }),
+      fig:    new THREE.MeshStandardMaterial({ color: 0x3b2352, roughness: 0.7 }),
+      carob:  new THREE.MeshStandardMaterial({ color: 0x241605, roughness: 0.8 }),
+    };
+    const bough = (mat, rt, rb, h, x, y, z, parent, tilt = 0, turn = 0) => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 6), mat);
+      m.position.set(x, y, z);
+      m.rotation.set(tilt, turn, 0);
+      m.castShadow = true;
+      parent.add(m);
+      return m;
+    };
+    const berries = (mat, n, r, y, spread, parent) => {
+      for (let i = 0; i < n; i++) {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 6, 5), mat);
+        const a = rnd(0, 6.283), d = rnd(spread * 0.4, spread);
+        b.position.set(Math.cos(a) * d, y + rnd(-spread * 0.4, spread * 0.3), Math.sin(a) * d);
+        b.castShadow = true;
+        parent.add(b);
+      }
+    };
+
+    // Every builder returns a group whose origin sits at the foot of the trunk,
+    // so a caller only has to know the ground height.
+    const TREES = {
+      // A bare ringed column with the whole crown at the top: no other tree in
+      // the land has this silhouette, and it is the one the gates are carved
+      // with. Fronds are flattened cones, drooping further the older the leaf.
+      tamar(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(15, 23) * sc;
+        bough(bark.palm, 0.62 * sc, 1.05 * sc, h, 0, h / 2, 0, g, 0, 0);
+        // Old frond bases left on the trunk as a scaly collar.
+        for (let i = 0; i < 7; i++) {
+          const k = new THREE.Mesh(new THREE.ConeGeometry(0.9 * sc, 0.7 * sc, 5), bark.palm);
+          k.position.set(0, h * (0.30 + i * 0.085), 0);
+          k.rotation.set(Math.PI / 2.2, (i * 2.4) % 6.283, 0);
+          g.add(k);
+        }
+        // A frond is not a spoke. Laid out flat and radiating, eleven of them
+        // read as a green asterisk from any raised camera — which is most of
+        // this scene. A real frond leaves the crown climbing, then arches over
+        // under its own weight, and the whole crown is a fountain.
+        //
+        // So each one is two segments hung off nested pivots: the outer group
+        // sets the compass bearing, the inner sets how far the frond has bent
+        // down. Nesting rather than one Euler because the order then cannot be
+        // got wrong. The second segment carries more bend than the first, which
+        // is the arch.
+        const fronds = 14;
+        for (let i = 0; i < fronds; i++) {
+          const yaw = new THREE.Group();
+          yaw.position.y = h;
+          yaw.rotation.y = (i / fronds) * 6.283 + rnd(-0.18, 0.18);
+          // Youngest fronds stand near-upright at the heart, oldest hang below
+          // the horizontal. Spread across the ring so the crown has a top.
+          const bend = -0.55 + (i / fronds) * 1.75 + rnd(-0.12, 0.12);
+          const len = rnd(7, 10.5) * sc;
+          const seg = (l, w, drop, atX) => {
+            const pit = new THREE.Group();
+            pit.rotation.z = -drop;
+            pit.position.x = atX;
+            const blade = new THREE.Mesh(new THREE.ConeGeometry(w, l, 4), foliage.palm);
+            blade.scale.set(1, 1, 0.16);        // flatten the cone into a blade
+            blade.rotation.z = -Math.PI / 2;    // lay it along +X
+            blade.position.x = l / 2;
+            blade.castShadow = true;
+            pit.add(blade);
+            return pit;
+          };
+          const inner = seg(len * 0.55, 1.15 * sc, bend, 0);
+          const outer = seg(len * 0.5, 0.72 * sc, 0.5 + bend * 0.35, len * 0.55);
+          inner.add(outer);
+          yaw.add(inner);
+          g.add(yaw);
+        }
+        const dates = new THREE.Group();
+        dates.position.y = h - 1.2 * sc;
+        berries(fruit.date, 14, 0.34 * sc, 0, 1.7 * sc, dates);
+        g.add(dates);
+        return g;
+      },
+      // Yeshayahu's tree, and the only true spire in the scene — it does the
+      // job of a vertical accent that nothing else here can.
+      berosh(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(14, 21) * sc;
+        bough(bark.dark, 0.4 * sc, 0.75 * sc, h * 0.3, 0, h * 0.15, 0, g);
+        // Three overlapping cones, each leaning and turned a little off the
+        // last. One clean cone is a traffic cone; the offsets are what make it
+        // a tree that grew. Widest low, narrowest at the tip.
+        const tiers = [
+          { r: h * 0.21, l: h * 0.58, y: h * 0.36 },
+          { r: h * 0.17, l: h * 0.62, y: h * 0.56 },
+          { r: h * 0.11, l: h * 0.46, y: h * 0.80 },
+        ];
+        for (const [i, t] of tiers.entries()) {
+          const c = new THREE.Mesh(new THREE.ConeGeometry(t.r, t.l, 7), foliage.cypress);
+          c.position.set(rnd(-0.3, 0.3) * sc, t.y, rnd(-0.3, 0.3) * sc);
+          c.rotation.set(rnd(-0.05, 0.05), i * 0.9, rnd(-0.05, 0.05));
+          c.castShadow = true;
+          g.add(c);
+        }
+        return g;
+      },
+      zayit(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(4.5, 7) * sc;
+        // Old olives split low and lean apart; that fork is the whole read.
+        bough(bark.olive, 0.75 * sc, 1.25 * sc, h, 0, h / 2, 0, g, rnd(-0.1, 0.1));
+        const arms = 2 + (Math.random() < 0.5 ? 1 : 0);
+        for (let i = 0; i < arms; i++) {
+          const a = (i / arms) * 6.283 + rnd(-0.4, 0.4);
+          const l = rnd(2.6, 4.2) * sc;
+          const arm = bough(bark.olive, 0.35 * sc, 0.6 * sc, l, 0, h + l * 0.3, 0, g);
+          arm.rotation.set(rnd(0.35, 0.7), a, 0);
+          arm.position.set(Math.cos(a) * l * 0.3, h + l * 0.28, Math.sin(a) * l * 0.3);
+          const lobe = makeCanopy(rnd(2.4, 3.6) * sc, foliage.olive, 2);
+          lobe.position.set(Math.cos(a) * l * 0.75, h + l * 0.55, Math.sin(a) * l * 0.75);
+          g.add(lobe);
+        }
+        return g;
+      },
+      rimon(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(3.2, 4.6) * sc;
+        bough(bark.olive, 0.45 * sc, 0.7 * sc, h, 0, h / 2, 0, g, rnd(-0.12, 0.12));
+        const cr = makeCanopy(rnd(2.6, 3.6) * sc, foliage.rimon, 3);
+        cr.position.y = h + 1.8 * sc; g.add(cr);
+        berries(fruit.rimon, 9, 0.5 * sc, h + 1.6 * sc, 2.6 * sc, g);
+        return g;
+      },
+      te_enah(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(3.4, 4.8) * sc;
+        bough(bark.olive, 0.8 * sc, 1.15 * sc, h, 0, h / 2, 0, g);
+        // The fig is wider than it is tall — that spread is why the phrase is
+        // "under his fig tree".
+        const cr = makeCanopy(rnd(4.2, 5.8) * sc, foliage.fig, 4);
+        cr.scale.set(1.25, 0.62, 1.25);
+        cr.position.y = h + 1.4 * sc; g.add(cr);
+        berries(fruit.fig, 7, 0.36 * sc, h + 1.2 * sc, 3.4 * sc, g);
+        return g;
+      },
+      charuv(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(4.5, 6.5) * sc;
+        bough(bark.dark, 1.0 * sc, 1.5 * sc, h, 0, h / 2, 0, g);
+        const cr = makeCanopy(rnd(5, 6.8) * sc, foliage.carob, 4);
+        cr.scale.set(1.1, 0.8, 1.1);
+        cr.position.y = h + 2.4 * sc; g.add(cr);
+        berries(fruit.carob, 10, 0.26 * sc, h + 2 * sc, 4 * sc, g);
+        return g;
+      },
+      shaked(sc = 1) {
+        const g = new THREE.Group();
+        const h = rnd(4, 5.6) * sc;
+        bough(bark.olive, 0.42 * sc, 0.66 * sc, h, 0, h / 2, 0, g, rnd(-0.1, 0.1));
+        const cr = makeCanopy(rnd(2.8, 4) * sc, foliage.almond, 4);
+        cr.scale.set(1.1, 0.78, 1.1);
+        cr.position.y = h + 1.9 * sc; g.add(cr);
+        return g;
+      },
+    };
+
+    // ── Merging ──────────────────────────────────────────────────────────
+    //
+    // A hundred and eight trees built from primitives is about thirteen hundred
+    // meshes, and thirteen hundred draw calls a frame for scenery that never
+    // moves is indefensible. The usual answer is
+    // BufferGeometryUtils.mergeBufferGeometries, but that lives in
+    // three/examples/jsm and importing it would end the `react` + `three` and
+    // nothing else rule this component is built on.
+    //
+    // So: merge here. Walk a group, bake each mesh's world matrix into its
+    // vertices, and concatenate everything sharing a material into one buffer.
+    // The grove goes from ~1300 draw calls to one per material. Geometries are
+    // de-indexed first, which costs vertices but makes concatenation a
+    // straight copy with no index rebasing to get wrong.
+    //
+    // The trade is frustum culling: one merged mesh spanning the whole ring is
+    // never culled, so it is always submitted. For static scenery at this count
+    // that is still overwhelmingly the better side of the bargain.
+    const mergeByMaterial = (root) => {
+      root.updateMatrixWorld(true);
+      const buckets = new Map();
+      root.traverse((o) => {
+        if (!o.isMesh) return;
+        const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
+        g.applyMatrix4(o.matrixWorld);   // also runs the normal matrix
+        if (!buckets.has(o.material)) buckets.set(o.material, []);
+        buckets.get(o.material).push(g);
+      });
+      const out = new THREE.Group();
+      for (const [mat, geos] of buckets) {
+        let total = 0;
+        for (const g of geos) total += g.attributes.position.count;
+        const pos = new Float32Array(total * 3);
+        const nor = new Float32Array(total * 3);
+        const uv = new Float32Array(total * 2);
+        let o3 = 0, o2 = 0;
+        for (const g of geos) {
+          const n = g.attributes.position.count;
+          pos.set(g.attributes.position.array, o3);
+          if (g.attributes.normal) nor.set(g.attributes.normal.array, o3);
+          if (g.attributes.uv) uv.set(g.attributes.uv.array, o2);
+          o3 += n * 3; o2 += n * 2;
+          g.dispose();
+        }
+        const merged = new THREE.BufferGeometry();
+        merged.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        merged.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
+        merged.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+        merged.computeBoundingSphere();
+        const m = new THREE.Mesh(merged, mat);
+        m.castShadow = m.receiveShadow = true;
+        out.add(m);
+      }
+      return out;
+    };
+
+    // Devarim 16:21 in code. Nothing may be planted inside the precinct, so the
+    // whole plaza footprint plus its stairs is refused outright.
+    const plantable = (x, z) => !(Math.abs(x) < HALF + 90 && Math.abs(z) < HALF + 110);
+
+    // Trees are planted into a holding group, not the scene, so the whole
+    // grove can be merged in one pass once it is complete.
+    const grove = new THREE.Group();
+    const plant = (kind, x, z, y = LAND_Y, sc = 1) => {
+      if (!plantable(x, z)) return null;
+      const t = TREES[kind](sc);
+      t.position.set(x, y, z);
+      t.rotation.y = rnd(0, 6.283);
+      grove.add(t);
+      return t;
+    };
+
+    // Ninety trees: חי times five. The grove is weighted the way the hills
+    // around Jerusalem are — mostly olive, with the palms and cypresses set
+    // nearer the approach where their height does the most work.
+    const GROVE = [
+      ["zayit", 40], ["tamar", 18], ["berosh", 16],
+      ["charuv", 12], ["te_enah", 10], ["shaked", 7], ["rimon", 5],
+    ];
+    for (const [kind, count] of GROVE) {
+      let placed = 0, guard = 0;
+      while (placed < count && guard++ < count * 40) {
+        const a = rnd(0, Math.PI * 2);
+        // Palms and cypresses crowd the approach; the orchard trees sit back.
+        const near = kind === "tamar" || kind === "berosh";
+        const r = near ? rnd(430, 700) : rnd(470, 1020);
+        const x = Math.cos(a) * r, z = Math.sin(a) * r;
+        if (plant(kind, x, z, LAND_Y, rnd(0.85, 1.2))) placed++;
+      }
     }
+    scene.add(mergeByMaterial(grove));
 
     const SKIRT = 14;
     const skirt = (w, d, x, z) => box(w, SKIRT, d, mega, x, LAND_Y + SKIRT / 2, z);
@@ -1702,22 +2000,30 @@ export default function Mikdash() {
     scene.add(sparks);
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x1b3312, roughness: 0.9 });
     const fruitMat = new THREE.MeshStandardMaterial({ color: 0xae1706, roughness: 0.6 });
-    for (let t = 0; t < 11; t++) {
-      const tx = 190 + t * 52 + (t % 2) * 16;
+    // Yechezkel 47:12 is specific about what grows on these banks: כָּל־עֵץ
+    // מַאֲכָל, every tree of food, its fruit renewed month by month. So the
+    // river is planted only with the bearing species, cycling so no two
+    // neighbours match — and nine a side makes eighteen, חי, which is the
+    // right number for a bank whose whole business is healing.
+    //
+    // These are the one exception to plantable(): they stand on the river's
+    // banks outside the precinct, which is where the pasuk puts them. Nothing
+    // here crosses into the azarah.
+    const RIVER_TREES = ["tamar", "rimon", "te_enah"];
+    const riverGrove = new THREE.Group();
+    for (let t = 0; t < 9; t++) {
+      const tx = 190 + t * 62 + (t % 2) * 18;
       const ty = tx > HALF + 39 ? LAND_Y : 0;
-      for (const s of [-1, 1]) {
-        cyl(1, 1.5, 9, 7, cedar, tx, ty + 4.5, 30 + s * (13 + (t % 3) * 4));
-        const crown = makeCanopy(5 + (t % 3), leafMat);
-        crown.position.set(tx, ty + 12, 30 + s * (13 + (t % 3) * 4));
-        scene.add(crown);
-        for (let f = 0; f < 4; f++) {
-          const fr = new THREE.Mesh(new THREE.SphereGeometry(0.55, 5, 4), fruitMat);
-          const a = rnd(0, 6.28);
-          fr.position.set(tx + Math.cos(a) * 4, ty + 11 + rnd(-2, 2), 30 + s * (13 + (t % 3) * 4) + Math.sin(a) * 4);
-          scene.add(fr);
-        }
+      for (const sgn of [-1, 1]) {
+        const tz = 30 + sgn * (15 + (t % 3) * 5);
+        const kind = RIVER_TREES[(t + (sgn > 0 ? 1 : 0)) % RIVER_TREES.length];
+        const tr = TREES[kind](kind === "tamar" ? 0.7 : 1.05);
+        tr.position.set(tx, ty, tz);
+        tr.rotation.y = rnd(0, 6.283);
+        riverGrove.add(tr);
       }
     }
+    scene.add(mergeByMaterial(riverGrove));
 
     // ═══════════ FIGURES: kohanim + Levites ═══════════
     const figures = [];
@@ -1849,6 +2155,95 @@ export default function Mikdash() {
     fox.userData = { id: 8, tail };
     scene.add(fox);
     clickables.push(fox);
+
+    // ═══════════ גְּמַלִּים — the camels of the nations ═══════════
+    //
+    // Yeshayahu 60:6, the same chapter that sends the berosh to beautify the
+    // Sanctuary thirteen verses later: שִׁפְעַת גְּמַלִּים תְּכַסֵּךְ ...
+    // כֻּלָּם מִשְּׁבָא יָבֹאוּ זָהָב וּלְבוֹנָה יִשָּׂאוּ — a multitude of
+    // camels shall cover you, all of them from Sheva shall come, bearing gold
+    // and frankincense, and heralding the praises of Hashem.
+    //
+    // Both halves of that load already have a home in this House: the gold is
+    // on the facade, and the לְבוֹנָה is one of the eleven spices of the
+    // ketoret (Keritot 6a) and the two spoonfuls set beside the lechem hapanim
+    // (Vayikra 24:7). So the camels are drawn arriving, still loaded, below the
+    // southern stairs where a pilgrim road would come up — outside the walls,
+    // because a camel has no business in the courts.
+    const camelHide = new THREE.MeshStandardMaterial({ color: 0x6b5433, roughness: 0.95 });
+    const camelPale = new THREE.MeshStandardMaterial({ color: 0x8a7150, roughness: 0.95 });
+    const pannier = new THREE.MeshStandardMaterial({ color: 0x5c1f1a, roughness: 0.9 });
+    const makeCamel = (couched = false) => {
+      const g = new THREE.Group();
+      const lift = couched ? 2.2 : 5.6;          // a couched camel folds to the ground
+      const body = new THREE.Mesh(new THREE.SphereGeometry(3, 11, 9), camelHide);
+      body.scale.set(1.75, 0.95, 1.05);
+      body.position.y = lift; body.castShadow = true; g.add(body);
+      // The hump is the whole silhouette; one, so it reads as a dromedary.
+      const hump = new THREE.Mesh(new THREE.SphereGeometry(1.9, 9, 7), camelHide);
+      hump.scale.set(1.15, 1.05, 0.95);
+      hump.position.set(-0.2, lift + 2.1, 0); hump.castShadow = true; g.add(hump);
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 1.15, 5.4, 7), camelHide);
+      neck.position.set(3.6, lift + 2.2, 0);
+      neck.rotation.z = couched ? -0.95 : -0.42;  // a resting camel lowers its head
+      neck.castShadow = true; g.add(neck);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(1.05, 9, 7), camelPale);
+      const hx = couched ? 5.6 : 5.3, hy = lift + (couched ? 4.0 : 4.9);
+      head.scale.set(1.35, 0.9, 0.9);
+      head.position.set(hx, hy, 0); head.castShadow = true; g.add(head);
+      const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.6, 7, 6), camelPale);
+      muzzle.scale.set(1.4, 0.8, 0.8);
+      muzzle.position.set(hx + 1.25, hy - 0.35, 0); g.add(muzzle);
+      for (const es of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.6, 5), camelPale);
+        ear.position.set(hx - 0.5, hy + 0.85, es * 0.5); g.add(ear);
+      }
+      // Legs: standing they are straight columns, couched they fold under and
+      // only the knee shows.
+      for (let l = 0; l < 4; l++) {
+        const fore = l < 2;
+        const lx = fore ? 2.4 : -2.6, lz = (l % 2 ? 1 : -1) * 1.35;
+        if (couched) {
+          const knee = new THREE.Mesh(new THREE.SphereGeometry(0.85, 7, 6), camelHide);
+          knee.position.set(lx, 1.1, lz); knee.castShadow = true; g.add(knee);
+        } else {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.46, 5.4, 6), camelHide);
+          leg.position.set(lx, 2.7, lz); leg.castShadow = true; g.add(leg);
+          const knee = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 5), camelHide);
+          knee.position.set(lx, 3.4, lz); g.add(knee);
+        }
+      }
+      const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.22, 2.6, 5), camelHide);
+      tail.position.set(-5.2, lift + 0.6, 0); tail.rotation.z = 0.5; g.add(tail);
+      // The load. Panniers either flank, gold in one and levonah in the other.
+      for (const ps of [-1, 1]) {
+        const bag = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.2, 1.4), pannier);
+        bag.position.set(-0.4, lift + 0.5, ps * 2.2);
+        bag.rotation.z = 0.06; bag.castShadow = true; g.add(bag);
+      }
+      const ingots = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.7, 1.1), gold);
+      ingots.position.set(-0.4, lift + 1.9, 2.2); ingots.castShadow = true; g.add(ingots);
+      const resin = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 6), marble);
+      resin.scale.set(1.5, 0.7, 1); resin.position.set(-0.4, lift + 1.8, -2.2); g.add(resin);
+      return g;
+    };
+    // Three, arriving: one already couched and unloading, two still standing.
+    // They sit below the southern approach on the surrounding land, well
+    // outside plantable()'s precinct box, so nothing crowds the stairs.
+    // Set east of centre: due south they sat under the on-screen nav pad in
+    // the opening framing, which is the one place nothing worth seeing should
+    // go. Here they read against open dust with the stairs behind them.
+    const CAMELS = [
+      { x: 132, z: HALF + 116, ry: -0.55, couched: true },
+      { x: 178, z: HALF + 142, ry: -1.2, couched: false },
+      { x: 216, z: HALF + 108, ry: -0.85, couched: false },
+    ];
+    for (const c of CAMELS) {
+      const cm = makeCamel(c.couched);
+      cm.position.set(c.x, LAND_Y, c.z);
+      cm.rotation.y = c.ry;
+      scene.add(cm);
+    }
 
     // ═══════════ כִּנּוֹר — the harp of the Levites ═══════════
     //

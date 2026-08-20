@@ -1,5 +1,65 @@
 # Changelog
 
+## v3.10 — "Every Tree of Food" (0.3.10)
+
+- **Seven species of tree, each one because a source puts it here.** Seventy
+  identical grey-green lollipops is not a landscape, it is one tree stamped
+  seventy times. Now: **תָּמָר** date palm — Yechezkel 40:16, 26, 31 carves
+  תִּמֹרִים onto the gates themselves and 41:18 alternates them with cherubim
+  along the Heichal walls, so the House wears palms and the hillside should have
+  the tree they are cut from; **בְּרוֹשׁ** cypress — Yeshayahu 60:13, explicit
+  about why it is planted, לְפָאֵר מְקוֹם מִקְדָּשִׁי, "to beautify the place
+  of My sanctuary" (tidhar and te'ashur in the same verse are not securely
+  identified, so only the berosh is drawn); **זַיִת** olive — Shemot 27:20,
+  Zechariah 4:3; **רִמּוֹן** pomegranate — Shemot 28:33, Melachim I 7:20, and
+  the tree the eighteen hidden rimonim come off; **תְּאֵנָה** fig — Melachim I
+  5:5, Micah 4:4, each man under his vine and his fig tree; **חָרוּב** carob —
+  Ta'anit 23a, Choni and the man planting for his children; **שָׁקֵד** almond
+  in blossom — Shemot 25:33, the menorah's cups are מְשֻׁקָּדִים, and Bamidbar
+  17:23. A hundred and eight of them, חי times six.
+- **Devarim 16:21 is now enforced in code.** לֹא־תִטַּע לְךָ אֲשֵׁרָה
+  כָּל־עֵץ אֵצֶל מִזְבַּח ה'. Rambam (Hilchot Avodah Zarah 6:9) reads כל עץ at
+  its word: a tree planted anywhere in the azarah incurs lashes, even one
+  planted for the House's honour. `plantable()` refuses the whole precinct
+  footprint, so not one of the hundred and eight can stand inside the courts.
+  Tehillim 92:14 — planted in the House of Hashem, they flourish in the courts
+  of our G-d — has to be metaphor for exactly this reason.
+- **The river is planted only with bearing trees.** Yechezkel 47:12 is specific:
+  כָּל־עֵץ מַאֲכָל, every tree of food, its fruit renewed month by month. Date,
+  pomegranate and fig cycle along the banks, nine a side, eighteen in all.
+- **A palm frond is not a spoke.** Laid out flat and radiating, eleven of them
+  read as a green asterisk from any raised camera, which is most of this scene.
+  Each frond is now two segments on nested pivots — one group sets the compass
+  bearing, the other how far the frond has bent under its own weight, with the
+  outer segment carrying more bend than the inner. That is the arch, and the
+  crown becomes a fountain instead of a star.
+- **The cypress was a traffic cone.** One clean cone has no business being a
+  tree. Three overlapping tiers now, each leaning and turned off the last.
+- **Camels of the nations.** Yeshayahu 60:6 — שִׁפְעַת גְּמַלִּים תְּכַסֵּךְ,
+  a multitude of camels shall cover you, bearing זָהָב וּלְבוֹנָה, gold and
+  frankincense. The same chapter that sends the cypress, thirteen verses
+  earlier. Both halves of that load already live in this House: the gold is on
+  the facade, and the levonah is one of the ketoret's eleven spices (Keritot 6a)
+  and the two spoonfuls beside the lechem hapanim (Vayikra 24:7). Three of them
+  below the southern stairs, one couched and unloading, still in their panniers
+  — outside the walls, because a camel has no business in the courts.
+- **A geometry merger, so the grove costs almost nothing.** A hundred and eight
+  trees built from primitives is about thirteen hundred meshes, and thirteen
+  hundred draw calls a frame for scenery that never moves is indefensible. The
+  usual answer is `BufferGeometryUtils.mergeBufferGeometries`, but that lives in
+  `three/examples/jsm` and importing it would end the `react` + `three` and
+  nothing else rule the whole component is built on. So `mergeByMaterial()`
+  walks a group, bakes each mesh's world matrix into its vertices, and
+  concatenates everything sharing a material into one buffer. The grove and the
+  river banks go from ~1300 draw calls to one per material. The trade is frustum
+  culling — a merged mesh spanning the ring is never culled — which at this
+  count is overwhelmingly the better side of the bargain.
+- **[TODO.md](TODO.md)** — the working backlog for beauty and life, with the
+  rules that constrain it (no tree in the azarah, multiples of 18, append-only
+  ids, no new runtime dependency) written at the top so they are checked before
+  anything is added rather than after.
+
+
 ## v3.9 — "Carved, Not Printed" (0.3.9)
 
 A lookdev pass. Nothing moved and nothing was added to the floor plan; what

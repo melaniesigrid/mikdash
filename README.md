@@ -47,13 +47,14 @@ computed on the visitor's machine at load. The entire experience ships as one
 | | |
 |---|---|
 | **Live** | [melaniesigrid.github.io/mikdash](https://melaniesigrid.github.io/mikdash/) |
-| **Version** | v3.9 — "Carved, Not Printed" ([CHANGELOG](CHANGELOG.md)) |
+| **Version** | v3.10 — "Every Tree of Food" ([CHANGELOG](CHANGELOG.md)) · backlog in [TODO.md](TODO.md) |
 | **Runtime dependencies** | 3 — `react`, `react-dom`, `three`. That's the whole list. |
 | **Source** | 3,114 lines in one component, [`src/Mikdash.jsx`](src/Mikdash.jsx) |
 | **Art assets shipped** | **0** — 14 canvas texture generators, 14 derived normal maps, 10 derived roughness maps, 2 GLSL shaders |
 | **Audio files shipped** | **0** — 6 synthesized instruments + a 3-layer ambient bed |
 | **Bundle** | 780 KB raw / **218 KB gzipped**, single chunk, no CSS file |
 | **Findable content** | 36 sourced teachings across 40 cited primary sources |
+| **Planting** | 7 tree species, 108 in the grove + 18 on the river banks, none inside the courts (Devarim 16:21) |
 | **Persistence** | `window.storage`, with a `localStorage` shim for the open web |
 | **Deploy** | Push to `main` → GitHub Actions → Pages, no manual step |
 
@@ -231,7 +232,7 @@ run; mobile gets dual-thumb controls.
 
 ---
 
-## Current state (v3.9 — "Carved, Not Printed")
+## Current state (v3.10 — "Every Tree of Food")
 
 | System | Status | Notes |
 |---|---|---|
@@ -241,7 +242,11 @@ run; mobile gets dual-thumb controls.
 | Linear colour pipeline | ✅ | sRGB in, linear shading, sRGB out; both hand-written shaders carry `encodings_fragment`; every hand-picked colour relit to match |
 | Baked ambient occlusion | ✅ | Vertex-colour grounding on every box and cylinder over 16 amot, in world units — no post-processing, no per-frame cost |
 | Filtering + shadows | ✅ | Anisotropy from `capabilities` (cap 8), shadow frustum tightened to the precinct, 4096 map where the GPU allows, bias + normalBias |
-| Landform | ✅ | Hills displaced by sinusoids in spherical coordinates; olive and river canopies built from three offset lobes so no silhouette is a circle |
+| Landform | ✅ | Hills displaced by sinusoids in spherical coordinates; no canopy silhouette is a circle |
+| Seven sourced species | ✅ | Palm, cypress, olive, pomegranate, fig, carob, almond — each cited; palm fronds arch on nested pivots, cypresses built from three leaning tiers |
+| No tree in the azarah | ✅ | `plantable()` enforces Devarim 16:21 / Rambam Hilchot Avodah Zarah 6:9 across all 126 trees |
+| Camels of the nations | ✅ | Yeshayahu 60:6, bearing gold and frankincense, couched below the southern stairs |
+| Merged static geometry | ✅ | `mergeByMaterial()` bakes world transforms and concatenates by material — the grove drops from ~1300 draw calls to one per material, with no `examples/jsm` import |
 | GLSL sky (day ⇄ night timelapse) | ✅ | Sun/moon arcs, hashed twinkling stars, milky band, dithering |
 | GLSL fire (altar) | ✅ | Four nested cones, embers, blue sparks, smoke, warm + blue point lights |
 | Daylight contrast | ✅ | ACES tone mapping, strong sun against low ambient fill, stone mixed below white so the courses survive direct sun |
@@ -325,6 +330,14 @@ disagree, the Yechezkel plan wins, because that is the House this is.
 | Red heifer, and the causeway of arches | Bamidbar 19; Parah 3:6; Yoma 14a |
 | The Shechinah never left the Western Wall | Shemot Rabbah 2:2; Shir HaShirim Rabbah 2:9 |
 | Eighteen who answer (kohanim + Levites) | Tamid 1–7; Bikkurim 3:2–4; Arachin 10b–11a; Ta'anit 27b |
+| Palms carved on the gates and Heichal walls | Yechezkel 40:16, 26, 31; 41:18 |
+| Cypress planted to beautify the Sanctuary | Yeshayahu 60:13 |
+| No tree may be planted in the courtyard | Devarim 16:21; Rambam Hilchot Avodah Zarah 6:9 |
+| Only trees of food on the river's banks | Yechezkel 47:12 |
+| Carob, and planting for one's children | Ta'anit 23a |
+| Almond — the menorah's cups, Aharon's staff | Shemot 25:33; Bamidbar 17:23 |
+| Fig — each man under his vine and fig tree | Melachim I 5:5; Micah 4:4 |
+| Camels bearing gold and frankincense | Yeshayahu 60:6; Keritot 6a; Vayikra 24:7 |
 
 ### House rules
 
