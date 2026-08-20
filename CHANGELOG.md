@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.7 — "Findable From the Road" (0.3.7)
+
+- **The House can be found by someone not already looking for it.** `index.html`
+  carried a title and one description and nothing else: no canonical URL, no
+  sharing card, no structured data, and — for a page whose entire body is an
+  empty `#root` until React mounts WebGL — nothing at all for a crawler to
+  read. Added the canonical link, Open Graph and Twitter card tags against a
+  1200×630 capture of the courts, a JSON-LD `WebApplication` block, and a
+  `sitemap.xml`. The `#root` div now ships prose describing the floor plan,
+  the thirty-six nistarot and what a visitor can do, which React clears on
+  first render — so the crawler and the first second of the page both say
+  something, and `<noscript>` explains what is needed. Thirty-six replaces the
+  stale "sixteen wonders" the description still claimed.
+
+
 ## v3.6 — "Out From Under the Rail" (0.3.6)
 
 - **The top of the House no longer hides behind its own buttons.** The title,
@@ -12,6 +27,15 @@
   rail's column is reserved: on a narrow screen from the right only, since
   there is no room left to stay centered, and on a wide one from both sides,
   so the block still reads as centered. Verified clear from 320px to 1920px.
+
+- **The hints list can be shut again.** רמזים opened a panel at `top: 230` with
+  no `z-index`, rendered after the chip rail — so it painted straight over the
+  "Hide hints" chip at `top: 251`, the only way to close it. On a desktop a
+  stray click on the sliver above still worked; on a phone there is no Escape
+  key and no tap-outside, so the panel was a trap. The rail now sits above the
+  panel, the panel carries its own ×, and it is capped to clear the navigation
+  pad — with a sideways phone standing the list beside the rail instead of
+  below it. Hit-tested at 320, 390, 667, 844 and 1280 wide.
 
 ## v3.5 — "Thirty-Six" (0.3.5)
 
