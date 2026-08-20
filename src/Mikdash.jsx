@@ -2716,7 +2716,18 @@ export default function Mikdash() {
     let nowT = 0;
 
     // ═══════════ Camera control: orbit + first-person ═══════════
-    const orbit = { theta: 0.8 + Math.PI/2, phi: Math.PI * 0.46, radius: 38, target: harp.position.clone().add(new THREE.Vector3(0, 7, 0)), dragging: false, lastX: 0, lastY: 0, drift: 0 };
+    // Where the House opens. HOME is declared here rather than beside
+    // resetView() because the opening shot and the reset target must be the
+    // same place — when they were two separate literals a close-in rig for
+    // inspecting the harp (radius 38, no drift) got left in as the initial
+    // orbit, so the House opened buried against a wall and only the ⌂ button
+    // ever showed the courts. One object now, spread into the live state.
+    const HOME = { theta: Math.PI * 0.2, phi: Math.PI * 0.37, radius: 700, target: new THREE.Vector3(-40, 30, 0) };
+    const orbit = {
+      theta: HOME.theta, phi: HOME.phi, radius: HOME.radius, target: HOME.target.clone(),
+      dragging: false, lastX: 0, lastY: 0,
+      drift: 0.00072,   // the slow turn that shows the precinct off on arrival
+    };
     const player = {
       pos: new THREE.Vector3(180, 3.4, 0),
       yaw: Math.PI, pitch: 0,
@@ -2728,7 +2739,6 @@ export default function Mikdash() {
     // On-screen navigation. Held buttons set a flag and the render loop moves
     // the camera per frame, so a long press glides instead of stepping.
     const nav = { l: 0, r: 0, u: 0, d: 0, in: 0, out: 0 };
-    const HOME = { theta: Math.PI * 0.2, phi: Math.PI * 0.37, radius: 700, target: new THREE.Vector3(-40, 30, 0) };
     apiRef.current.nav = (k, on) => { if (k in nav) nav[k] = on ? 1 : 0; };
     apiRef.current.guideTo = (id) => {
       let obj = null;
