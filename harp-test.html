@@ -1,0 +1,113 @@
+<!doctype html><html><body style="margin:0;background:#20262e">
+<script type="module">
+import * as THREE from 'three';
+const scene = new THREE.Scene();
+const envMap = null, metals = [], clickables = [];
+const gold   = new THREE.MeshStandardMaterial({color:0xd4a437, metalness:0.88, roughness:0.3});
+const cedar  = new THREE.MeshStandardMaterial({color:0x8a5a34, roughness:0.7});
+const bronze = new THREE.MeshStandardMaterial({color:0x8a5a2b, metalness:0.75, roughness:0.35});
+const cyl = (rt,rb,h,seg,mat,x,y,z,parent=scene) => {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg), mat);
+  m.position.set(x,y,z); m.castShadow = m.receiveShadow = true; parent.add(m); return m;
+};
+    // ═══════════ כִּנּוֹר — the harp of the Levites ═══════════
+    //
+    // Arachin 13b: the kinnor of the Mikdash was strung with seven; the kinnor
+    // of the days of Mashiach with eight; and of the World to Come, with ten.
+    // So this one carries seven — and gains its eighth, the octave above the
+    // lowest string, at the moment somebody finds it.
+    //
+    // Every member is placed off two lines: the soundboard the strings are
+    // pinned into, and the harmonic curve they hang from. Nothing is positioned
+    // by eye, which is the difference between strings that meet wood at both
+    // ends and strings that float in the middle of a frame.
+    const harp = new THREE.Group();
+    const SB0 = new THREE.Vector2(-2.7, 1.2), SB1 = new THREE.Vector2(3.1, 5.2);  // soundboard: bass foot → treble shoulder
+    const NK0 = new THREE.Vector2(-3.1, 9.6), NK1 = new THREE.Vector2(3.2, 6.4);  // harmonic curve, over the same span
+    const boardAt = (u) => new THREE.Vector2(SB0.x + (SB1.x - SB0.x) * u, SB0.y + (SB1.y - SB0.y) * u);
+    const neckAt = (u) => new THREE.Vector2(
+      NK0.x + (NK1.x - NK0.x) * u,
+      NK0.y + (NK1.y - NK0.y) * u + Math.sin(u * Math.PI) * 1.35   // it arches; a harmonic curve is not a chord
+    );
+    // one tapered member of the frame, laid between two points of it
+    const limb = (a, b, rt, rb, seg, mat, z = 0) => {
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const m = cyl(rt, rb, Math.hypot(dx, dy), seg, mat, (a.x + b.x) / 2, (a.y + b.y) / 2, z, harp);
+      m.rotation.z = Math.atan2(dy, dx) - Math.PI / 2;             // a cylinder points +Y; aim it down the member
+      return m;
+    };
+    const bDir = SB1.clone().sub(SB0).normalize();
+    const bN = new THREE.Vector2(-bDir.y, bDir.x);                 // the soundboard's normal, pointing at the neck
+    // the soundbox: an octagonal cedar body slung under the board, fattest at the bass
+    limb(SB0.clone().addScaledVector(bN, -1.35).addScaledVector(bDir, -0.55),
+         SB1.clone().addScaledVector(bN, -0.75).addScaledVector(bDir, 0.4), 0.82, 1.7, 8, cedar);
+    limb(SB0, SB1, 0.14, 0.19, 6, gold);                           // the rib the strings are pinned along
+    cyl(1.05, 1.3, 0.5, 8, gold, -1.95, 0.2, 0, harp);             // and the foot it stands on
+    // the rose cut into the belly, where a soundbox is opened so it can sing
+    const rc = boardAt(0.36).addScaledVector(bN, -0.85);
+    const rose = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.1, 6, 14), gold);
+    rose.position.set(rc.x, rc.y, 1.0); harp.add(rose);
+    // the forepillar, carrying the whole pull of the strings down to the foot
+    limb(new THREE.Vector2(-3.5, 0.3), NK0, 0.42, 0.62, 8, gold);
+    // the neck, walked along the curve in twelve tapering courses
+    for (let i = 0; i < 12; i++) {
+      const u0 = i / 12, u1 = (i + 1) / 12;
+      limb(neckAt(u0), neckAt(u1), 0.5 - u1 * 0.22, 0.5 - u0 * 0.22, 8, gold);
+    }
+    // a pomegranate finial over the pillar, like everything else golden here
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8), gold);
+    finial.position.set(NK0.x, NK0.y + 0.55, 0); harp.add(finial);
+    for (let c = 0; c < 4; c++) {
+      const a = c * Math.PI / 2;
+      const crown = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.48, 5), gold);
+      crown.position.set(NK0.x + Math.cos(a) * 0.25, NK0.y + 1.16, Math.sin(a) * 0.25);
+      crown.rotation.z = -Math.cos(a) * 0.42; crown.rotation.x = Math.sin(a) * 0.42;
+      harp.add(crown);
+    }
+    // Freygish on D — the same mode the fifteen steps are tuned to, so the harp
+    // and the ascent answer each other. The eighth string is the octave.
+    const HARP_TUNING = [146.83, 155.56, 185.0, 196.0, 220.0, 233.08, 261.63, 293.66];
+    const stringMat = new THREE.MeshStandardMaterial({ color: 0xfff1c4, metalness: 0.85, roughness: 0.22 });
+    stringMat.envMap = envMap; metals.push(stringMat);
+    const harpStrings = [];
+    for (let st = 0; st < 8; st++) {
+      const u = 0.085 + st * 0.125;
+      const top = neckAt(u), bot = boardAt(u);
+      const sm = limb(top, bot, 0.055, 0.055, 6, stringMat);
+      sm.castShadow = false;
+      const peg = cyl(0.1, 0.1, 1.5, 6, bronze, top.x, top.y, 0, harp);
+      peg.rotation.x = Math.PI / 2;
+      sm.userData = { amp: 0, ph: st * 1.7, peg };
+      harpStrings.push(sm);
+      if (st === 7) { sm.visible = false; peg.visible = false; }   // the eighth is still waiting
+    }
+    const revealEighth = () => {
+      harpStrings[7].visible = true;
+      harpStrings[7].userData.peg.visible = true;
+    };
+    
+    
+    
+    harp.userData = { id: 9 };
+    
+
+scene.add(harp);
+// a floor, so anything floating is obvious
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60,60), new THREE.MeshStandardMaterial({color:0xb9b2a0}));
+floor.rotation.x = -Math.PI/2; scene.add(floor);
+scene.add(new THREE.HemisphereLight(0xa0bdff, 0x8e7241, 0.7));
+const sun = new THREE.DirectionalLight(0xffdea5, 2.2); sun.position.set(14,20,16); scene.add(sun);
+const key = new THREE.DirectionalLight(0xffffff, 0.8); key.position.set(-12,8,14); scene.add(key);
+const W = 460, H = 560;
+const views = [[0,0],[0.9,0],[Math.PI/2,0],[0.5,0.55]];
+const wrap = document.createElement('div'); wrap.style.display='flex'; document.body.appendChild(wrap);
+for (const [yaw,pitch] of views) {
+  const cam = new THREE.PerspectiveCamera(35, W/H, 0.1, 200);
+  const r = 26;
+  cam.position.set(Math.sin(yaw)*Math.cos(pitch)*r, 5.5 + Math.sin(pitch)*r, Math.cos(yaw)*Math.cos(pitch)*r);
+  cam.lookAt(0, 5.2, 0);
+  const rn = new THREE.WebGLRenderer({antialias:true}); rn.setSize(W,H); rn.setPixelRatio(2);
+  rn.setClearColor(0x20262e); rn.render(scene, cam); wrap.appendChild(rn.domElement);
+}
+document.title = 'ready';
+</script></body></html>

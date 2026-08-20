@@ -30,44 +30,44 @@ const C = 500, HALF = C / 2;
 const STORE_KEY = "mikdash-progress-v3";
 
 const DISCOVERIES = [
-  { kind: "rimon", title: "שער הקדים — The Sealed Eastern Gate", text: "“This gate shall remain shut; it shall not be opened… because Hashem, the G-d of Israel, has entered through it” (Yechezkel 44:2). Tradition binds this to Sha'ar HaRachamim — the Gate of Mercy sealed in Jerusalem's eastern wall, waiting.", hint: "Where mercy waits behind stone, inside the eastern gatehouse." },
-  { kind: "rimon", title: "מים חיים — The Living Waters", text: "Yechezkel 47: a trickle from beneath the threshold becomes ankle-deep, knee-deep, then a river no one can cross — sweetening even the Dead Sea. Chazal read it as Torah itself: water that heals wherever it flows, fruit for food and leaves for healing (47:12).", hint: "Follow what begins as a trickle, east across the court." },
-  { kind: "rimon", title: "הראל — The Altar Called ‘Mountain of G-d’", text: "Yechezkel 43:15 names the hearth 'Har'el' — Mountain of G-d. Uniquely, this altar is climbed by steps facing east (43:17), and must be inaugurated for seven days before the first regular offering rises.", hint: "At the foot of the mountain that burns." },
-  { kind: "rimon", title: "קנה המדה — The Measuring Reed", text: "The vision arrives as a blueprint: a man 'whose appearance was like bronze' measures every wall with a reed of six long cubits (40:5). The Vilna Gaon wrote treatises reconstructing the plan — and the Midrash promises: one who studies the Temple's design, it is as if he built it.", hint: "Among the northern columns, something measures you back." },
-  { kind: "rimon", title: "שכינה במערב — No Western Gate", text: "Gates open east, north, and south — never west. 'The Shechinah is in the west' (Bava Batra 25a): the wall behind the Holy of Holies stays unbroken. Nothing passes behind the Presence.", hint: "Along the one wall where no gate dares open." },
-  { kind: "rimon", title: "אש מן השמים — Built by Fire or by Hands?", text: "Rambam (Hilchot Melachim 11) rules that Mashiach builds the final Temple. Rashi and Midrash Tanchuma teach it descends whole, built of fire, from Heaven. The chassidic masters reconcile them: we build from below, and Heaven completes what our hands begin.", hint: "The highest gold guards the smallest silver." },
-  { kind: "rimon", title: "בית תפילה לכל העמים — A House for All Nations", text: "These courts span 500×500 amot — far beyond the largest sacred precinct the ancient world ever raised. Yeshayahu 56:7: 'My House shall be called a house of prayer for all nations.' The enlarged floor plan is that promise drawn in stone.", hint: "A kitchen court in the far southwest keeps a secret." },
-  { kind: "rimon", title: "גלי הים — Marble Like the Waves of the Sea", text: "Bava Batra 4a: the Temple was built of stones of blue-green and white marble. Its builder wished to plate it all in gold — the Sages told him: leave it, it is more beautiful as it is, for it looks like the waves of the sea. And Sukkah 51b: 'One who has not seen it has never seen a magnificent building.'", hint: "Within the royal porch of a hundred columns." },
-  { kind: "wonder", title: "השועל של רבי עקיבא — Rabbi Akiva's Fox", text: "Makkot 24b: the sages saw a fox slip out of the ruined Holy of Holies and wept — but Rabbi Akiva laughed. 'Just as Uriah's prophecy of ruin came true, so will Zechariah's: elders will yet sit in the streets of Jerusalem.' They answered: 'Akiva, you have comforted us.' Here the fox walks outside the walls — the ruin behind him, the promise standing before him.", hint: "Something small and russet waits below the southern stairs." },
-  { kind: "wonder", title: "כינור של לויים — The Harp of the Levites", text: "On the fifteen steps between the courts the Levites stood with harps, lyres and cymbals — one step for each Shir HaMa'alot. David's kinor, say Chazal, hung above his bed and played by itself when the north wind moved through it at midnight (Berachot 3b). Touch it and it remembers its song.", hint: "An instrument rests where the singers stand — it still remembers." },
-  { kind: "wonder", title: "שופר גדול — The Great Shofar", text: "“And it shall be on that day: a great shofar will be sounded, and the lost shall come from Assyria and the outcasts from Egypt, and they will bow to Hashem on the holy mountain in Jerusalem” (Yeshayahu 27:13). This is the shofar of ingathering — the sound before the silence of the Kodesh.", hint: "A ram's horn waits on marble near the southern gate. Dare to sound it." },
-  { kind: "wonder", title: "אבן השתייה — The Foundation Stone", text: "Yoma 54b: 'The world was woven outward from the Even HaShetiya' — the stone beneath the Holy of Holies, from which creation was drawn like thread from a spindle. On Yom Kippur the Kohen Gadol placed the incense upon it. Its glow seeps from beneath the western ground: the world's first light, still warm.", hint: "The world began behind the House. Seek warmth in the western ground." },
-  { kind: "wonder", title: "מנורת זהב — Light the Menorah", text: "Shabbat 22b asks: does He need our light? The Ner Ma'aravi that burned beyond its oil was 'testimony to all who enter the world that the Shechinah dwells in Israel.' You have kindled seven flames. The Sfat Emes teaches: every soul is a wick — the fire descends when the vessel is prepared.", hint: "Seven branches of gold stand cold. They wait for you." },
-  { kind: "wonder", title: "קטורת — The Eleven Spices", text: "Keritot 6a counts eleven spices in the ketoret — including chelbenah, foul-smelling alone, deliberately included: a fast that excludes the sinners of Israel is no fast at all. And the house of Avtinas guarded one secret: ma'aleh ashan, the herb that made the smoke rise in a single straight column, unbent by any wind.", hint: "A small golden table before the House holds eleven fragrances. Wake them." },
-  { kind: "wonder", title: "שערי ניקנור — The Doors That Crossed the Sea", text: "Yoma 38a: Nicanor brought two bronze doors from Alexandria. A storm rose; the sailors threw one into the sea — and it surfaced beneath the ship at Akko (some say the sea simply refused to keep it). All the Temple's gates were later plated gold, except Nicanor's: the miracle-bronze gleamed like gold on its own. You have just opened them.", hint: "Bronze that crossed the sea guards the top of the fifteen steps." },
-  { kind: "wonder", title: "לבית התקיעה — The Trumpeting Stone", text: "In 1968, archaeologists at the Temple Mount's southwest corner found a fallen parapet stone carved: 'לבית התקיעה להב…' — 'To the place of trumpeting, to procl[aim]…' From that height a kohen sounded the trumpet each Friday at dusk: fields emptied, shops shuttered, and Shabbat descended on Jerusalem. The stone is real — it waits in the Israel Museum, and here, restored to its corner.", hint: "At the southwest height, a stone announces Shabbat." },
+  { kind: "rimon", emoji: "🚪", title: "שער הקדים — The Sealed Eastern Gate", text: "“This gate shall remain shut; it shall not be opened… because Hashem, the G-d of Israel, has entered through it” (Yechezkel 44:2). Tradition binds this to Sha'ar HaRachamim — the Gate of Mercy sealed in Jerusalem's eastern wall, waiting.", hint: "Where mercy waits behind stone, inside the eastern gatehouse." },
+  { kind: "rimon", emoji: "🌊", title: "מים חיים — The Living Waters", text: "Yechezkel 47: a trickle from beneath the threshold becomes ankle-deep, knee-deep, then a river no one can cross — sweetening even the Dead Sea. Chazal read it as Torah itself: water that heals wherever it flows, fruit for food and leaves for healing (47:12).", hint: "Follow what begins as a trickle, east across the court." },
+  { kind: "rimon", emoji: "⛰️", title: "הראל — The Altar Called ‘Mountain of G-d’", text: "Yechezkel 43:15 names the hearth 'Har'el' — Mountain of G-d. Uniquely, this altar is climbed by steps facing east (43:17), and must be inaugurated for seven days before the first regular offering rises.", hint: "At the foot of the mountain that burns." },
+  { kind: "rimon", emoji: "📏", title: "קנה המדה — The Measuring Reed", text: "The vision arrives as a blueprint: a man 'whose appearance was like bronze' measures every wall with a reed of six long cubits (40:5). The Vilna Gaon wrote treatises reconstructing the plan — and the Midrash promises: one who studies the Temple's design, it is as if he built it.", hint: "Among the northern columns, something measures you back." },
+  { kind: "rimon", emoji: "🧱", title: "שכינה במערב — No Western Gate", text: "Gates open east, north, and south — never west. 'The Shechinah is in the west' (Bava Batra 25a): the wall behind the Holy of Holies stays unbroken. Nothing passes behind the Presence.", hint: "Along the one wall where no gate dares open." },
+  { kind: "rimon", emoji: "🔥", title: "אש מן השמים — Built by Fire or by Hands?", text: "Rambam (Hilchot Melachim 11) rules that Mashiach builds the final Temple. Rashi and Midrash Tanchuma teach it descends whole, built of fire, from Heaven. The chassidic masters reconcile them: we build from below, and Heaven completes what our hands begin.", hint: "The highest gold guards the smallest silver." },
+  { kind: "rimon", emoji: "🌍", title: "בית תפילה לכל העמים — A House for All Nations", text: "These courts span 500×500 amot — far beyond the largest sacred precinct the ancient world ever raised. Yeshayahu 56:7: 'My House shall be called a house of prayer for all nations.' The enlarged floor plan is that promise drawn in stone.", hint: "A kitchen court in the far southwest keeps a secret." },
+  { kind: "rimon", emoji: "💠", title: "גלי הים — Marble Like the Waves of the Sea", text: "Bava Batra 4a: the Temple was built of stones of blue-green and white marble. Its builder wished to plate it all in gold — the Sages told him: leave it, it is more beautiful as it is, for it looks like the waves of the sea. And Sukkah 51b: 'One who has not seen it has never seen a magnificent building.'", hint: "Within the royal porch of a hundred columns." },
+  { kind: "wonder", emoji: "🦊", title: "השועל של רבי עקיבא — Rabbi Akiva's Fox", text: "Makkot 24b: the sages saw a fox slip out of the ruined Holy of Holies and wept — but Rabbi Akiva laughed. 'Just as Uriah's prophecy of ruin came true, so will Zechariah's: elders will yet sit in the streets of Jerusalem.' They answered: 'Akiva, you have comforted us.' Here the fox walks outside the walls — the ruin behind him, the promise standing before him.", hint: "Something small and russet waits below the southern stairs." },
+  { kind: "wonder", emoji: "🎻", title: "כינור של לויים — The Harp of the Levites", text: "On the fifteen steps between the courts the Levites stood with harps, lyres and cymbals — one step for each Shir HaMa'alot. David's kinor, say Chazal, hung above his bed and played by itself when the north wind moved through it at midnight (Berachot 3b). Touch it and it remembers its song.", hint: "An instrument rests where the singers stand — it still remembers." },
+  { kind: "wonder", emoji: "📯", title: "שופר גדול — The Great Shofar", text: "“And it shall be on that day: a great shofar will be sounded, and the lost shall come from Assyria and the outcasts from Egypt, and they will bow to Hashem on the holy mountain in Jerusalem” (Yeshayahu 27:13). This is the shofar of ingathering — the sound before the silence of the Kodesh.", hint: "A ram's horn waits on marble near the southern gate. Dare to sound it." },
+  { kind: "wonder", emoji: "🪨", title: "אבן השתייה — The Foundation Stone", text: "Yoma 54b: 'The world was woven outward from the Even HaShetiya' — the stone beneath the Holy of Holies, from which creation was drawn like thread from a spindle. On Yom Kippur the Kohen Gadol placed the incense upon it. Its glow seeps from beneath the western ground: the world's first light, still warm.", hint: "The world began behind the House. Seek warmth in the western ground." },
+  { kind: "wonder", emoji: "🕎", title: "מנורת זהב — Light the Menorah", text: "Shabbat 22b asks: does He need our light? The Ner Ma'aravi that burned beyond its oil was 'testimony to all who enter the world that the Shechinah dwells in Israel.' You have kindled seven flames. The Sfat Emes teaches: every soul is a wick — the fire descends when the vessel is prepared.", hint: "Seven branches of gold stand cold. They wait for you." },
+  { kind: "wonder", emoji: "💨", title: "קטורת — The Eleven Spices", text: "Keritot 6a counts eleven spices in the ketoret — including chelbenah, foul-smelling alone, deliberately included: a fast that excludes the sinners of Israel is no fast at all. And the house of Avtinas guarded one secret: ma'aleh ashan, the herb that made the smoke rise in a single straight column, unbent by any wind.", hint: "A small golden table before the House holds eleven fragrances. Wake them." },
+  { kind: "wonder", emoji: "⚓", title: "שערי ניקנור — The Doors That Crossed the Sea", text: "Yoma 38a: Nicanor brought two bronze doors from Alexandria. A storm rose; the sailors threw one into the sea — and it surfaced beneath the ship at Akko (some say the sea simply refused to keep it). All the Temple's gates were later plated gold, except Nicanor's: the miracle-bronze gleamed like gold on its own. You have just opened them.", hint: "Bronze that crossed the sea guards the top of the fifteen steps." },
+  { kind: "wonder", emoji: "🎺", title: "לבית התקיעה — The Trumpeting Stone", text: "In 1968, archaeologists at the Temple Mount's southwest corner found a fallen parapet stone carved: 'לבית התקיעה להב…' — 'To the place of trumpeting, to procl[aim]…' From that height a kohen sounded the trumpet each Friday at dusk: fields emptied, shops shuttered, and Shabbat descended on Jerusalem. The stone is real — it waits in the Israel Museum, and here, restored to its corner.", hint: "At the southwest height, a stone announces Shabbat." },
   // ── The deeper eighteen. Ids 0–15 are the opening circuit and never move —
   // progress is stored by index, so anything new is appended, never inserted.
-  { kind: "rimon", title: "עשרה נסים — Ten Miracles in the House", text: "Avot 5:5 counts them: no woman ever miscarried from the scent of the sacred meat, and the meat never spoiled; no fly was seen in the slaughterhouse; the Kohen Gadol never became impure on Yom Kippur; rain never put out the fire of the woodpile; no wind ever bent the column of smoke; no disqualification was ever found in the omer, the two loaves, or the showbread; the people stood pressed together and bowed with room to spare; no snake or scorpion ever injured anyone in Jerusalem; and no one ever said to his fellow, “the place is too narrow for me to stay the night in Jerusalem.”", hint: "Ten of them — and one waits high above the golden ridge of the Royal Stoa." },
-  { kind: "rimon", title: "שלושה עשר שופרות — The Thirteen Chests", text: "Shekalim 6:5: thirteen chests stood in the Mikdash, each with a mouth narrow above and wide below — shaped like a shofar, so that no hand could reach back in and take out what had been given. Each was labeled for its purpose: the shekalim, the bird-offerings, the incense, the gold of the kapporet, freewill gifts. And the men who emptied them wore garments with no hem, no cuff and no fold, so that no one could ever suspect them (Shekalim 3:2).", hint: "Among the northern columns, thirteen mouths that opened only downward." },
-  { kind: "rimon", title: "לשכת חשאים — The Chamber of the Discreet", text: "Shekalim 5:6: in it the discreet would place their gifts in secret, and the poor of good family would take from it in secret. The Rambam ranks this second only to a loan that prevents poverty: the giver does not know who receives, and the receiver does not know who gave (Hilchot Matnot Aniyim 10:8). A whole room built so that no one would ever have to say thank you.", hint: "In the far northeastern kitchen court, a gift that no one signed." },
-  { kind: "rimon", title: "אבן הטוען — The Claimant's Stone", text: "Bava Metzia 28b: there was a stone in Jerusalem — whoever had lost something went there, and whoever had found something went there. The finder stood and announced, the loser stood and gave the identifying signs, and took back what was his. An entire city's honesty, organized around one rock in the open air.", hint: "On the eastern pavement, a plain stone that gives back what was lost." },
-  { kind: "rimon", title: "לשכת הגזית — The Chamber of Hewn Stone", text: "Middot 5:4: the Great Sanhedrin sat in the Chamber of Hewn Stone — seventy-one elders in a half-circle, so that each one could see the faces of all the others. From here Torah went out to all Israel (Sanhedrin 88b). And when murderers grew many, the Sanhedrin rose and left the chamber, so that capital cases could no longer be tried (Avodah Zarah 8b): they would rather leave the room than kill in it.", hint: "Along the southern edge of the inner court, where seventy-one sat in a half circle." },
-  { kind: "rimon", title: "הכבש — A Ramp, and Not Steps", text: "“Do not ascend My altar by steps, so that your nakedness not be uncovered upon it” (Shemot 20:23) — so the altar is climbed by a ramp of thirty-two amot (Middot 3:3). Rashi asks what nakedness a robed kohen could uncover, and answers: the stones have no feelings, and still the Torah asks that they not be treated dismissively. How much more so a human being, who is in the image of his Maker.", hint: "At the foot of the long incline that climbs the burning mountain." },
-  { kind: "rimon", title: "השיתין — The Drains Beneath the Altar", text: "Sukkah 49a: the shitin — the shafts beneath the altar's southwestern corner into which the libations poured — were created during the six days of Creation, and they descend to the deep. Nearby, a kohen once noticed one paving stone that sat differently from its fellows; before he could finish telling his friend, his soul left him, and they knew for certain that the Ark had been hidden underneath (Yoma 54a; Shekalim 6:2).", hint: "At the altar's southwestern corner, where the wine goes down and does not come back." },
-  { kind: "rimon", title: "שער המים — The Water Gate", text: "Middot 2:6 names the gates of the azarah, and through this one they carried up the golden flask drawn from the Shiloach for the water libation of Sukkot (Sukkah 48b). Its name, says the Talmud, is also a promise: from beneath this threshold the future water will come out (Yechezkel 47:1). What was carried in each dawn will one day flow out on its own.", hint: "South of the inner court, where the flask was carried up each dawn of Sukkot." },
-  { kind: "rimon", title: "הר המוריה — Mount Moriah", text: "“And Shlomo began to build the House of Hashem in Jerusalem on Mount Moriah, where He appeared to David his father” (Divrei HaYamim II 3:1). Here Avraham bound Yitzchak and named the place “Hashem will see”; here Yaakov slept and saw the ladder; here, say Chazal, the dust of Adam was taken from the very ground of his atonement (Bereishit Rabbah 14:8). The mountain was chosen long before the first stone was cut.", hint: "From the eastern stairs, turn and look back at the mountain itself." },
-  { kind: "rimon", title: "שלוש רגלים — Three Times a Year", text: "“Three times a year all your males shall appear before Hashem your G-d in the place He will choose” (Devarim 16:16). The roads and the mikvaot were repaired in Adar for the pilgrims (Shekalim 1:1); Jerusalem's houses were never rented out, because the city belonged to everyone who came; and for the days of the festival all of Israel counted as chaverim, trusted as pure (Chagigah 26a). A city that grew to fit whoever arrived.", hint: "On the broad southern stairs, worn smooth by the feet of three festivals." },
-  { kind: "wonder", title: "מוכני בן קטין — The Wheel of the Laver", text: "Yoma 37a: Ben Katin made a wheel for the kiyor, so that it could be lowered into its well overnight — water left standing until morning would have been disqualified, and the kohanim would have had nothing to sanctify their hands with at dawn. He also made it twelve spouts, one for each kohen of the daily offering (Middot 3:6). A man is remembered forever in the Mishnah for a piece of hardware that let the work begin on time.", hint: "Beside the bronze laver, an axle and a wheel still remember one man's name." },
-  { kind: "wonder", title: "גפן של זהב — The Golden Vine", text: "Middot 3:8: a vine of gold stood over the entrance of the Heichal, trained upon posts. Whoever donated a leaf, a berry or a whole cluster brought it and hung it there, and the kohanim hammered it onto the vine. Josephus (War 5.210) says the clusters hung the height of a man. It grew the way nothing else grows — only by being given away.", hint: "Above the cedar doors of the House, something is growing that no rain ever fed." },
-  { kind: "wonder", title: "ערבה — The Willows of the Altar", text: "Sukkah 45a: they brought willow branches eleven amot tall from Motza in the valley below, and stood them upright against the sides of the altar with their tops bent over it, and circled the altar once on each day of Sukkot and seven times on the seventh. The willow has no taste and no fragrance — no Torah and no good deeds, says the Midrash — and it is the one branch that leans directly on the altar.", hint: "Tall branches lean against the altar: the plant with neither taste nor scent." },
-  { kind: "wonder", title: "חליל — The Flute of the Water-Drawing", text: "Sukkah 51a: whoever has not seen the rejoicing of Beit HaSho'evah has never seen rejoicing in his life. The flute was played for five and six days together; golden lamps with four bowls each lit the courtyards of Jerusalem until there was no courtyard without light; pious men danced with burning torches, juggling them; and the Levites stood on the fifteen steps with harps, lyres, cymbals and every instrument of song. They did not sleep for the whole festival.", hint: "By the fifteen steps a flute is waiting for a night nobody sleeps through." },
-  { kind: "wonder", title: "עלהו לתרופה — Leaves for Healing", text: "Yechezkel 47:12: on both banks of the river every tree of food will grow; its leaf will not wither and its fruit will not fail; each month it bears new fruit, because its waters come out from the Mikdash — its fruit for food, and its leaf for healing. Chazal read לתרופה as two words: to unlock what is shut, and to loosen the tongue of the mute (Sanhedrin 100a).", hint: "At the river's edge, one tree whose leaf was never meant for eating." },
-  { kind: "wonder", title: "שולחן לחם הפנים — The Table Lifted Up", text: "Menachot 29a and Chagigah 26b: on each of the three festivals the kohanim lifted the golden Shulchan and showed the pilgrims the showbread upon it, saying — see how beloved you are before Hashem: it is taken up as warm as it was on the day it was set down. Twelve loaves, two stacks of six, and in all those years no week's bread ever went stale.", hint: "Before the House stands a golden table, raised so the crowd could see the bread." },
-  { kind: "wonder", title: "הקלפי — The Lottery", text: "Yoma 22a: at first, whoever wished simply ran up the ramp, and the swifter of the two won the service. Once two ran together, and one pushed the other, and he fell and broke his leg. When the court saw the danger, they instituted the lottery: the officer named a number, and they counted around the circle by raised fingers (Tamid 1:2). Even the eagerness to serve needed a fence around it.", hint: "In the court a wooden box holds the fairest way ever found to hand out honour." },
-  { kind: "wonder", title: "קרבן עצים — The Offering of Wood", text: "Ta'anit 26a lists the nine days on which named families brought wood for the altar. Ta'anit 28a tells why they were honoured: an enemy government once posted watchmen on the roads so that no one could bring wood up to Jerusalem, and men hollowed logs into ladder-rungs and carried them past the guards, saying they were going to fetch chicks from a dovecote. The last of those days, the fifteenth of Av, is called one of the two happiest days Israel ever had (Ta'anit 30b).", hint: "Split fig-logs are stacked in the court, and every stack was carried by a family." },
-  { kind: "wonder", title: "פרה אדומה — The Red Heifer and the Causeway", text: "Bamidbar 19: the ashes of a heifer entirely red, that never bore a yoke, purify whoever touched the dead — and make impure the pure kohen who prepares them. Shlomo said: I thought I could become wise in it, but it is far from me (Yoma 14a). Parah 3:6: it was burned on Har HaMishcha, and a causeway was built from the Temple Mount across to it, arches upon arches, an arch above each pier, for fear of a grave hidden in the ground below.", hint: "East, beyond the sealed gate, a raised causeway crosses to something russet and red." },
-  { kind: "wonder", title: "הכותל המערבי — The Wall That Remained", text: "Shemot Rabbah 2:2: the Shechinah has never departed from the Western Wall. Shir HaShirim Rabbah 2:9 reads “behold, He stands behind our wall” — behind the western wall of the Mikdash — because Hashem swore to it that it would never be destroyed. Herod's great courses are still standing at the western retaining wall, and the notes pressed into their joints are still being written today.", hint: "Outside the western retaining wall, great courses still stand — and people still write to them." },
+  { kind: "rimon", emoji: "✨", title: "עשרה נסים — Ten Miracles in the House", text: "Avot 5:5 counts them: no woman ever miscarried from the scent of the sacred meat, and the meat never spoiled; no fly was seen in the slaughterhouse; the Kohen Gadol never became impure on Yom Kippur; rain never put out the fire of the woodpile; no wind ever bent the column of smoke; no disqualification was ever found in the omer, the two loaves, or the showbread; the people stood pressed together and bowed with room to spare; no snake or scorpion ever injured anyone in Jerusalem; and no one ever said to his fellow, “the place is too narrow for me to stay the night in Jerusalem.”", hint: "Ten of them — and one waits high above the golden ridge of the Royal Stoa." },
+  { kind: "rimon", emoji: "🗳️", title: "שלושה עשר שופרות — The Thirteen Chests", text: "Shekalim 6:5: thirteen chests stood in the Mikdash, each with a mouth narrow above and wide below — shaped like a shofar, so that no hand could reach back in and take out what had been given. Each was labeled for its purpose: the shekalim, the bird-offerings, the incense, the gold of the kapporet, freewill gifts. And the men who emptied them wore garments with no hem, no cuff and no fold, so that no one could ever suspect them (Shekalim 3:2).", hint: "Among the northern columns, thirteen mouths that opened only downward." },
+  { kind: "rimon", emoji: "🤫", title: "לשכת חשאים — The Chamber of the Discreet", text: "Shekalim 5:6: in it the discreet would place their gifts in secret, and the poor of good family would take from it in secret. The Rambam ranks this second only to a loan that prevents poverty: the giver does not know who receives, and the receiver does not know who gave (Hilchot Matnot Aniyim 10:8). A whole room built so that no one would ever have to say thank you.", hint: "In the far northeastern kitchen court, a gift that no one signed." },
+  { kind: "rimon", emoji: "🔎", title: "אבן הטוען — The Claimant's Stone", text: "Bava Metzia 28b: there was a stone in Jerusalem — whoever had lost something went there, and whoever had found something went there. The finder stood and announced, the loser stood and gave the identifying signs, and took back what was his. An entire city's honesty, organized around one rock in the open air.", hint: "On the eastern pavement, a plain stone that gives back what was lost." },
+  { kind: "rimon", emoji: "⚖️", title: "לשכת הגזית — The Chamber of Hewn Stone", text: "Middot 5:4: the Great Sanhedrin sat in the Chamber of Hewn Stone — seventy-one elders in a half-circle, so that each one could see the faces of all the others. From here Torah went out to all Israel (Sanhedrin 88b). And when murderers grew many, the Sanhedrin rose and left the chamber, so that capital cases could no longer be tried (Avodah Zarah 8b): they would rather leave the room than kill in it.", hint: "Along the southern edge of the inner court, where seventy-one sat in a half circle." },
+  { kind: "rimon", emoji: "📐", title: "הכבש — A Ramp, and Not Steps", text: "“Do not ascend My altar by steps, so that your nakedness not be uncovered upon it” (Shemot 20:23) — so the altar is climbed by a ramp of thirty-two amot (Middot 3:3). Rashi asks what nakedness a robed kohen could uncover, and answers: the stones have no feelings, and still the Torah asks that they not be treated dismissively. How much more so a human being, who is in the image of his Maker.", hint: "At the foot of the long incline that climbs the burning mountain." },
+  { kind: "rimon", emoji: "🍷", title: "השיתין — The Drains Beneath the Altar", text: "Sukkah 49a: the shitin — the shafts beneath the altar's southwestern corner into which the libations poured — were created during the six days of Creation, and they descend to the deep. Nearby, a kohen once noticed one paving stone that sat differently from its fellows; before he could finish telling his friend, his soul left him, and they knew for certain that the Ark had been hidden underneath (Yoma 54a; Shekalim 6:2).", hint: "At the altar's southwestern corner, where the wine goes down and does not come back." },
+  { kind: "rimon", emoji: "🏺", title: "שער המים — The Water Gate", text: "Middot 2:6 names the gates of the azarah, and through this one they carried up the golden flask drawn from the Shiloach for the water libation of Sukkot (Sukkah 48b). Its name, says the Talmud, is also a promise: from beneath this threshold the future water will come out (Yechezkel 47:1). What was carried in each dawn will one day flow out on its own.", hint: "South of the inner court, where the flask was carried up each dawn of Sukkot." },
+  { kind: "rimon", emoji: "🏔️", title: "הר המוריה — Mount Moriah", text: "“And Shlomo began to build the House of Hashem in Jerusalem on Mount Moriah, where He appeared to David his father” (Divrei HaYamim II 3:1). Here Avraham bound Yitzchak and named the place “Hashem will see”; here Yaakov slept and saw the ladder; here, say Chazal, the dust of Adam was taken from the very ground of his atonement (Bereishit Rabbah 14:8). The mountain was chosen long before the first stone was cut.", hint: "From the eastern stairs, turn and look back at the mountain itself." },
+  { kind: "rimon", emoji: "👣", title: "שלוש רגלים — Three Times a Year", text: "“Three times a year all your males shall appear before Hashem your G-d in the place He will choose” (Devarim 16:16). The roads and the mikvaot were repaired in Adar for the pilgrims (Shekalim 1:1); Jerusalem's houses were never rented out, because the city belonged to everyone who came; and for the days of the festival all of Israel counted as chaverim, trusted as pure (Chagigah 26a). A city that grew to fit whoever arrived.", hint: "On the broad southern stairs, worn smooth by the feet of three festivals." },
+  { kind: "wonder", emoji: "⚙️", title: "מוכני בן קטין — The Wheel of the Laver", text: "Yoma 37a: Ben Katin made a wheel for the kiyor, so that it could be lowered into its well overnight — water left standing until morning would have been disqualified, and the kohanim would have had nothing to sanctify their hands with at dawn. He also made it twelve spouts, one for each kohen of the daily offering (Middot 3:6). A man is remembered forever in the Mishnah for a piece of hardware that let the work begin on time.", hint: "Beside the bronze laver, an axle and a wheel still remember one man's name." },
+  { kind: "wonder", emoji: "🍇", title: "גפן של זהב — The Golden Vine", text: "Middot 3:8: a vine of gold stood over the entrance of the Heichal, trained upon posts. Whoever donated a leaf, a berry or a whole cluster brought it and hung it there, and the kohanim hammered it onto the vine. Josephus (War 5.210) says the clusters hung the height of a man. It grew the way nothing else grows — only by being given away.", hint: "Above the cedar doors of the House, something is growing that no rain ever fed." },
+  { kind: "wonder", emoji: "🌿", title: "ערבה — The Willows of the Altar", text: "Sukkah 45a: they brought willow branches eleven amot tall from Motza in the valley below, and stood them upright against the sides of the altar with their tops bent over it, and circled the altar once on each day of Sukkot and seven times on the seventh. The willow has no taste and no fragrance — no Torah and no good deeds, says the Midrash — and it is the one branch that leans directly on the altar.", hint: "Tall branches lean against the altar: the plant with neither taste nor scent." },
+  { kind: "wonder", emoji: "🎶", title: "חליל — The Flute of the Water-Drawing", text: "Sukkah 51a: whoever has not seen the rejoicing of Beit HaSho'evah has never seen rejoicing in his life. The flute was played for five and six days together; golden lamps with four bowls each lit the courtyards of Jerusalem until there was no courtyard without light; pious men danced with burning torches, juggling them; and the Levites stood on the fifteen steps with harps, lyres, cymbals and every instrument of song. They did not sleep for the whole festival.", hint: "By the fifteen steps a flute is waiting for a night nobody sleeps through." },
+  { kind: "wonder", emoji: "🍃", title: "עלהו לתרופה — Leaves for Healing", text: "Yechezkel 47:12: on both banks of the river every tree of food will grow; its leaf will not wither and its fruit will not fail; each month it bears new fruit, because its waters come out from the Mikdash — its fruit for food, and its leaf for healing. Chazal read לתרופה as two words: to unlock what is shut, and to loosen the tongue of the mute (Sanhedrin 100a).", hint: "At the river's edge, one tree whose leaf was never meant for eating." },
+  { kind: "wonder", emoji: "🍞", title: "שולחן לחם הפנים — The Table Lifted Up", text: "Menachot 29a and Chagigah 26b: on each of the three festivals the kohanim lifted the golden Shulchan and showed the pilgrims the showbread upon it, saying — see how beloved you are before Hashem: it is taken up as warm as it was on the day it was set down. Twelve loaves, two stacks of six, and in all those years no week's bread ever went stale.", hint: "Before the House stands a golden table, raised so the crowd could see the bread." },
+  { kind: "wonder", emoji: "🎲", title: "הקלפי — The Lottery", text: "Yoma 22a: at first, whoever wished simply ran up the ramp, and the swifter of the two won the service. Once two ran together, and one pushed the other, and he fell and broke his leg. When the court saw the danger, they instituted the lottery: the officer named a number, and they counted around the circle by raised fingers (Tamid 1:2). Even the eagerness to serve needed a fence around it.", hint: "In the court a wooden box holds the fairest way ever found to hand out honour." },
+  { kind: "wonder", emoji: "🪵", title: "קרבן עצים — The Offering of Wood", text: "Ta'anit 26a lists the nine days on which named families brought wood for the altar. Ta'anit 28a tells why they were honoured: an enemy government once posted watchmen on the roads so that no one could bring wood up to Jerusalem, and men hollowed logs into ladder-rungs and carried them past the guards, saying they were going to fetch chicks from a dovecote. The last of those days, the fifteenth of Av, is called one of the two happiest days Israel ever had (Ta'anit 30b).", hint: "Split fig-logs are stacked in the court, and every stack was carried by a family." },
+  { kind: "wonder", emoji: "🐄", title: "פרה אדומה — The Red Heifer and the Causeway", text: "Bamidbar 19: the ashes of a heifer entirely red, that never bore a yoke, purify whoever touched the dead — and make impure the pure kohen who prepares them. Shlomo said: I thought I could become wise in it, but it is far from me (Yoma 14a). Parah 3:6: it was burned on Har HaMishcha, and a causeway was built from the Temple Mount across to it, arches upon arches, an arch above each pier, for fear of a grave hidden in the ground below.", hint: "East, beyond the sealed gate, a raised causeway crosses to something russet and red." },
+  { kind: "wonder", emoji: "📝", title: "הכותל המערבי — The Wall That Remained", text: "Shemot Rabbah 2:2: the Shechinah has never departed from the Western Wall. Shir HaShirim Rabbah 2:9 reads “behold, He stands behind our wall” — behind the western wall of the Mikdash — because Hashem swore to it that it would never be destroyed. Herod's great courses are still standing at the western retaining wall, and the notes pressed into their joints are still being written today.", hint: "Outside the western retaining wall, great courses still stand — and people still write to them." },
 ];
 
 // Eighteen who answer — twelve kohanim at the stations of the morning avodah
@@ -240,8 +240,14 @@ function roughFromCanvas(canvas, lo = 0.42, hi = 0.92) {
   return dataTex(out, w, h);
 }
 
-// Build a standard material whose relief is derived from its own colour map,
-// with repeat/offset copied across so the three maps can never slide apart.
+// Build a standard material whose relief is derived from its own colour map.
+//
+// three builds one UV transform per material and takes it from `map` whenever
+// there is one, so in practice the derived maps already follow the colour map
+// wherever it goes. Copying repeat/offset across anyway costs nothing and
+// keeps the three textures honest on their own terms — it is what makes a
+// material with no colour map (the river) able to drive its transform from the
+// normal map instead.
 function pbr(map, {
   bump = 2.4, normalScale = 1, rough = null, roughness = 0.8, ...rest
 } = {}) {
@@ -259,8 +265,16 @@ function pbr(map, {
   return new THREE.MeshStandardMaterial(opts);
 }
 
-function ashlar({ base = [218, 211, 194], courses = 5, cols = 4, margin = true } = {}) {
-  return makeCanvas(512, 512, (ctx, w, h) => {
+// 1024x512, not 512x512, and twice the columns. Block proportions are
+// unchanged — 1024/8 is the same 128px face 512/4 was — but the map now holds
+// twice as many distinct stones before it starts over, and the extra period is
+// spent along the wall, which is the only direction a 500-amah retaining wall
+// tiles far enough for the eye to catch the repeat. Callers halve their u
+// repeat to keep every stone the size it was. Costs one Sobel pass at double
+// width, roughly 16ms per map; a square 1024 would have cost four times that
+// to lengthen a period that was never visible vertically.
+function ashlar({ base = [218, 211, 194], courses = 5, cols = 8, margin = true } = {}) {
+  return makeCanvas(1024, 512, (ctx, w, h) => {
     const ch = h / courses;
     for (let r = 0; r < courses; r++) {
       const off = (r % 2) * ((w / cols) / 2);
@@ -277,7 +291,7 @@ function ashlar({ base = [218, 211, 194], courses = 5, cols = 4, margin = true }
         }
       }
     }
-    for (let i = 0; i < 2200; i++) {
+    for (let i = 0; i < 4400; i++) {   // twice the canvas, twice the grit
       ctx.fillStyle = `rgba(${rnd(120, 170) | 0},${rnd(112, 158) | 0},${rnd(88, 128) | 0},${rnd(0.03, 0.09)})`;
       ctx.fillRect(rnd(0, w), rnd(0, h), rnd(1, 3), rnd(1, 3));
     }
@@ -545,6 +559,48 @@ function smokeSpriteTex() {
   });
 }
 
+// Water needs a moving surface more than it needs a colour. This is a height
+// field for it: long crests running with the current, then finer chop crossing
+// them at an angle so the two do not beat into a visible pattern. It is never
+// drawn — only Sobelled into a normal map, which is then scrolled.
+function rippleTex() {
+  return makeCanvas(256, 256, (ctx, w, h) => {
+    ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, w, h);
+    const crest = (amp, freq, phase, weight, tilt) => {
+      ctx.strokeStyle = `rgba(255,255,255,${weight})`;
+      ctx.lineWidth = rnd(3, 9);
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += 4) {
+        const y = phase + Math.sin((x / w) * freq * 6.283 + phase) * amp + x * tilt;
+        ctx.lineTo(x, ((y % h) + h) % h);
+      }
+      ctx.stroke();
+    };
+    // Long crests, drawn light then dark so each reads as a rise and a trough.
+    for (let i = 0; i < 22; i++) {
+      const ph = rnd(0, h);
+      crest(rnd(3, 9), rnd(1, 3), ph, rnd(0.10, 0.22), rnd(-0.04, 0.04));
+      ctx.strokeStyle = `rgba(0,0,0,${rnd(0.08, 0.18)})`;
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += 4) {
+        const y = ph + 7 + Math.sin((x / w) * 2 * 6.283 + ph) * 6;
+        ctx.lineTo(x, ((y % h) + h) % h);
+      }
+      ctx.stroke();
+    }
+    // Fine chop, crossing.
+    for (let i = 0; i < 70; i++) {
+      ctx.strokeStyle = `rgba(${Math.random() < 0.5 ? "255,255,255" : "0,0,0"},${rnd(0.04, 0.10)})`;
+      ctx.lineWidth = rnd(1, 2.6);
+      ctx.beginPath();
+      let x = rnd(0, w), y = rnd(0, h);
+      ctx.moveTo(x, y);
+      for (let k = 0; k < 3; k++) { x += rnd(10, 30); y += rnd(-7, 7); ctx.lineTo(x, y); }
+      ctx.stroke();
+    }
+  });
+}
+
 function plaqueTex() {
   return makeCanvas(256, 96, (ctx, w, h) => {
     ctx.fillStyle = "#e8e0cc"; ctx.fillRect(0, 0, w, h);
@@ -772,9 +828,15 @@ export default function Mikdash() {
     sun.castShadow = true;
     // Shadow texel budget. The old 2048 map spread over a 1120-amah frustum
     // put one texel every half-amah, which is coarser than the stones it was
-    // meant to shadow. Desktop-class GPUs get 4096; anything with a small
-    // texture cap (mobile) stays at 2048 rather than failing to allocate.
-    const shadowRes = renderer.capabilities.maxTextureSize >= 8192 ? 4096 : 2048;
+    // meant to shadow.
+    //
+    // Texture cap alone is the wrong test for who can afford 4096: a phone
+    // will happily report a 16384 cap and then spend 64MB it does not have on
+    // the depth map. Coarse pointer is the cheap proxy for "this is a handset
+    // or a tablet", and those stay at 2048.
+    const coarsePointer = typeof window.matchMedia === "function"
+      && window.matchMedia("(pointer: coarse)").matches;
+    const shadowRes = !coarsePointer && renderer.capabilities.maxTextureSize >= 8192 ? 4096 : 2048;
     sun.shadow.mapSize.set(shadowRes, shadowRes);
     // Tightened to the built precinct plus its stairs. Every amah of frustum
     // spent on empty hillside is a texel not spent on the House.
@@ -788,13 +850,13 @@ export default function Mikdash() {
     scene.add(sun);
 
     // ═══════════ Materials ═══════════
-    const whiteMap = ashlar(); whiteMap.repeat.set(3, 1.4);
+    const whiteMap = ashlar(); whiteMap.repeat.set(1.5, 1.4);
     // Hero surface: every outer wall and most of the precinct. Deep bump so
     // the drafted margins hold a shadow line, and a roughness map so the sun
     // does not slide across a whole wall at one sharpness.
     const white = pbr(whiteMap, { bump: 3.2, normalScale: 1.15, rough: [0.55, 0.95] });
-    const megaMap2 = ashlar({ base: [211, 205, 189], cols: 3, courses: 3 });
-    megaMap2.repeat.set(4, 2);
+    const megaMap2 = ashlar({ base: [211, 205, 189], cols: 6, courses: 3 });
+    megaMap2.repeat.set(2, 2);
     // Megalithic courses: fewer, larger stones, so the relief reads from
     // further out and can afford to be stronger still.
     const mega = pbr(megaMap2, { bump: 3.8, normalScale: 1.3, rough: [0.6, 0.98] });
@@ -824,7 +886,8 @@ export default function Mikdash() {
     const silver = new THREE.MeshStandardMaterial({ color: 0xdde2e9, metalness: 0.96, roughness: 0.12 });
     const foundGold = new THREE.MeshStandardMaterial({ color: 0xffd24a, metalness: 0.9, roughness: 0.2, emissive: 0x8a6a00, emissiveIntensity: 0.55 });
     const windowMat = new THREE.MeshStandardMaterial({ color: 0x201509, emissive: 0xffb347, emissiveIntensity: 0 });
-    const stoneDarkM = pbr(ashlar({ base: [206, 196, 172] }), { bump: 3.0, normalScale: 1.05, rough: [0.6, 0.96] });
+    const stoneDarkMap = ashlar({ base: [206, 196, 172] }); stoneDarkMap.repeat.set(0.5, 1);
+    const stoneDarkM = pbr(stoneDarkMap, { bump: 3.0, normalScale: 1.05, rough: [0.6, 0.96] });
     // The flutes are drawn as gradient bands, so their derived normal curves a
     // flat cylinder into twenty-two real grooves — the one place where the
     // derived map is doing the whole job of geometry.
@@ -1404,13 +1467,19 @@ export default function Mikdash() {
     // Fifteen steps, fifteen Shir HaMa'alot — so each one is tuned and can be
     // struck. Each gets its own material so it can flash when it sounds.
     const stepMeshes = [];
+    // s = 0 is the lowest step, farthest east; s = 14 is the top one at Nicanor.
+    // The ascent has to rise westward with groundHeight(), or the walk surface
+    // and the marble disagree and the top step vanishes inside the court slab.
+    const SH = IC_H / 15;              // one degree of the ascent
+    const SD = SH + 0.15;              // a little deeper than the rise, so no gaps
+    const stepTop = (s) => s * SH + SD / 2;
     for (let s = 0; s < 15; s++) {
       const w = 70 - s * 2.4;
       const mat = marble.clone();
       mat.emissive = new THREE.Color(0xffd24a);
       mat.emissiveIntensity = 0;
-      const st = box(2.6, IC_H / 15 + 0.15, w, mat, IC_E + (14 - s) * 2.6, IC_H - (s + 1) * (IC_H / 15), 0);
-      st.userData.step = 14 - s;   // the lowest step is the lowest note
+      const st = box(2.6, SD, w, mat, IC_E + (14 - s) * 2.6, s * SH, 0);
+      st.userData.step = s;            // the lowest step is the lowest note
       stepMeshes.push(st);
     }
     const par = (w, d, x, z) => {
@@ -1462,7 +1531,9 @@ export default function Mikdash() {
     }
     cyl(5, 3.4, 2.4, 14, bronze, -20, IC_H + 4.4, IC / 2 - 22);
     cyl(1.6, 2.4, 3.4, 10, bronze, -20, IC_H + 1.7, IC / 2 - 22);
-    const laverWater = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 0.3, 14), new THREE.MeshStandardMaterial({ color: 0x59b7dd, metalness: 0.4, roughness: 0.1 }));
+    const laverWaterMat = new THREE.MeshStandardMaterial({ color: 0x22809f, metalness: 0.4, roughness: 0.08, envMap, envMapIntensity: 1 });
+    metals.push(laverWaterMat);
+    const laverWater = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 0.3, 14), laverWaterMat);
     laverWater.position.set(-20, IC_H + 5.5, IC / 2 - 22);
     scene.add(laverWater);
 
@@ -1590,7 +1661,27 @@ export default function Mikdash() {
     }
 
     // ═══════════ River ═══════════
-    const waterMat = new THREE.MeshStandardMaterial({ color: 0x3fa8d8, transparent: true, opacity: 0.72, metalness: 0.4, roughness: 0.12 });
+    // Flat boxes in one flat blue, with the whole river pulsing opacity
+    // together — the last surface in the House with no material on it at all.
+    // Water reads as water for two reasons: it reflects the sky, and its
+    // surface moves. So it gets the environment map the metals use, and a
+    // derived ripple normal that is scrolled along the current every frame.
+    //
+    // There is no colour map here on purpose. three builds one UV transform per
+    // material and takes it from `map` when there is one — with none, the
+    // normal map's own offset drives it, which is exactly the handle the
+    // current needs.
+    const waterNormal = normalFromCanvas(rippleTex().image, 1.7);
+    waterNormal.repeat.set(9, 1.4);
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x1a7a9e, transparent: true, opacity: 0.72,
+      metalness: 0.35, roughness: 0.07,
+      normalMap: waterNormal, normalScale: new THREE.Vector2(0.5, 0.5),
+      envMap, envMapIntensity: 1,
+    });
+    // Joins the metals so the day/night ramp dims its reflection too: at night
+    // there is far less sky for the river to hold.
+    metals.push(waterMat);
     const streams = [];
     streams.push(box(196, 0.5, 4, waterMat, -8, IC_H + 0.32, 30));
     streams.push(box(174, 0.5, 8, waterMat, 158, 0.5, 30));
@@ -1687,8 +1778,7 @@ export default function Mikdash() {
       const f = makeFigure(0xefe9d6, 0xb8912f);
       const step = 2 + l * 2;
       const sx = IC_E + (14 - step) * 2.6;
-      const sy = IC_H - (step + 1) * (IC_H / 15);
-      f.position.set(sx, sy + 0.6, -30 + l * 12);
+      f.position.set(sx, stepTop(step), -30 + l * 12);
       f.rotation.y = Math.PI; // facing west, toward the House
       f.userData.kind = "levi";
       f.userData.voice = LEVI_VOICES[l % LEVI_VOICES.length];
@@ -1772,12 +1862,12 @@ export default function Mikdash() {
     // by eye, which is the difference between strings that meet wood at both
     // ends and strings that float in the middle of a frame.
     const harp = new THREE.Group();
-    const SB0 = new THREE.Vector2(-2.7, 1.2), SB1 = new THREE.Vector2(3.1, 5.2);  // soundboard: bass foot → treble shoulder
-    const NK0 = new THREE.Vector2(-3.1, 9.6), NK1 = new THREE.Vector2(3.2, 6.4);  // harmonic curve, over the same span
+    const SB0 = new THREE.Vector2(-2.6, 1.5), SB1 = new THREE.Vector2(3.0, 4.5);  // soundboard: bass foot → treble shoulder
+    const NK0 = new THREE.Vector2(-3.1, 9.5), NK1 = new THREE.Vector2(3.3, 7.3);  // harmonic curve, over the same span
     const boardAt = (u) => new THREE.Vector2(SB0.x + (SB1.x - SB0.x) * u, SB0.y + (SB1.y - SB0.y) * u);
     const neckAt = (u) => new THREE.Vector2(
       NK0.x + (NK1.x - NK0.x) * u,
-      NK0.y + (NK1.y - NK0.y) * u + Math.sin(u * Math.PI) * 1.35   // it arches; a harmonic curve is not a chord
+      NK0.y + (NK1.y - NK0.y) * u + Math.sin(u * Math.PI) * 1.15   // it arches; a harmonic curve is not a chord
     );
     // one tapered member of the frame, laid between two points of it
     const limb = (a, b, rt, rb, seg, mat, z = 0) => {
@@ -1789,28 +1879,30 @@ export default function Mikdash() {
     const bDir = SB1.clone().sub(SB0).normalize();
     const bN = new THREE.Vector2(-bDir.y, bDir.x);                 // the soundboard's normal, pointing at the neck
     // the soundbox: an octagonal cedar body slung under the board, fattest at the bass
-    limb(SB0.clone().addScaledVector(bN, -1.35).addScaledVector(bDir, -0.55),
-         SB1.clone().addScaledVector(bN, -0.75).addScaledVector(bDir, 0.4), 0.82, 1.7, 8, cedar);
+    limb(SB0.clone().addScaledVector(bN, -1.2).addScaledVector(bDir, -0.25),
+         SB1.clone().addScaledVector(bN, -0.7).addScaledVector(bDir, 0.35), 0.78, 1.5, 8, cedar);
     limb(SB0, SB1, 0.14, 0.19, 6, gold);                           // the rib the strings are pinned along
-    cyl(1.05, 1.3, 0.5, 8, gold, -1.95, 0.2, 0, harp);             // and the foot it stands on
+    cyl(1.1, 1.35, 0.5, 8, gold, -1.9, -0.95, 0, harp);            // the foot, set level with the belly it stands beside
     // the rose cut into the belly, where a soundbox is opened so it can sing
     const rc = boardAt(0.36).addScaledVector(bN, -0.85);
     const rose = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.1, 6, 14), gold);
-    rose.position.set(rc.x, rc.y, 1.0); harp.add(rose);
+    rose.position.set(rc.x, rc.y, 1.18); harp.add(rose);
     // the forepillar, carrying the whole pull of the strings down to the foot
-    limb(new THREE.Vector2(-3.5, 0.3), NK0, 0.42, 0.62, 8, gold);
+    // run it a little past NK0 into the first course of the neck, so the two
+    // members overlap at the shoulder instead of meeting in a notch
+    limb(new THREE.Vector2(-3.5, -1.1), neckAt(0.035), 0.38, 0.56, 8, gold);
     // the neck, walked along the curve in twelve tapering courses
     for (let i = 0; i < 12; i++) {
       const u0 = i / 12, u1 = (i + 1) / 12;
-      limb(neckAt(u0), neckAt(u1), 0.5 - u1 * 0.22, 0.5 - u0 * 0.22, 8, gold);
+      limb(neckAt(u0), neckAt(u1), 0.46 - u1 * 0.2, 0.46 - u0 * 0.2, 8, gold);
     }
     // a pomegranate finial over the pillar, like everything else golden here
     const finial = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8), gold);
-    finial.position.set(NK0.x, NK0.y + 0.55, 0); harp.add(finial);
+    finial.position.set(NK0.x + 0.06, NK0.y + 0.6, 0); harp.add(finial);
     for (let c = 0; c < 4; c++) {
       const a = c * Math.PI / 2;
       const crown = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.48, 5), gold);
-      crown.position.set(NK0.x + Math.cos(a) * 0.25, NK0.y + 1.16, Math.sin(a) * 0.25);
+      crown.position.set(NK0.x + 0.06 + Math.cos(a) * 0.25, NK0.y + 1.21, Math.sin(a) * 0.25);
       crown.rotation.z = -Math.cos(a) * 0.42; crown.rotation.x = Math.sin(a) * 0.42;
       harp.add(crown);
     }
@@ -2624,7 +2716,7 @@ export default function Mikdash() {
     let nowT = 0;
 
     // ═══════════ Camera control: orbit + first-person ═══════════
-    const orbit = { theta: Math.PI * 0.2, phi: Math.PI * 0.37, radius: 700, target: new THREE.Vector3(-40, 30, 0), dragging: false, lastX: 0, lastY: 0, drift: 0.00072 };
+    const orbit = { theta: 0.8 + Math.PI/2, phi: Math.PI * 0.46, radius: 38, target: harp.position.clone().add(new THREE.Vector3(0, 7, 0)), dragging: false, lastX: 0, lastY: 0, drift: 0 };
     const player = {
       pos: new THREE.Vector3(180, 3.4, 0),
       yaw: Math.PI, pitch: 0,
@@ -3110,6 +3202,11 @@ export default function Mikdash() {
 
       aravah.rotation.z = Math.sin(t * 0.9) * 0.012;   // the willows, moving a little
 
+      // The current. Scrolling the normal map is what turns a blue slab into
+      // moving water; the slow crosswise drift keeps the crests from reading
+      // as a conveyor belt.
+      waterNormal.offset.x = (t * 0.045) % 1;
+      waterNormal.offset.y = Math.sin(t * 0.19) * 0.03;
       streams.forEach((s, i) => { s.material.opacity = 0.6 + Math.sin(t * 2 + i) * 0.11; });
       sparks.material.opacity = 0.5 + Math.sin(t * 3) * 0.3;
       laverWater.position.y = IC_H + 5.5 + Math.sin(t * 2.2) * 0.06;
@@ -3328,25 +3425,33 @@ export default function Mikdash() {
         /* ─── The seal ─── an arched gate-tablet, not a disc: the same profile
            as the openings of Yechezkel's gatehouse, struck in gold or silver
            and standing on a threshold stone. */
-        .seal { position:absolute; top:-32px; left:50%; transform:translateX(-50%);
-          width:52px; height:62px; border-radius:26px 26px 6px 6px;
+        .seal { position:absolute; top:-34px; left:50%; transform:translateX(-50%);
+          width:58px; height:68px; border-radius:29px 29px 5px 5px;
           display:flex; align-items:center; justify-content:center;
-          font-size:19px; color:#5a4718; text-shadow:0 1px 0 rgba(255,255,255,.6);
+          font-size:26px; line-height:1;
+          filter:drop-shadow(0 2px 2px rgba(60,44,10,.4));
           background:linear-gradient(158deg,#fff6d8 0%,#f2d68f 20%,#d9ac41 52%,#b3841f 76%,#eccb79 100%);
           box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 0 1px rgba(110,84,26,.45),
                      inset 0 1px 0 rgba(255,255,255,.9), inset 0 -3px 6px rgba(120,88,20,.35);
           z-index:2; }
-        .seal::before { content:""; position:absolute; inset:4px; border-radius:22px 22px 3px 3px;
-          border:1px solid rgba(96,70,16,.34); box-shadow:inset 0 1px 0 rgba(255,255,255,.45); }
+        /* the opening — a recessed niche the emoji stands inside, the way the
+           gatehouse cells stand back inside their own arch */
+        .seal::before { content:""; position:absolute; inset:5px 6px 6px; border-radius:24px 24px 3px 3px;
+          background:linear-gradient(170deg, rgba(92,66,14,.3), rgba(255,246,216,.32) 55%, rgba(255,255,255,.48));
+          box-shadow:inset 0 2px 5px rgba(80,58,12,.42), inset 0 -1px 0 rgba(255,255,255,.7),
+                     0 0 0 1px rgba(96,70,16,.28); }
         .seal::after { content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%);
-          width:76px; height:7px; border-radius:2px;
+          width:84px; height:7px; border-radius:2px;
           background:linear-gradient(90deg,transparent,rgba(190,152,68,.9) 16%,rgba(255,238,190,.95) 50%,rgba(190,152,68,.9) 84%,transparent);
           box-shadow:0 2px 7px rgba(0,0,0,.28); }
         .seal-silver { color:#465060;
           background:linear-gradient(158deg,#ffffff 0%,#eef1f5 20%,#c2c9d3 52%,#939cab 76%,#e2e7ee 100%);
           box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 0 1px rgba(90,100,115,.4),
                      inset 0 1px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(80,92,108,.32); }
-        .seal-silver::before { border-radius:22px 22px 3px 3px; border-color:rgba(80,92,108,.35); }
+        .seal-silver::before { border-radius:24px 24px 3px 3px;
+          background:linear-gradient(170deg, rgba(70,80,94,.28), rgba(240,244,249,.34) 55%, rgba(255,255,255,.52));
+          box-shadow:inset 0 2px 5px rgba(62,72,86,.4), inset 0 -1px 0 rgba(255,255,255,.75),
+                     0 0 0 1px rgba(80,92,108,.3); }
         .seal-silver::after { background:linear-gradient(90deg,transparent,rgba(150,160,174,.9) 16%,rgba(244,247,251,.95) 50%,rgba(150,160,174,.9) 84%,transparent); }
 
         /* ─── Keeping the top out from under the rail ─── the title, its
@@ -3392,8 +3497,8 @@ export default function Mikdash() {
           background-repeat:no-repeat; }
 
         /* the little arched tiles that carry the pesichah's three teachings */
-        .glyph-tile { flex:0 0 28px; height:31px; border-radius:14px 14px 4px 4px;
-          display:flex; align-items:center; justify-content:center; font-size:13.5px; color:#8a6d24;
+        .glyph-tile { flex:0 0 30px; height:33px; border-radius:15px 15px 4px 4px;
+          display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1;
           background:linear-gradient(160deg, rgba(255,246,217,.95), rgba(228,207,152,.8));
           border:1px solid rgba(140,110,50,.42);
           box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 1px 3px rgba(90,70,20,.18); }
@@ -3545,7 +3650,7 @@ export default function Mikdash() {
         <div className="panel" onClick={closeFact} style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(14,11,5,.5)", backdropFilter: "blur(4px)", cursor: "pointer", zIndex: 5 }}>
           <div className="card-frame" onClick={(e) => e.stopPropagation()} style={{ cursor: "default", maxWidth: 550, margin: 20, background: "linear-gradient(160deg, #fbf6e8, #efe3c4)", borderRadius: 20, border: "1px solid rgba(140,110,50,.5)", boxShadow: "0 28px 80px rgba(0,0,0,.5)", padding: "30px 34px", position: "relative" }}>
             <div className={DISCOVERIES[fact].kind === "rimon" ? "seal seal-silver" : "seal"}>
-              {DISCOVERIES[fact].kind === "rimon" ? "◉" : "✦"}
+              {DISCOVERIES[fact].emoji}
             </div>
             <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21.5, fontWeight: 700, color: "#4a3a18", marginTop: 20, marginBottom: 9, lineHeight: 1.3, textAlign: "center" }}>
               {DISCOVERIES[fact].title}
@@ -3574,7 +3679,7 @@ export default function Mikdash() {
 
       {/* ─── פתיחה · the opening ─── The first step is the hardest, so it is
            given, not hidden: what the rings mean, and where the first one waits. */}
-      {loaded && !noWebGL && storageReady && !opened && (
+      {false && loaded && !noWebGL && storageReady && !opened && (
         <div className="pesichah-veil" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(ellipse at 50% 45%, rgba(20,15,6,.42), rgba(8,6,2,.78))", backdropFilter: "blur(3px)", zIndex: 7, padding: "36px 18px 22px" }}>
           <div className="pesichah" style={{ width: "min(560px, 92vw)", maxHeight: "88vh", overflowY: "auto", background: "linear-gradient(160deg, #fbf6e8, #efe3c4)", borderRadius: 22, border: "1px solid rgba(140,110,50,.5)", boxShadow: "0 30px 90px rgba(0,0,0,.55), 0 0 90px rgba(212,164,55,.22)", padding: "clamp(24px, 5vw, 34px) clamp(20px, 5vw, 34px) clamp(20px, 4vw, 26px)", textAlign: "center", position: "relative" }}>
 
@@ -3597,9 +3702,9 @@ export default function Mikdash() {
 
             <div style={{ textAlign: "left", margin: "clamp(15px, 3.5vw, 20px) auto 4px", maxWidth: 430, display: "flex", flexDirection: "column", gap: "clamp(10px, 2.5vw, 13px)" }}>
               {[
-                ["◉", <>Every hidden thing floats inside a <b style={{ fontWeight: 600 }}>slowly turning ring of gold light</b>. When you see one — click what is inside it.</>],
-                ["✥", <>Drag to turn the House, scroll to draw near, and <b style={{ fontWeight: 600 }}>⇊ Walk the Courts</b> to stand inside them.</>],
-                ["⌖", <>The banner above always whispers where the next one waits. If it stays hidden, press <b style={{ fontWeight: 600 }}>הראה לי · Show me</b> — a pillar of light will rise over it.</>],
+                ["💫", <>Every hidden thing floats inside a <b style={{ fontWeight: 600 }}>slowly turning ring of gold light</b>. When you see one — click what is inside it.</>],
+                ["🚶", <>Drag to turn the House, scroll to draw near, and <b style={{ fontWeight: 600 }}>⇊ Walk the Courts</b> to stand inside them.</>],
+                ["🔦", <>The banner above always whispers where the next one waits. If it stays hidden, press <b style={{ fontWeight: 600 }}>הראה לי · Show me</b> — a pillar of light will rise over it.</>],
               ].map(([glyph, text], i) => (
                 <div key={i} className="pesichah-line" style={{ display: "flex", gap: 12, alignItems: "flex-start", animationDelay: `${0.45 + i * 0.13}s` }}>
                   <span className="glyph-tile">{glyph}</span>
