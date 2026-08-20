@@ -1,5 +1,34 @@
 # Changelog
 
+## v3.4 — "The Opening" (0.3.4)
+
+- **The first step is given, not hidden.** A visitor who never finds wonder #1
+  never sees the other fifteen, so the opening no longer asks anything of them.
+  On the first visit a pesichah card unrolls over the House — בֹּאוּ שְׁעָרָיו
+  בְּתוֹדָה — naming the one thing the game never said out loud: *every hidden
+  thing floats inside a slowly turning ring of gold light.* It says where the
+  first one waits (inside the eastern gatehouse), and its button flies the
+  camera there. Shown once, ever, and remembered alongside progress.
+- **Two more rungs under it.** The banner's *Show me* gleams while nothing has
+  been found. And after 40 seconds in quest mode with an empty count, the
+  beacon rises over the first rimon unasked — "בֹּא וּרְאֵה — come and see."
+  Both key off `found.length === 0` and go quiet the moment anything is found.
+- **The kohanim answer.** Click any of the eight kohanim or four Levites and
+  they speak from their station of the morning avodah — terumat hadeshen, the
+  arrangement of the wood, the lottery after a kohen was pushed on the ramp,
+  Ben Katin's wheel for the kiyor, the tamid, the water libation, the showbread
+  still warm a week on, birkat kohanim. Every line carries its source, the way
+  every dimension does. *(Was already in the tree; shipping here.)*
+- **Columns worth looking at.** The Royal Stoa's columns are properly
+  Corinthian now — a fluted shaft off a new procedural texture, an acanthus
+  bell, an abacus, and volutes. Yachin and Boaz are rebuilt to Melachim I 7:
+  a twelve-amah circumference (so the radius is 12/2π, not a guess), net-work
+  and chain-work on the capitals, two rows of pomegranates, lily-work.
+  *(Was already in the tree; shipping here.)*
+- **The Divine Name.** English text now writes **Hashem** or **G-d**, never
+  "God" spelled out — in the sixteen teachings, in the completion card, and as
+  a documented house rule for anything added later.
+
 ## v3.3 — "Gold, Fire, and Fifteen Notes" (0.3.3)
 
 - **The facade was black, and it was a bug.** A metal surface in three.js takes

@@ -5,7 +5,7 @@ rendered in the grandeur of a monumental white-stone precinct, with sixteen hidd
 wonders drawn from Tanach, Talmud, and archaeology.**
 
 > "מִצִּיּוֹן מִכְלַל יֹפִי אֱלֹהִים הוֹפִיעַ" — Tehillim 50:2
-> "Out of Zion, the perfection of beauty, God shone forth."
+> "Out of Zion, the perfection of beauty, G-d shone forth."
 
 This README is the working design document. It documents everything a
 contributor (human or AI) needs to continue building: the coordinate system,
@@ -14,7 +14,7 @@ and the roadmap toward a full game.
 
 ---
 
-## Current state (v3.3 — "Gold, Fire, and Fifteen Notes")
+## Current state (v3.4 — "The Opening")
 
 One self-contained React component: `Mikdash.jsx` (React 18 + Three.js r128,
 no other dependencies, no assets — every texture is generated procedurally at
@@ -37,6 +37,8 @@ and fire are GLSL shaders).
 | First-person walk mode | ✅ | WASD/arrows + drag-look, Shift to run, mobile dual-thumb controls, AABB collision, terrain height function |
 | Animated figures | ✅ | 8 kohanim walking waypoint loops in the azarah; 8 Levites swaying on the fifteen steps |
 | Sixteen wonders quest | ✅ | Sequential unlock with toast guidance + free-explore toggle |
+| The pesichah (opening) | ✅ | A first-visit card that teaches the ring-of-light affordance and names where wonder #1 waits; "Show me the first" flies the camera in. Shown once, ever |
+| First-step rescue | ✅ | 40s with nothing found and the beacon rises over wonder #1 unasked; the banner's *Show me* gleams until the first find |
 | Persistent progress | ✅ | `window.storage` key `mikdash-progress-v3` (found list + day/night pref) |
 | WebAudio events | ✅ | Shofar tekiah, freygish harp arpeggio, Shabbat trumpet fanfare, ketoret chime |
 | Ambient bed | ✅ | Wind (height + night), fire of the ma'aracha (near the altar), Levites' ascent (near the fifteen steps) — mixed per frame, one ♪ / ⃠ switch silences everything |
@@ -87,6 +89,16 @@ and fire are GLSL shaders).
 | Trumpeting Stone inscription (real artifact, 1968) | Israel Museum, IAA 78-1439 |
 | Great shofar of ingathering | Yeshayahu 27:13 |
 | Fire from Heaven vs. built by Mashiach | Rambam Hilchot Melachim 11; Rashi/Tanchuma |
+
+**The Divine Name.** In English the House's Maker is written **Hashem**, or
+**G-d** where a translation needs the word. Never "God" spelled out. Halachically
+this is a chumra, not an obligation — the seven Names that may not be erased
+(Shulchan Aruch YD 276:9) are the Hebrew ones, and the Shach (YD 179:11) holds
+the erasure prohibition does not extend to other languages; a screen is not
+writing at all by most contemporary poskim. But the cost of the hyphen is zero
+and it makes the House comfortable for every visitor, so it is the house style.
+The same rule bars any Hebrew Divine Name from appearing in the source or the UI
+— quote pesukim around it, or use אלוקים / ה׳ if one is ever unavoidable.
 
 **Content rule:** all hidden-object language uses Jewish framing only —
 *nistarot* (hidden things), *rimonim* (pomegranates), wonders. No
@@ -154,8 +166,28 @@ next tier would be 24).
     keyboard + dual-thumb touch input.
 12. **Render loop** — environment easing, fire, wonders idle animation
     (including quest veiling of future rimonim), figures, doves, water.
-13. **React UI** — quest banner, counter, mode chips, hints panel (locked
-    hints show "still veiled"), toast, fact modal, completion card.
+13. **React UI** — the pesichah card, quest banner, counter, mode chips, hints
+    panel (locked hints show "still veiled"), toast, fact modal, completion card.
+
+### The first step
+A visitor who cannot find wonder #1 never sees wonders 2–16, so the opening is
+the one place where nothing is hidden. Three layers, each one cheaper to ignore
+than the last:
+
+1. **The pesichah card** (`opened` state, persisted in `STORE_KEY`) — shown once
+   on the first visit, after `loaded` so the House fades in behind it. It names
+   the affordance ("every hidden thing floats inside a slowly turning ring of
+   gold light"), the controls, and where the first one waits. Its primary button
+   calls `guideTo(0)`.
+2. **The gleaming button** — the banner's *Show me* carries `.gleam` while
+   `found.length === 0`, and only then.
+3. **The unasked rescue** — a `setTimeout` that fires `guideTo(0)` after 40s of
+   quest mode with nothing found. It is cleared the moment anything is found, so
+   it can only ever fire for the first wonder.
+
+Everything here keys off `found.length === 0`. Do not extend the ladder to later
+wonders: by then the hint line and *Show me* are enough, and being led by the
+hand stops being delight.
 
 ### React ⇄ Three bridges
 State lives in React; the scene reads it through refs (`foundRef`, `questRef`,
@@ -210,7 +242,7 @@ repo and that string has to move with it, or every asset 404s.
 - [ ] Localization: full Hebrew UI toggle; Russian, Spanish, French, German.
 
 **Non-goals:** depicting the interior of the Kodesh HaKodashim; any imagery
-of Hashem; combat or violence mechanics; real-money anything.
+of Hashem; spelling out the Divine Name in English; combat or violence mechanics; real-money anything.
 
 ## Contributing
 
