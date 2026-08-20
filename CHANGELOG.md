@@ -1,5 +1,34 @@
 # Changelog
 
+## v3.12 — "Dust and a Paved Court" (0.3.12)
+
+- **The azarah floor was a stretched texture, not a flat one.** It had been the
+  top face of the inner-court block, which wears the sea-wave marble at
+  `repeat(1.6, 1)` — right for a 10-amah wall face, but a `BoxGeometry` gives
+  every face the same 0..1 UV, so that same tile spanned the 260-amah floor and
+  one repeat of pattern was smeared across 162 amot. The most-looked-at surface
+  in the House rendered as a featureless pale plane, and no amount of material
+  work on `wave` could have fixed it. The floor is now its own plane with its
+  own scale: one tile ≈ 26 amot, a slab ≈ 6, which is a stone two men can set.
+  Middot gives no pattern for the court floor, so this is dressed stone rather
+  than an invention with a citation stapled on — large slabs, veining clipped
+  so it never crosses a joint, and joints drawn *lighter* than the field,
+  because a polished floor's joints catch light rather than reading as the
+  black lines of a dry-laid pavement. Shallow relief, and a roughness map to
+  break the highlight across the slabs.
+- **Dust in the air.** The one thing still separating this from a photograph of
+  a model was that the air was perfectly clear — a stone at nine hundred amot
+  read as crisply as one at nine. Fog handles the far distance and does nothing
+  for the near ground, which is where heat shows. Eighteen very faint sprites
+  now lie low across the precinct and drift, keeping depth testing so the House
+  occludes them properly and they stack in front of whatever is furthest away.
+  Warmest and strongest when the sun rakes low, thinning at night.
+  - First cut keyed opacity purely off the rake term, which evaluated to 0.036
+    with the sun at its midday height: the whole layer was real in the code and
+    invisible on screen at the one time of day the House opens on. There is now
+    a floor under it, because desert air is never actually clear.
+
+
 ## v3.11 — "A Wind Over the Grove" (0.3.11)
 
 - **The trees move.** Nothing in this landscape did except the doves and the

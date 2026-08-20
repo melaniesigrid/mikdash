@@ -21,7 +21,8 @@ preferences.
   planted for the House's beauty. `plantable()` enforces it in code.
 - **Multiples of 18** for any countable collection — see the number rule in the
   README. Currently: 36 nistarot, 18 figures who answer, 18 doves, 18 river
-  trees, 90 grove trees. Sourced counts (15 steps, 11 spices) outrank it.
+  trees, 108 grove trees, 216 + 108 bushes, 108 stones. Sourced counts (15
+  steps, 11 spices) outrank it.
 - **Ids are append-only.** `DISCOVERIES` indices are persisted. Never insert,
   never reorder.
 - **Cite the measurement.** A pasuk, daf or Josephus § in a comment beside any
@@ -37,7 +38,7 @@ preferences.
 - [x] **Seven tree species, each sourced** — date palm (Yechezkel 40:16 carves
       תִּמֹרִים on the gates), cypress (Yeshayahu 60:13, "to beautify the place
       of My sanctuary"), olive, pomegranate, fig, carob (Ta'anit 23a), almond
-      in blossom (Shemot 25:33). Ninety of them, חי times five.
+      in blossom (Shemot 25:33). A hundred and eight, חי times six.
 - [x] **Camels of the nations** — Yeshayahu 60:6, bearing gold and frankincense,
       couched below the southern stairs. Same chapter as the cypress.
 - [x] **River banks planted only with food trees** — Yechezkel 47:12 says
@@ -68,10 +69,13 @@ preferences.
 - [x] Linear colour pipeline (sRGB in, linear shading, sRGB out).
 - [x] Vertex-baked ambient occlusion on walls and columns.
 - [x] Water: scrolling ripple normal + sky reflection.
-- [ ] **The azarah floor is the flattest surface left.** It is a large pale
-      marble plane with almost no variation, and it is the most-looked-at floor
-      in the House. Wants slab layout, wear polish along the walked lines, and a
-      damp sheen near the laver.
+- [x] **The azarah floor.** Root cause was a UV scale, not a material: the
+      block's top face carried the wall's `repeat(1.6, 1)` across 260 amot. Now
+      its own plane at ~26 amot per tile, with pale joints and a polish
+      roughness map.
+- [ ] **Wear and water on the court floor.** The slabs are uniform — no polish
+      along the walked lines between Nicanor and the altar, no damp sheen near
+      the laver. Both are what would make it read as *used*.
 - [ ] **Verify the water up close.** Confirmed at distance only. At a low angle
       the sky reflection is doing the work, and the ripple `repeat(9, 1.4)`
       could read as a conveyor belt. Needs a proper low camera pass.
@@ -82,9 +86,8 @@ preferences.
 - [ ] **Gold wants anisotropy.** Beaten plate scatters along the hammer marks,
       not evenly. `MeshPhysicalMaterial` has `anisotropy` in newer three; on
       r128 this would need a custom `onBeforeCompile`.
-- [ ] **Dust in the air.** A few large, very faint sprites low over the plaza,
-      lit from behind at dawn and dusk. This is most of what sells heat and
-      scale in film.
+- [x] **Dust in the air.** 18 drifting sprites, depth-tested, peaking when the
+      sun rakes low. Watch the opacity floor if the sun angle ever changes.
 - [ ] **Shadow softening with distance.** PCF is uniform now; contact shadows
       should be tight and distant ones soft.
 
@@ -93,8 +96,10 @@ preferences.
 - [ ] **The camels.** One low grunt, rarely, when the camera is near.
 - [ ] **Footsteps in walk mode.** Different on marble, on paving, on dust — the
       surface is already known from `groundHeight()`.
-- [ ] **Wind should follow the trees.** The ambient wind bed and the (not yet
-      built) frond motion should share one gust signal, or they will disagree.
+- [ ] **Wind should follow the trees.** The ambient wind bed and the frond
+      motion are now two separate signals that visibly disagree — the trees bend
+      on `uWind`, the bed swells on its own clock. One shared gust value should
+      drive both.
 - [ ] **Distance-attenuate the fifteen steps.** They ring at full volume from
       anywhere in the precinct.
 
@@ -114,9 +119,13 @@ preferences.
 - [ ] **Mobile pass.** Shadow map now steps down on coarse pointers, but the
       tree count went up ninety-fold in mesh terms. Needs measuring on a real
       handset, not assumed.
-- [ ] **Merge static geometry.** `BufferGeometryUtils.mergeBufferGeometries` for
-      the colonnades and the grove; instanced columns; LOD on trees. The grove
-      alone is several hundred draw calls that never change.
+- [x] **Merge the grove.** `mergeByMaterial()` — written locally rather than
+      importing `BufferGeometryUtils`, which would have broken the no-new-import
+      rule. ~1300 draw calls down to one per material.
+- [ ] **Merge the rest.** The colonnades, the gate cells and the stair treads are
+      all static and still one draw call each. Same helper applies; the only
+      reason it has not been done is that some of them carry colliders and
+      clickable ids, which merging would flatten.
 
 ## Ideas worth considering, not yet decided
 

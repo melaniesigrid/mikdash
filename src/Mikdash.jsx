@@ -474,6 +474,76 @@ function pavingTex() {
   });
 }
 
+// The azarah floor. It had been the top face of the inner-court block, which
+// wears the sea-wave marble at repeat(1.6, 1) — fine on a 10-amah wall face,
+// but the same UV spans the 260-amah floor, so one tile of pattern was stretched
+// across 162 amot and the most-looked-at surface in the House rendered as a
+// featureless pale plane.
+//
+// Middot does not describe a pattern for the court floor, so this is dressed
+// stone rather than an invention with a citation attached: large slabs, joints
+// that are lighter than the field rather than darker (a polished floor's joints
+// catch light, they do not read as black lines the way a dry-laid pavement's
+// do), and per-slab tone variation wide enough that the eye reads individual
+// stones from standing height.
+// Airborne dust. One very diffuse radial falloff — no structure at all,
+// because structure is what makes a haze sprite read as a cloud sitting on the
+// ground instead of as air.
+function hazeTex() {
+  return makeCanvas(128, 128, (ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h);
+    const g = ctx.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2);
+    g.addColorStop(0, "rgba(255,255,255,0.5)");
+    g.addColorStop(0.45, "rgba(255,255,255,0.22)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  });
+}
+
+function courtStoneTex() {
+  return makeCanvas(512, 512, (ctx, w, h) => {
+    ctx.fillStyle = "rgb(226,220,205)"; ctx.fillRect(0, 0, w, h);
+    const n = 4, cell = w / n;
+    for (let r = 0; r < n; r++) {
+      for (let c2 = 0; c2 < n; c2++) {
+        const j = rnd(-9, 9);
+        const x = c2 * cell, y = r * cell;
+        const g = ctx.createLinearGradient(x, y, x + cell, y + cell);
+        g.addColorStop(0, `rgb(${224 + j | 0},${218 + j | 0},${202 + j | 0})`);
+        g.addColorStop(0.6, `rgb(${233 + j | 0},${227 + j | 0},${211 + j | 0})`);
+        g.addColorStop(1, `rgb(${220 + j | 0},${214 + j | 0},${198 + j | 0})`);
+        ctx.fillStyle = g;
+        ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+        // Faint veining, kept inside the slab — veins do not cross a joint.
+        ctx.save();
+        ctx.beginPath(); ctx.rect(x + 1, y + 1, cell - 2, cell - 2); ctx.clip();
+        for (let v = 0; v < 3; v++) {
+          ctx.strokeStyle = `rgba(${rnd(178, 202) | 0},${rnd(172, 196) | 0},${rnd(150, 176) | 0},${rnd(0.10, 0.22)})`;
+          ctx.lineWidth = rnd(0.5, 1.5);
+          ctx.beginPath();
+          let vx = x + rnd(0, cell), vy = y;
+          ctx.moveTo(vx, vy);
+          while (vy < y + cell) { vy += rnd(12, 30); vx += rnd(-20, 20); ctx.lineTo(vx, vy); }
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+    // Joints, pale.
+    ctx.strokeStyle = "rgba(246,242,232,0.55)";
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= n; i++) {
+      ctx.beginPath(); ctx.moveTo(0, i * cell); ctx.lineTo(w, i * cell); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(i * cell, 0); ctx.lineTo(i * cell, h); ctx.stroke();
+    }
+    // Scuff and grit, low contrast — this floor is washed daily.
+    for (let i = 0; i < 1800; i++) {
+      ctx.fillStyle = `rgba(${rnd(196, 226) | 0},${rnd(190, 220) | 0},${rnd(168, 200) | 0},${rnd(0.02, 0.06)})`;
+      ctx.fillRect(rnd(0, w), rnd(0, h), rnd(1, 2), rnd(1, 2));
+    }
+  });
+}
+
 function cloudTex() {
   return makeCanvas(256, 128, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
@@ -819,6 +889,34 @@ export default function Mikdash() {
         scene.add(s);
         clouds.push(s);
       }
+    }
+
+    // ── אָבָק — dust in the air ───────────────────────────────────────────
+    //
+    // The one thing separating this from a photograph of a model was that the
+    // air was perfectly clear: every stone at nine hundred amot read as
+    // crisply as one at nine. Fog fixes the far distance but does nothing for
+    // the near ground, and it is the near ground where heat shows.
+    //
+    // So: eighteen very faint sprites lying low across the precinct, drifting.
+    // They keep depth testing, so the House occludes them properly and they
+    // stack up in front of whatever is furthest away, which is what makes them
+    // read as depth rather than as a filter over the lens. Warmest and
+    // strongest at the low sun, nearly gone at midday and at night — dust is
+    // only visible when something rakes across it.
+    const hazeMap = hazeTex();
+    const haze = [];
+    for (let i = 0; i < 18; i++) {
+      const m = new THREE.SpriteMaterial({
+        map: hazeMap, transparent: true, opacity: 0, depthWrite: false, fog: false,
+      });
+      const sp = new THREE.Sprite(m);
+      const sc = rnd(320, 700);
+      sp.scale.set(sc, sc * rnd(0.22, 0.38), 1);
+      sp.position.set(rnd(-1300, 1300), rnd(6, 74), rnd(-1300, 1300));
+      sp.userData = { mat: m, base: rnd(0.08, 0.18), drift: rnd(0.6, 2.2), phase: rnd(0, 6.28) };
+      scene.add(sp);
+      haze.push(sp);
     }
 
     // ═══════════ Lights ═══════════
@@ -1913,6 +2011,23 @@ export default function Mikdash() {
     // ═══════════ Inner court ═══════════
     const inner = box(IC + 50, IC_H, IC, wave, -60, IC_H / 2, 0);
     inner.receiveShadow = true;
+    // The floor is laid as its own plane rather than left as the block's top
+    // face, because a BoxGeometry gives every face the same 0..1 UV: any repeat
+    // that suits the 260-amah floor makes nonsense of the 10-amah sides. One
+    // tile here is about 26 amot, so a slab is roughly six — a stone two men
+    // can set, which is what the courts were paved with.
+    const courtMap = courtStoneTex(); courtMap.repeat.set(10, 8);
+    const courtFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(IC + 50, IC),
+      // Shallow relief: this stone is dressed flat and polished, so the joints
+      // want to catch light, not cast shadows. The roughness map does the real
+      // work — a polished floor's highlight breaks up across the slabs.
+      pbr(courtMap, { bump: 1.2, normalScale: 0.35, rough: [0.18, 0.46] })
+    );
+    courtFloor.rotation.x = -Math.PI / 2;
+    courtFloor.position.set(-60, IC_H + 0.04, 0);   // clear of the block's top face
+    courtFloor.receiveShadow = true;
+    scene.add(courtFloor);
     const IC_E = -60 + (IC + 50) / 2; // = 70, eastern edge of inner court
     // Fifteen steps, fifteen Shir HaMa'alot — so each one is tuned and can be
     // struck. Each gets its own material so it can flash when it sounds.
@@ -3584,6 +3699,23 @@ export default function Mikdash() {
         c2.userData.mat.opacity = c2.userData.baseO * lerp(1, 0.28, e2);
         c2.userData.mat.color.setRGB(lerp(1, 0.35, e2), lerp(1, 0.4, e2), lerp(1, 0.55, e2));
       });
+      // Dust peaks when the sun is low and the light rakes through it. sunDir.y
+      // runs about 0.6 at midday down through 0 at the horizon, so 1 - y is the
+      // rake; squared, because the effect is not linear in anyone's memory of it.
+      const rake = Math.min(1, Math.max(0, 1 - sunDir.y * 1.35));
+      // A floor of 0.3 rather than a pure rake term: with the sun at its
+      // midday height this evaluated to 0.036 and the whole eighteen-sprite
+      // layer was invisible at the one time of day the House opens on — real
+      // in the code and absent on screen. Desert air is never actually clear.
+      const dustLit = (0.3 + 0.7 * rake * rake) * (1 - e2 * 0.8);
+      for (let hi = 0; hi < haze.length; hi++) {
+        const u = haze[hi].userData;
+        u.mat.opacity = u.base * dustLit;
+        // Warm at the rake, neutral overhead.
+        u.mat.color.setRGB(1, lerp(1, 0.86, rake), lerp(1, 0.68, rake));
+        haze[hi].position.x += u.drift * dt;
+        if (haze[hi].position.x > 1400) haze[hi].position.x = -1400;
+      }
 
       // ── walk mode physics ──
       if (walkRef.current) {
