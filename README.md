@@ -47,11 +47,11 @@ computed on the visitor's machine at load. The entire experience ships as one
 | | |
 |---|---|
 | **Live** | [melaniesigrid.github.io/mikdash](https://melaniesigrid.github.io/mikdash/) |
-| **Version** | v3.10 — "Every Tree of Food" ([CHANGELOG](CHANGELOG.md)) · backlog in [TODO.md](TODO.md) |
+| **Version** | v3.13 — "The Levites' Steps Can Be Played" ([CHANGELOG](CHANGELOG.md)) · backlog in [TODO.md](TODO.md) |
 | **Runtime dependencies** | 3 — `react`, `react-dom`, `three`. That's the whole list. |
 | **Source** | 3,114 lines in one component, [`src/Mikdash.jsx`](src/Mikdash.jsx) |
 | **Art assets shipped** | **0** — 14 canvas texture generators, 14 derived normal maps, 10 derived roughness maps, 2 GLSL shaders |
-| **Audio files shipped** | **0** — 6 synthesized instruments + a 3-layer ambient bed |
+| **Audio files shipped** | **0** — 6 synthesized instruments, a 3-layer ambient bed, and 4 melodies as note data |
 | **Bundle** | 780 KB raw / **218 KB gzipped**, single chunk, no CSS file |
 | **Findable content** | 36 sourced teachings across 40 cited primary sources |
 | **Planting** | 7 tree species, 108 in the grove + 18 on the river banks, none inside the courts (Devarim 16:21) |
@@ -232,7 +232,7 @@ run; mobile gets dual-thumb controls.
 
 ---
 
-## Current state (v3.10 — "Every Tree of Food")
+## Current state (v3.13 — "The Levites' Steps Can Be Played")
 
 | System | Status | Notes |
 |---|---|---|
@@ -246,6 +246,12 @@ run; mobile gets dual-thumb controls.
 | Seven sourced species | ✅ | Palm, cypress, olive, pomegranate, fig, carob, almond — each cited; palm fronds arch on nested pivots, cypresses built from three leaning tiers |
 | No tree in the azarah | ✅ | `plantable()` enforces Devarim 16:21 / Rambam Hilchot Avodah Zarah 6:9 across all 126 trees |
 | Camels of the nations | ✅ | Yeshayahu 60:6, bearing gold and frankincense, couched below the southern stairs |
+| Wind | ✅ | Vertex-shader sway on the merged grove; weight baked per vertex at merge time as height above each tree's own foot, squared, so canopies don't shear off their trunks. Per-species amplitude |
+| Ground cover | ✅ | 216 bushes biased toward the precinct, a 108-bush fringe spilling over the paving edge to break the join, 108 half-buried stones — all merged and swayed |
+| A paved azarah | ✅ | Its own plane at ~26 amot per tile. It had been the block's top face, carrying the wall's `repeat(1.6, 1)` across 260 amot |
+| Dust in the air | ✅ | 18 drifting depth-tested sprites, peaking when the sun rakes low |
+| Melodies on the steps | ✅ | Four public-domain melodies scheduled on the audio clock; the sounding note lights a key strip and its own tread in the courts. Copyrighted songs are deliberately excluded, and unverified transcriptions say so in the UI |
+| A panel for the peace | ✅ | Yeshayahu 2:4 and 56:7, Micah 4:4, Rambam Hilchot Melachim 12:5, Tehillim 122:6 |
 | Merged static geometry | ✅ | `mergeByMaterial()` bakes world transforms and concatenates by material — the grove drops from ~1300 draw calls to one per material, with no `examples/jsm` import |
 | GLSL sky (day ⇄ night timelapse) | ✅ | Sun/moon arcs, hashed twinkling stars, milky band, dithering |
 | GLSL fire (altar) | ✅ | Four nested cones, embers, blue sparks, smoke, warm + blue point lights |
@@ -338,6 +344,12 @@ disagree, the Yechezkel plan wins, because that is the House this is.
 | Almond — the menorah's cups, Aharon's staff | Shemot 25:33; Bamidbar 17:23 |
 | Fig — each man under his vine and fig tree | Melachim I 5:5; Micah 4:4 |
 | Camels bearing gold and frankincense | Yeshayahu 60:6; Keritot 6a; Vayikra 24:7 |
+| Swords into plowshares, on this mountain | Yeshayahu 2:2–4; Micah 4:3–4 |
+| A house of prayer for all peoples | Yeshayahu 56:7 |
+| No famine, no war, no envy, in that time | Rambam Hilchot Melachim 12:5 |
+| Pray for the peace of Jerusalem | Tehillim 122:6 |
+| Two angels walk a person home on Shabbat eve | Shabbat 119b; Tikkunei Shabbat, Prague 1641 |
+| The Levites played on the fifteen steps | Middot 2:5; Sukkah 51b |
 
 ### House rules
 
