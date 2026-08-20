@@ -140,15 +140,124 @@ const RIMON_POS = [
 ];
 
 // ────────────────────────── procedural textures ──────────────────────────
+// Set from renderer.capabilities once the context exists. Every texture is
+// tuned through here, so nothing can be left on the default anisotropy of 1 —
+// which is what turns a 500-amah plaza into grey mush at a grazing angle.
+let MAX_ANISO = 1;
+
 function makeCanvas(w, h, draw) {
   const c = document.createElement("canvas");
   c.width = w; c.height = h;
   draw(c.getContext("2d"), w, h);
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = MAX_ANISO;
+  // Everything drawn on a 2D canvas comes out in sRGB. Say so, or three feeds
+  // those bytes to the lighting maths as though they were already linear and
+  // every shaded midtone lands too bright — the milky, contrast-free look.
+  // Derived normal/roughness maps are *data*, not colour, and stay linear.
+  t.encoding = THREE.sRGBEncoding;
   return t;
 }
 const rnd = (a, b) => a + Math.random() * (b - a);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Derived PBR maps
+//
+// A colour map on its own gives a wall that is a *photograph* of stone: the
+// drafted margin is painted on, so it stays painted on no matter where the sun
+// is. What makes ashlar read as carved is the margin catching light on one
+// side and holding shadow on the other, and that needs a normal map.
+//
+// Rather than ship one, derive it from the pixels already drawn: read the
+// canvas back, treat luminance as height, and Sobel it into a tangent-space
+// normal. The margins are drawn darker than the boss, so they fall away; the
+// speckle becomes grain. One generator feeds both maps, so a texture and its
+// relief can never drift apart.
+// ─────────────────────────────────────────────────────────────────────────────
+function heightFromCanvas(canvas) {
+  const w = canvas.width, h = canvas.height;
+  const d = canvas.getContext("2d").getImageData(0, 0, w, h).data;
+  const out = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    const o = i * 4;
+    // Weight by alpha: a sprite's transparent surround must not read as a pit.
+    const a = d[o + 3] / 255;
+    out[i] = ((d[o] * 0.299 + d[o + 1] * 0.587 + d[o + 2] * 0.114) / 255) * a + (1 - a) * 0.5;
+  }
+  return { w, h, data: out };
+}
+
+function dataTex(bytes, w, h) {
+  const t = new THREE.DataTexture(bytes, w, h, THREE.RGBAFormat);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.magFilter = THREE.LinearFilter;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.generateMipmaps = true;
+  t.anisotropy = MAX_ANISO;
+  t.needsUpdate = true;
+  return t;
+}
+
+function normalFromCanvas(canvas, strength = 2.4) {
+  const { w, h, data } = heightFromCanvas(canvas);
+  // Wrapped sampling — the map tiles, so its relief has to tile with it or
+  // every repeat boundary shows up as a seam of hard lighting.
+  const at = (x, y) => data[((y % h) + h) % h * w + (((x % w) + w) % w)];
+  const out = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1))
+               - (at(x - 1, y - 1) + 2 * at(x - 1, y) + at(x - 1, y + 1));
+      const dy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1))
+               - (at(x - 1, y - 1) + 2 * at(x, y - 1) + at(x + 1, y - 1));
+      let nx = -dx * strength, ny = -dy * strength;
+      const inv = 1 / Math.sqrt(nx * nx + ny * ny + 1);
+      const o = (y * w + x) * 4;
+      out[o] = (nx * inv * 0.5 + 0.5) * 255;
+      out[o + 1] = (ny * inv * 0.5 + 0.5) * 255;
+      out[o + 2] = (inv * 0.5 + 0.5) * 255;
+      out[o + 3] = 255;
+    }
+  }
+  return dataTex(out, w, h);
+}
+
+// Uniform roughness is what makes CG stone look like painted plastic: the whole
+// wall takes the sun back at exactly the same sharpness. Real ashlar does not —
+// the chiselled margin scatters, the dressed boss is smoother, and weathering
+// is blotchy. Remap luminance into a narrow roughness band and the highlight
+// starts to break up across a surface instead of sliding over it.
+function roughFromCanvas(canvas, lo = 0.42, hi = 0.92) {
+  const { w, h, data } = heightFromCanvas(canvas);
+  const out = new Uint8Array(w * h * 4);
+  for (let i = 0; i < w * h; i++) {
+    const v = (hi - (hi - lo) * data[i]) * 255;
+    const o = i * 4;
+    out[o] = out[o + 1] = out[o + 2] = v;   // three reads roughness from .g
+    out[o + 3] = 255;
+  }
+  return dataTex(out, w, h);
+}
+
+// Build a standard material whose relief is derived from its own colour map,
+// with repeat/offset copied across so the three maps can never slide apart.
+function pbr(map, {
+  bump = 2.4, normalScale = 1, rough = null, roughness = 0.8, ...rest
+} = {}) {
+  const normalMap = normalFromCanvas(map.image, bump);
+  normalMap.repeat.copy(map.repeat);
+  normalMap.offset.copy(map.offset);
+  const opts = { map, normalMap, normalScale: new THREE.Vector2(normalScale, normalScale), roughness, ...rest };
+  if (rough) {
+    const roughnessMap = roughFromCanvas(map.image, rough[0], rough[1]);
+    roughnessMap.repeat.copy(map.repeat);
+    roughnessMap.offset.copy(map.offset);
+    opts.roughnessMap = roughnessMap;
+    opts.roughness = 1;   // scalar multiplies the map — keep the map authoritative
+  }
+  return new THREE.MeshStandardMaterial(opts);
+}
 
 function ashlar({ base = [218, 211, 194], courses = 5, cols = 4, margin = true } = {}) {
   return makeCanvas(512, 512, (ctx, w, h) => {
@@ -259,34 +368,94 @@ function cedarTex() {
   });
 }
 
+// Judean dust. The first version scattered nine thousand hard 1-4px squares
+// and a hundred hard-edged discs, which is fine as *colour* — but once the
+// terrain took a derived normal map, every one of those specks became a pebble
+// and the whole hillside broke out in orange peel. Ground at this scale wants
+// the opposite: large soft tonal drift, a little windblown streaking, and
+// grain fine enough to stay grain.
 function groundTexture() {
   return makeCanvas(512, 512, (ctx, w, h) => {
-    ctx.fillStyle = "#c8b184"; ctx.fillRect(0, 0, w, h);
-    for (let i = 0; i < 9000; i++) {
-      ctx.fillStyle = `rgba(${rnd(130, 212) | 0},${rnd(112, 186) | 0},${rnd(70, 136) | 0},${rnd(0.05, 0.2)})`;
-      const s = rnd(1, 4);
-      ctx.fillRect(rnd(0, w), rnd(0, h), s, s);
+    ctx.fillStyle = "#c6ae80"; ctx.fillRect(0, 0, w, h);
+    // No large-scale features. This map tiles 26 times across the plain, and
+    // anything bigger than a few pixels becomes a stamp the eye can follow —
+    // broad mottling here read as a checkerboard stretching to the horizon.
+    // Large-scale variation is the job of the terrain and the haze; the map's
+    // job is grain. Streaks stay faint and short for the same reason.
+    ctx.lineCap = "round";
+    for (let i = 0; i < 120; i++) {
+      ctx.strokeStyle = `rgba(${rnd(150, 190) | 0},${rnd(132, 172) | 0},${rnd(96, 132) | 0},${rnd(0.02, 0.05)})`;
+      ctx.lineWidth = rnd(2, 6);
+      ctx.beginPath();
+      let x = rnd(0, w), y = rnd(0, h);
+      ctx.moveTo(x, y);
+      for (let k = 0; k < 3; k++) { x += rnd(8, 22); y += rnd(-5, 5); ctx.lineTo(x, y); }
+      ctx.stroke();
     }
-    for (let i = 0; i < 130; i++) {
-      ctx.fillStyle = `rgba(${rnd(88, 118) | 0},${rnd(104, 134) | 0},${rnd(48, 70) | 0},0.5)`;
-      ctx.beginPath(); ctx.arc(rnd(0, w), rnd(0, h), rnd(2, 5), 0, 7); ctx.fill();
+    // Fine grain, low contrast — texture the eye reads as dust, not gravel.
+    for (let i = 0; i < 14000; i++) {
+      ctx.fillStyle = `rgba(${rnd(150, 205) | 0},${rnd(132, 182) | 0},${rnd(94, 140) | 0},${rnd(0.02, 0.07)})`;
+      ctx.fillRect(rnd(0, w), rnd(0, h), 1, 1);
+    }
+    // Sparse stones, soft enough to survive being turned into relief.
+    for (let i = 0; i < 40; i++) {
+      const x = rnd(0, w), y = rnd(0, h), r = rnd(2.5, 6);
+      const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0.5, x, y, r);
+      g.addColorStop(0, "rgba(206,194,166,0.5)");
+      g.addColorStop(1, "rgba(126,112,84,0.28)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
     }
   });
 }
 
+// Court paving. The first version was a perfect 8x8 grid with a hard 2px
+// joint at half opacity, which read as graph paper the moment the camera came
+// down to the plaza — a dead-straight lattice running to the horizon, every
+// cell the same size and nearly the same value.
+//
+// Herodian paving is not a grid. It is courses of differing height, each
+// course broken into slabs of differing width, with the breaks staggered from
+// one course to the next. Joints are thin, warm and soft rather than black,
+// and slabs vary enough in tone to read individually. That is what is drawn
+// here — and the wider tonal spread also gives the derived normal map real
+// slabs to lift instead of a lattice to emboss.
 function pavingTex() {
   return makeCanvas(512, 512, (ctx, w, h) => {
-    const n = 8, s = w / n;
-    for (let r = 0; r < n; r++) for (let c2 = 0; c2 < n; c2++) {
-      const j = rnd(-6, 6);
-      ctx.fillStyle = `rgb(${216 + j | 0},${210 + j | 0},${192 + j | 0})`;
-      ctx.fillRect(c2 * s + 1.5, r * s + 1.5, s - 3, s - 3);
+    ctx.fillStyle = "rgb(196,188,168)"; ctx.fillRect(0, 0, w, h);   // joint bed
+    const rows = [];
+    for (let y = 0; y < h; ) { const ch = rnd(44, 82); rows.push([y, Math.min(ch, h - y)]); y += ch; }
+    for (const [y, ch] of rows) {
+      // Stagger every course so no joint runs more than one course deep.
+      let x = -rnd(0, 70);
+      while (x < w) {
+        const sw = rnd(48, 118);
+        const j = rnd(-13, 13);
+        const g = ctx.createLinearGradient(x, y, x + sw, y + ch);
+        // Each slab is dressed slightly differently, and worn brighter in the
+        // middle where feet have polished it.
+        g.addColorStop(0, `rgb(${208 + j | 0},${201 + j | 0},${182 + j | 0})`);
+        g.addColorStop(0.55, `rgb(${220 + j | 0},${214 + j | 0},${196 + j | 0})`);
+        g.addColorStop(1, `rgb(${203 + j | 0},${196 + j | 0},${176 + j | 0})`);
+        ctx.fillStyle = g;
+        ctx.fillRect(x + 1.2, y + 1.2, sw - 2.4, ch - 2.4);
+        // A soft inner shadow on two sides seats the slab into its bed.
+        ctx.strokeStyle = "rgba(150,140,116,0.30)";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(x + 1.6, y + ch - 2); ctx.lineTo(x + 1.6, y + 1.6); ctx.lineTo(x + sw - 2, y + 1.6);
+        ctx.stroke();
+        x += sw;
+      }
     }
-    ctx.fillStyle = "rgba(140,128,100,0.5)";
-    for (let i = 0; i <= n; i++) { ctx.fillRect(0, i * s - 1, w, 2); ctx.fillRect(i * s - 1, 0, 2, h); }
-    for (let i = 0; i < 1600; i++) {
-      ctx.fillStyle = `rgba(170,158,120,${rnd(0.04, 0.09)})`;
-      ctx.fillRect(rnd(0, w), rnd(0, h), 2, 2);
+    // Wear, grit and the odd chip.
+    for (let i = 0; i < 2600; i++) {
+      ctx.fillStyle = `rgba(${rnd(168, 206) | 0},${rnd(158, 198) | 0},${rnd(126, 168) | 0},${rnd(0.03, 0.08)})`;
+      ctx.fillRect(rnd(0, w), rnd(0, h), rnd(1, 2.5), rnd(1, 2.5));
+    }
+    for (let i = 0; i < 26; i++) {
+      ctx.fillStyle = `rgba(146,136,110,${rnd(0.10, 0.2)})`;
+      ctx.beginPath(); ctx.arc(rnd(0, w), rnd(0, h), rnd(1.5, 4), 0, 7); ctx.fill();
     }
   });
 }
@@ -493,7 +662,13 @@ export default function Mikdash() {
       // highlights off instead, so the stone keeps its courses and the fire
       // keeps its hue over them.
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.98;
+      // Lighting has to happen in linear space and be converted to sRGB on the
+      // way out. Without this the whole pipeline shades on sRGB numbers, which
+      // is why the courts read milky: shadows lift, midtones flatten, and no
+      // amount of light tuning recovers the contrast.
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      // Correct encoding brightens everything, so the exposure comes back down.
+      renderer.toneMappingExposure = 0.78;
     } catch (err) {
       // No WebGL: an old device, a disabled setting, a headless browser. The
       // House cannot be drawn — say so rather than leaving a white page.
@@ -501,6 +676,11 @@ export default function Mikdash() {
       return;
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Grazing angles are most of this scene — a 500-amah plaza, colonnade
+    // roofs running away from the camera, stairs seen edge-on. At the default
+    // anisotropy of 1 all of it blurs to grey a third of the way to the
+    // horizon. Read the real cap rather than assuming 16.
+    MAX_ANISO = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -508,7 +688,10 @@ export default function Mikdash() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, mount.clientWidth / mount.clientHeight, 0.5, 5000);
-    scene.fog = new THREE.Fog(0xbfd2e2, 980, 2400);
+    // Fog colour is consumed linearly, so the old pale blue encoded out almost
+    // white and flattened the horizon into the sky. Linearised, and warmed a
+    // little towards the dust it is supposed to be hanging in.
+    scene.fog = new THREE.Fog(0x86a0b4, 900, 2500);
 
     // ═══════════ SKY (GLSL) ═══════════
     const skyUniforms = {
@@ -533,9 +716,14 @@ export default function Mikdash() {
           void main(){
             vec3 d = normalize(vDir);
             float h = clamp(d.y, -0.06, 1.0);
-            vec3 dayZen = vec3(0.30,0.55,0.83), dayMid = vec3(0.60,0.76,0.90), dayHor = vec3(0.94,0.88,0.76);
+            // These were picked by eye when the renderer wrote whatever it was
+            // handed. Now the output is encoded to sRGB, so the same numbers
+            // come out roughly a stop and a half brighter — the horizon went to
+            // a white wash. Linearised (≈ x^2.2) they land where they were
+            // originally judged to look right.
+            vec3 dayZen = vec3(0.070,0.268,0.666), dayMid = vec3(0.325,0.552,0.792), dayHor = vec3(0.873,0.757,0.552);
             vec3 day = mix(dayHor, mix(dayMid, dayZen, smoothstep(0.18,0.75,h)), smoothstep(0.0,0.22,h));
-            vec3 nZen = vec3(0.012,0.02,0.075), nMid = vec3(0.04,0.06,0.15), nHor = vec3(0.13,0.14,0.22);
+            vec3 nZen = vec3(0.0008,0.0022,0.0035), nMid = vec3(0.0035,0.006,0.016), nHor = vec3(0.012,0.014,0.035);
             vec3 nightC = mix(nHor, mix(nMid, nZen, smoothstep(0.15,0.7,h)), smoothstep(0.0,0.2,h));
             vec3 col = mix(day, nightC, uNight);
             float sdot = max(dot(d, uSunDir), 0.0);
@@ -552,6 +740,11 @@ export default function Mikdash() {
             col += band * 0.045 * vec3(0.7,0.75,0.95) * uNight;
             col += (hash(d*1234.5)-0.5)*0.012;
             gl_FragColor = vec4(col, 1.0);
+            // A ShaderMaterial writes gl_FragColor raw — three only appends the
+            // output conversion to its own materials. Without this include the
+            // sky alone would stay in the old space and sit visibly darker than
+            // the House standing against it.
+            #include <encodings_fragment>
           }`,
       })
     );
@@ -577,24 +770,48 @@ export default function Mikdash() {
     scene.add(hemi);
     const sun = new THREE.DirectionalLight(0xfff0d2, 1.55);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    Object.assign(sun.shadow.camera, { left: -560, right: 560, top: 560, bottom: -560, near: 60, far: 2200 });
+    // Shadow texel budget. The old 2048 map spread over a 1120-amah frustum
+    // put one texel every half-amah, which is coarser than the stones it was
+    // meant to shadow. Desktop-class GPUs get 4096; anything with a small
+    // texture cap (mobile) stays at 2048 rather than failing to allocate.
+    const shadowRes = renderer.capabilities.maxTextureSize >= 8192 ? 4096 : 2048;
+    sun.shadow.mapSize.set(shadowRes, shadowRes);
+    // Tightened to the built precinct plus its stairs. Every amah of frustum
+    // spent on empty hillside is a texel not spent on the House.
+    Object.assign(sun.shadow.camera, { left: -430, right: 430, top: 430, bottom: -430, near: 60, far: 2200 });
+    // Now that the stone carries a normal map, shadow acne shows up as a moiré
+    // crawling over every wall. normalBias offsets the lookup along the surface
+    // normal, which fixes acne on curved and angled faces without the
+    // peter-panning that a large depth bias alone would cause.
+    sun.shadow.bias = -0.0006;
+    sun.shadow.normalBias = 0.9;
     scene.add(sun);
 
     // ═══════════ Materials ═══════════
     const whiteMap = ashlar(); whiteMap.repeat.set(3, 1.4);
-    const white = new THREE.MeshStandardMaterial({ map: whiteMap, roughness: 0.8 });
+    // Hero surface: every outer wall and most of the precinct. Deep bump so
+    // the drafted margins hold a shadow line, and a roughness map so the sun
+    // does not slide across a whole wall at one sharpness.
+    const white = pbr(whiteMap, { bump: 3.2, normalScale: 1.15, rough: [0.55, 0.95] });
     const megaMap2 = ashlar({ base: [211, 205, 189], cols: 3, courses: 3 });
     megaMap2.repeat.set(4, 2);
-    const mega = new THREE.MeshStandardMaterial({ map: megaMap2, roughness: 0.85 });
+    // Megalithic courses: fewer, larger stones, so the relief reads from
+    // further out and can afford to be stronger still.
+    const mega = pbr(megaMap2, { bump: 3.8, normalScale: 1.3, rough: [0.6, 0.98] });
     const waveMap = seaWaveMarble(); waveMap.repeat.set(1.6, 1);
-    const wave = new THREE.MeshStandardMaterial({ map: waveMap, roughness: 0.55 });
+    // Polished marble: the wave banding is a colour change, not a carving, so
+    // the relief stays shallow. The roughness map is what sells it — the
+    // blue-green bands take the sun back sharper than the white.
+    const wave = pbr(waveMap, { bump: 1.1, normalScale: 0.55, rough: [0.18, 0.5] });
     const marbleMap = marbleTex();
-    const marble = new THREE.MeshStandardMaterial({ map: marbleMap, roughness: 0.45 });
+    const marble = pbr(marbleMap, { bump: 1.0, normalScale: 0.5, rough: [0.22, 0.55] });
     const goldMap = goldTex();
-    const gold = new THREE.MeshStandardMaterial({ map: goldMap, metalness: 0.88, roughness: 0.26 });
+    // Beaten plate, not machined sheet: the hammer marks are what make gold
+    // read as gold. Without relief a metal surface is a perfect mirror of the
+    // environment map and reads as flat yellow paint.
+    const gold = pbr(goldMap, { bump: 1.9, normalScale: 0.8, metalness: 0.88, rough: [0.16, 0.42] });
     // gold plate: metallic but NOT self-emissive by day — no more "sun inside the House"
-    const goldPlate = new THREE.MeshStandardMaterial({ map: goldMap, metalness: 0.95, roughness: 0.22, emissive: 0x1c1200, emissiveIntensity: 0 });
+    const goldPlate = pbr(goldMap, { bump: 1.9, normalScale: 0.7, metalness: 0.95, rough: [0.12, 0.36], emissive: 0x1c1200, emissiveIntensity: 0 });
     const bronze = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, metalness: 0.75, roughness: 0.35 });
     const pmrem = new THREE.PMREMGenerator(renderer);
     pmrem.compileEquirectangularShader();
@@ -602,28 +819,86 @@ export default function Mikdash() {
     const envMap = pmrem.fromEquirectangular(eqTex).texture;
     eqTex.dispose(); pmrem.dispose();
     const cedarMap = cedarTex(); cedarMap.repeat.set(2, 1);
-    const cedar = new THREE.MeshStandardMaterial({ map: cedarMap, roughness: 0.7 });
+    // Grain you can rake light across.
+    const cedar = pbr(cedarMap, { bump: 2.6, normalScale: 0.9, rough: [0.5, 0.85] });
     const silver = new THREE.MeshStandardMaterial({ color: 0xdde2e9, metalness: 0.96, roughness: 0.12 });
     const foundGold = new THREE.MeshStandardMaterial({ color: 0xffd24a, metalness: 0.9, roughness: 0.2, emissive: 0x8a6a00, emissiveIntensity: 0.55 });
     const windowMat = new THREE.MeshStandardMaterial({ color: 0x201509, emissive: 0xffb347, emissiveIntensity: 0 });
-    const stoneDarkM = new THREE.MeshStandardMaterial({ map: ashlar({ base: [206, 196, 172] }), roughness: 0.9 });
-    const fluted = new THREE.MeshStandardMaterial({ map: flutedTex(), roughness: 0.52 });
+    const stoneDarkM = pbr(ashlar({ base: [206, 196, 172] }), { bump: 3.0, normalScale: 1.05, rough: [0.6, 0.96] });
+    // The flutes are drawn as gradient bands, so their derived normal curves a
+    // flat cylinder into twenty-two real grooves — the one place where the
+    // derived map is doing the whole job of geometry.
+    const fluted = pbr(flutedTex(), { bump: 2.2, normalScale: 1.4, rough: [0.35, 0.68] });
     // only the metals take the environment — the stone is lit and tuned already
     const metals = [gold, goldPlate, bronze, silver, foundGold];
     metals.forEach((m) => { m.envMap = envMap; m.envMapIntensity = 1; });
+
+    // ═══════════ Grounding (vertex-baked ambient occlusion) ═══════════
+    //
+    // The last thing that made the courts read as computer graphics was that
+    // nothing was *sitting* anywhere. A wall met the pavement at a clean bright
+    // seam, because a directional light plus a hemisphere fill has no way to
+    // know that the foot of a wall sees less sky than its top.
+    //
+    // The honest fix is a screen-space AO pass, but that means an
+    // EffectComposer and importing from `three/examples/jsm`, and this
+    // component is deliberately `react` + `three` and nothing else so it can be
+    // pasted into an artifact. So bake it instead: darken vertices toward the
+    // foot of every wall and column. One attribute, no passes, no per-frame
+    // cost — and because the gradient is in world units, a 60-amah retaining
+    // wall and a 20-amah gate pier get the same depth of shadow at the ground
+    // rather than a shadow proportional to how tall they happen to be.
+    const AO_REACH = 11;      // amot the darkening climbs from the foot
+    const AO_FLOOR = 0.55;    // brightness at the very bottom
+    const AO_MIN_H = 16;      // below this a box is a slab or a stair tread —
+                              // it would be uniformly dimmed, not grounded
+
+    // Cloning is per-material and cached, but two materials are mutated every
+    // frame by the day/night easing (goldPlate and windowMat take an emissive
+    // ramp). A clone would silently stop receiving those updates, so dynamic
+    // and metal materials opt out and simply go un-occluded.
+    const aoCache = new WeakMap();
+    const aoExempt = new Set([gold, goldPlate, bronze, silver, foundGold, windowMat]);
+    const aoMat = (m) => {
+      if (aoExempt.has(m)) return m;
+      let v = aoCache.get(m);
+      if (!v) { v = m.clone(); v.vertexColors = true; aoCache.set(m, v); }
+      return v;
+    };
+    // Writing the attribute is always safe: a material without vertexColors
+    // ignores it, so an exempt material costs nothing but the buffer.
+    const bakeAO = (geo, h) => {
+      const pos = geo.attributes.position;
+      const col = new Float32Array(pos.count * 3);
+      for (let i = 0; i < pos.count; i++) {
+        const foot = pos.getY(i) + h / 2;                       // 0 at the base
+        const t = Math.min(1, Math.max(0, foot / AO_REACH));
+        // Squared falloff: tight and dark in the crease, gone by knee height,
+        // which is how contact shadow actually behaves.
+        const shade = AO_FLOOR + (1 - AO_FLOOR) * (t * t);
+        col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = shade;
+      }
+      geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    };
 
     const colliders = [];
     const addCollider = (minX, maxX, minZ, maxZ) => colliders.push({ minX, maxX, minZ, maxZ });
 
     const box = (w, h, d, mat, x, y, z, parent = scene) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const grounded = h >= AO_MIN_H;
+      if (grounded) bakeAO(geo, h);
+      const m = new THREE.Mesh(geo, grounded ? aoMat(mat) : mat);
       m.position.set(x, y, z);
       m.castShadow = m.receiveShadow = true;
       parent.add(m);
       return m;
     };
     const cyl = (rt, rb, h, seg, mat, x, y, z, parent = scene) => {
-      const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+      const geo = new THREE.CylinderGeometry(rt, rb, h, seg);
+      const grounded = h >= AO_MIN_H;
+      if (grounded) bakeAO(geo, h);
+      const m = new THREE.Mesh(geo, grounded ? aoMat(mat) : mat);
       m.position.set(x, y, z);
       m.castShadow = m.receiveShadow = true;
       parent.add(m);
@@ -631,31 +906,89 @@ export default function Mikdash() {
     };
 
     // ═══════════ Land + platform ═══════════
-    const gTex = groundTexture(); gTex.repeat.set(10, 10);
-    const land = new THREE.Mesh(new THREE.CylinderGeometry(1600, 1680, 40, 56), new THREE.MeshStandardMaterial({ map: gTex, roughness: 1 }));
+    // 26 repeats over a 3200-amah disc puts one tile every ~123 amot. At the
+    // old 10 the drawn grain was being magnified twelve-fold, so dust read as
+    // boulders. Relief stays very low: ground seen from above is lit almost
+    // flat, and any real bump here just reads as noise.
+    const gTex = groundTexture(); gTex.repeat.set(26, 26);
+    const land = new THREE.Mesh(new THREE.CylinderGeometry(1600, 1680, 40, 56), pbr(gTex, { bump: 1.1, normalScale: 0.22, roughness: 1 }));
     land.position.y = -34;
     land.receiveShadow = true;
     scene.add(land);
     const LAND_Y = -14;
 
+    // The hills used to be smooth spheres in flat paint, which from the plaza
+    // read as marshmallows parked on the horizon: a perfect silhouette is the
+    // one thing no landform has. Displace each vertex along its own radius by
+    // a sum of sinusoids in spherical coordinates — cheap, coherent, and it
+    // wraps, so no seam — then recompute normals so the ridges catch the sun.
+    const hillMat = (tint) => {
+      const t = groundTexture(); t.repeat.set(4, 3);
+      return pbr(t, { bump: 1.1, normalScale: 0.3, roughness: 1, color: tint });
+    };
+    // Three shared materials: enough variety to break the ring, few enough to
+    // stay cheap. Cooler and darker than the near ground so the fog can lift
+    // them off it — aerial perspective is most of what makes distance read.
+    const hillMats = [hillMat(0xe4d3ad), hillMat(0xd6c6a2), hillMat(0xefdfba)];
     for (let i = 0; i < 15; i++) {
-      const a = (i / 15) * Math.PI * 2 + rnd(-0.1, 0.1);
-      const hill = new THREE.Mesh(new THREE.SphereGeometry(rnd(150, 300), 12, 8), new THREE.MeshStandardMaterial({ color: 0xb7a071, roughness: 1 }));
-      hill.scale.y = rnd(0.22, 0.4);
-      hill.position.set(Math.cos(a) * rnd(1200, 1450), LAND_Y - 8, Math.sin(a) * rnd(1200, 1450));
+      const a = (i / 15) * Math.PI * 2 + rnd(-0.14, 0.14);
+      const r = rnd(150, 300);
+      const geo = new THREE.SphereGeometry(r, 32, 18);
+      const pos = geo.attributes.position;
+      // One random phase set per hill, so no two share a ridge line.
+      const p1 = rnd(0, 6.28), p2 = rnd(0, 6.28), p3 = rnd(0, 6.28);
+      const v = new THREE.Vector3();
+      for (let k = 0; k < pos.count; k++) {
+        v.fromBufferAttribute(pos, k);
+        const th = Math.atan2(v.z, v.x), ph = Math.acos(Math.max(-1, Math.min(1, v.y / r)));
+        const d =
+          Math.sin(th * 3 + p1) * Math.sin(ph * 2 + p1) * 0.13 +
+          Math.sin(th * 5 - p2) * Math.sin(ph * 3 + p2) * 0.07 +
+          Math.sin(th * 9 + p3) * Math.sin(ph * 5 - p3) * 0.035;
+        v.multiplyScalar(1 + d);
+        pos.setXYZ(k, v.x, v.y, v.z);
+      }
+      geo.computeVertexNormals();
+      const hill = new THREE.Mesh(geo, hillMats[i % hillMats.length]);
+      hill.scale.y = rnd(0.2, 0.38);
+      hill.position.set(Math.cos(a) * rnd(1180, 1460), LAND_Y - 10, Math.sin(a) * rnd(1180, 1460));
       hill.receiveShadow = true;
       scene.add(hill);
     }
-    const oliveLeaf = new THREE.MeshStandardMaterial({ color: 0x6d7d4f, roughness: 0.95 });
+    // One sphere on a stick is the oldest tell in real-time graphics: the
+    // silhouette is a circle, and nothing in a landscape has a circular
+    // outline. Three overlapping lobes at different sizes, offsets and
+    // squashes cost two extra draws and break that outline completely — and
+    // because each lobe is placed with the same rnd() the rest of the House
+    // uses, no two trees in the grove are the same tree.
+    const makeCanopy = (radius, mat, lobes = 3) => {
+      const g = new THREE.Group();
+      for (let l = 0; l < lobes; l++) {
+        const rr = radius * (l === 0 ? 1 : rnd(0.52, 0.82));
+        const lobe = new THREE.Mesh(new THREE.SphereGeometry(rr, 9, 7), mat);
+        if (l > 0) {
+          const a = rnd(0, Math.PI * 2), d = radius * rnd(0.42, 0.78);
+          lobe.position.set(Math.cos(a) * d, rnd(-0.25, 0.5) * radius, Math.sin(a) * d);
+        }
+        lobe.scale.set(rnd(0.9, 1.15), rnd(0.62, 0.85), rnd(0.9, 1.15));
+        lobe.rotation.set(rnd(0, 0.5), rnd(0, 6.28), rnd(0, 0.5));
+        lobe.castShadow = true;
+        g.add(lobe);
+      }
+      return g;
+    };
+    // Olive: grey-green, and dark. Authored by eye before the renderer encoded
+    // its output, so linearised here along with every other hand-picked colour
+    // that was reading a stop and a half too pale.
+    const oliveLeaf = new THREE.MeshStandardMaterial({ color: 0x283514, roughness: 0.95 });
     for (let i = 0; i < 70; i++) {
       const a = rnd(0, Math.PI * 2), r = rnd(460, 980);
       const x = Math.cos(a) * r, z = Math.sin(a) * r;
       if (Math.abs(x) < HALF + 90 && Math.abs(z) < HALF + 110) continue;
-      cyl(0.8, 1.2, rnd(5, 8), 6, cedar, x, LAND_Y + 3, z);
-      const cr = new THREE.Mesh(new THREE.SphereGeometry(rnd(3.4, 6), 8, 6), oliveLeaf);
-      cr.scale.y = 0.75;
+      const trunk = cyl(0.8, 1.2, rnd(5, 8), 6, cedar, x, LAND_Y + 3, z);
+      trunk.rotation.z = rnd(-0.13, 0.13);   // nothing in a grove stands plumb
+      const cr = makeCanopy(rnd(3.4, 6), oliveLeaf);
       cr.position.set(x, LAND_Y + rnd(8, 11), z);
-      cr.castShadow = true;
       scene.add(cr);
     }
 
@@ -674,7 +1007,10 @@ export default function Mikdash() {
     }
 
     const pMap = pavingTex(); pMap.repeat.set(14, 14);
-    const plaza = box(C + 78, 4, C + 78, new THREE.MeshStandardMaterial({ map: pMap, roughness: 0.88 }), 0, -2, 0);
+    // The plaza is the largest single surface a visitor ever stands on, and
+    // the one most often seen at a grazing angle. Its joints need to survive
+    // both.
+    const plaza = box(C + 78, 4, C + 78, pbr(pMap, { bump: 3.4, normalScale: 1.1, rough: [0.55, 0.95] }), 0, -2, 0);
     plaza.receiveShadow = true;
 
     // Monumental stairs (south + east)
@@ -811,6 +1147,7 @@ export default function Mikdash() {
                  gl_FragColor = vec4(col * mix(1.0, 0.9, uDay),
                    clamp(a * uIntensity, 0.0, 1.0) * mix(${heartOnly ? "0.74" : "0.34"}, 1.0, uDay) * ${alphaScale.toFixed(2)});`
               : `gl_FragColor = vec4(col * mix(1.15, 0.5, uDay), clamp(a * mix(1.0, 0.38, uDay), 0.0, 1.0));`}
+            #include <encodings_fragment>
           }`,
       });
       const mesh = new THREE.Mesh(new THREE.ConeGeometry(radius, height, segments, 12, true), mat);
@@ -1272,16 +1609,15 @@ export default function Mikdash() {
     sparkGeo.setAttribute("position", new THREE.BufferAttribute(sparkArr, 3));
     const sparks = new THREE.Points(sparkGeo, new THREE.PointsMaterial({ color: 0xdff4ff, size: 1.7, transparent: true, opacity: 0.8 }));
     scene.add(sparks);
-    const leafMat = new THREE.MeshStandardMaterial({ color: 0x4a7d3a, roughness: 0.9 });
-    const fruitMat = new THREE.MeshStandardMaterial({ color: 0xd6552e, roughness: 0.6 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x1b3312, roughness: 0.9 });
+    const fruitMat = new THREE.MeshStandardMaterial({ color: 0xae1706, roughness: 0.6 });
     for (let t = 0; t < 11; t++) {
       const tx = 190 + t * 52 + (t % 2) * 16;
       const ty = tx > HALF + 39 ? LAND_Y : 0;
       for (const s of [-1, 1]) {
         cyl(1, 1.5, 9, 7, cedar, tx, ty + 4.5, 30 + s * (13 + (t % 3) * 4));
-        const crown = new THREE.Mesh(new THREE.SphereGeometry(5 + (t % 3), 9, 7), leafMat);
+        const crown = makeCanopy(5 + (t % 3), leafMat);
         crown.position.set(tx, ty + 12, 30 + s * (13 + (t % 3) * 4));
-        crown.castShadow = true;
         scene.add(crown);
         for (let f = 0; f < 4; f++) {
           const fr = new THREE.Mesh(new THREE.SphereGeometry(0.55, 5, 4), fruitMat);
@@ -1424,16 +1760,81 @@ export default function Mikdash() {
     scene.add(fox);
     clickables.push(fox);
 
+    // ═══════════ כִּנּוֹר — the harp of the Levites ═══════════
+    //
+    // Arachin 13b: the kinnor of the Mikdash was strung with seven; the kinnor
+    // of the days of Mashiach with eight; and of the World to Come, with ten.
+    // So this one carries seven — and gains its eighth, the octave above the
+    // lowest string, at the moment somebody finds it.
+    //
+    // Every member is placed off two lines: the soundboard the strings are
+    // pinned into, and the harmonic curve they hang from. Nothing is positioned
+    // by eye, which is the difference between strings that meet wood at both
+    // ends and strings that float in the middle of a frame.
     const harp = new THREE.Group();
-    const frame = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.5, 10, 24, Math.PI * 1.25), gold);
-    frame.rotation.z = -0.4; frame.position.y = 4.6; frame.castShadow = true; harp.add(frame);
-    box(1, 8, 1, gold, -3.2, 3.8, 0, harp);
-    const stringMat = new THREE.MeshBasicMaterial({ color: 0xfff6d8 });
-    for (let st = 0; st < 8; st++) {
-      const sm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 5.6 - st * 0.35, 4), stringMat);
-      sm.position.set(-2.4 + st * 0.8, 4.8, 0);
-      harp.add(sm);
+    const SB0 = new THREE.Vector2(-2.7, 1.2), SB1 = new THREE.Vector2(3.1, 5.2);  // soundboard: bass foot → treble shoulder
+    const NK0 = new THREE.Vector2(-3.1, 9.6), NK1 = new THREE.Vector2(3.2, 6.4);  // harmonic curve, over the same span
+    const boardAt = (u) => new THREE.Vector2(SB0.x + (SB1.x - SB0.x) * u, SB0.y + (SB1.y - SB0.y) * u);
+    const neckAt = (u) => new THREE.Vector2(
+      NK0.x + (NK1.x - NK0.x) * u,
+      NK0.y + (NK1.y - NK0.y) * u + Math.sin(u * Math.PI) * 1.35   // it arches; a harmonic curve is not a chord
+    );
+    // one tapered member of the frame, laid between two points of it
+    const limb = (a, b, rt, rb, seg, mat, z = 0) => {
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const m = cyl(rt, rb, Math.hypot(dx, dy), seg, mat, (a.x + b.x) / 2, (a.y + b.y) / 2, z, harp);
+      m.rotation.z = Math.atan2(dy, dx) - Math.PI / 2;             // a cylinder points +Y; aim it down the member
+      return m;
+    };
+    const bDir = SB1.clone().sub(SB0).normalize();
+    const bN = new THREE.Vector2(-bDir.y, bDir.x);                 // the soundboard's normal, pointing at the neck
+    // the soundbox: an octagonal cedar body slung under the board, fattest at the bass
+    limb(SB0.clone().addScaledVector(bN, -1.35).addScaledVector(bDir, -0.55),
+         SB1.clone().addScaledVector(bN, -0.75).addScaledVector(bDir, 0.4), 0.82, 1.7, 8, cedar);
+    limb(SB0, SB1, 0.14, 0.19, 6, gold);                           // the rib the strings are pinned along
+    cyl(1.05, 1.3, 0.5, 8, gold, -1.95, 0.2, 0, harp);             // and the foot it stands on
+    // the rose cut into the belly, where a soundbox is opened so it can sing
+    const rc = boardAt(0.36).addScaledVector(bN, -0.85);
+    const rose = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.1, 6, 14), gold);
+    rose.position.set(rc.x, rc.y, 1.0); harp.add(rose);
+    // the forepillar, carrying the whole pull of the strings down to the foot
+    limb(new THREE.Vector2(-3.5, 0.3), NK0, 0.42, 0.62, 8, gold);
+    // the neck, walked along the curve in twelve tapering courses
+    for (let i = 0; i < 12; i++) {
+      const u0 = i / 12, u1 = (i + 1) / 12;
+      limb(neckAt(u0), neckAt(u1), 0.5 - u1 * 0.22, 0.5 - u0 * 0.22, 8, gold);
     }
+    // a pomegranate finial over the pillar, like everything else golden here
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8), gold);
+    finial.position.set(NK0.x, NK0.y + 0.55, 0); harp.add(finial);
+    for (let c = 0; c < 4; c++) {
+      const a = c * Math.PI / 2;
+      const crown = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.48, 5), gold);
+      crown.position.set(NK0.x + Math.cos(a) * 0.25, NK0.y + 1.16, Math.sin(a) * 0.25);
+      crown.rotation.z = -Math.cos(a) * 0.42; crown.rotation.x = Math.sin(a) * 0.42;
+      harp.add(crown);
+    }
+    // Freygish on D — the same mode the fifteen steps are tuned to, so the harp
+    // and the ascent answer each other. The eighth string is the octave.
+    const HARP_TUNING = [146.83, 155.56, 185.0, 196.0, 220.0, 233.08, 261.63, 293.66];
+    const stringMat = new THREE.MeshStandardMaterial({ color: 0xfff1c4, metalness: 0.85, roughness: 0.22 });
+    stringMat.envMap = envMap; metals.push(stringMat);
+    const harpStrings = [];
+    for (let st = 0; st < 8; st++) {
+      const u = 0.085 + st * 0.125;
+      const top = neckAt(u), bot = boardAt(u);
+      const sm = limb(top, bot, 0.055, 0.055, 6, stringMat);
+      sm.castShadow = false;
+      const peg = cyl(0.1, 0.1, 1.5, 6, bronze, top.x, top.y, 0, harp);
+      peg.rotation.x = Math.PI / 2;
+      sm.userData = { amp: 0, ph: st * 1.7, peg };
+      harpStrings.push(sm);
+      if (st === 7) { sm.visible = false; peg.visible = false; }   // the eighth is still waiting
+    }
+    const revealEighth = () => {
+      harpStrings[7].visible = true;
+      harpStrings[7].userData.peg.visible = true;
+    };
     harp.position.set(IC_E + 14, IC_H * 0.45, -44);
     harp.rotation.y = 0.8;
     harp.scale.set(1.25, 1.25, 1.25);
@@ -1859,24 +2260,101 @@ export default function Mikdash() {
       osc.connect(filt); osc2.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
       osc.start(t0); osc2.start(t0); osc.stop(t0 + 2.2); osc2.stop(t0 + 2.2);
     };
-    const playHarp = () => {
+    // ── The kinnor: a plucked string, not an oscillator ──
+    //
+    // Karplus-Strong. Fill a ring one wavelength long with noise, then read it
+    // round and round, averaging each sample with the one behind it as it goes.
+    // The high partials die first and the fundamental last, which is what a
+    // stretched string actually does — and it falls out of four lines of
+    // arithmetic instead of a stack of oscillators.
+    //
+    // It is rendered into a buffer in JS rather than built from a DelayNode,
+    // because a WebAudio delay cannot hold a loop shorter than one render
+    // quantum: every string above ~344 Hz would have come out flat. Costs a
+    // few hundred microseconds per pitch and is cached, so the eight strings
+    // of the frame are computed once and then plucked for free.
+    const ksCache = new Map();
+    const ksString = (ctx, freq) => {
+      const key = freq.toFixed(2);
+      const hit = ksCache.get(key);
+      if (hit) return hit;
+      const sr = ctx.sampleRate;
+      const n = Math.max(2, Math.round(sr / freq));
+      // low strings ring on; the treble is gone in a second and a half
+      const secs = Math.max(1.5, Math.min(3.6, 3.6 * Math.pow(180 / freq, 0.55)));
+      const len = Math.floor(sr * secs);
+      const buf = ctx.createBuffer(1, len, sr);
+      const out = buf.getChannelData(0);
+      const ring = new Float32Array(n);
+      for (let i = 0; i < n; i++) ring[i] = Math.random() * 2 - 1;
+      // a string is plucked over a finger's width, not at a point: smoothing the
+      // excitation once is the difference between an attack and a click
+      for (let i = 0; i < n; i++) ring[i] = (ring[i] + ring[(i + 1) % n]) * 0.5;
+      const rho = Math.pow(0.02, 1 / (freq * secs));   // loss per trip round the ring
+      const blend = 0.72;                              // gut would be lower; this is a strung metal harp
+      let p = 0, prev = 0;
+      for (let i = 0; i < len; i++) {
+        const v = ring[p];
+        out[i] = v;
+        ring[p] = rho * (blend * v + (1 - blend) * prev);
+        prev = v;
+        if (++p === n) p = 0;
+      }
+      // ends: 1 ms on, 60 ms off, so neither the pluck nor the buffer clicks
+      const fi = Math.floor(sr * 0.001), fo = Math.floor(sr * 0.06);
+      for (let i = 0; i < fi; i++) out[i] *= i / fi;
+      for (let i = 0; i < fo; i++) out[len - 1 - i] *= i / fo;
+      ksCache.set(key, buf);
+      return buf;
+    };
+    // The soundbox the strings are sitting on: a broad resonance where the cedar
+    // body would sing, and a roll-off above it, so the notes sound like they are
+    // coming out of something and not out of nothing.
+    let harpChain = null;
+    const harpBus = (ctx) => {
+      if (harpChain) return harpChain;
+      const body = ctx.createBiquadFilter();
+      body.type = "peaking"; body.frequency.value = 250; body.Q.value = 0.85; body.gain.value = 5;
+      const air = ctx.createBiquadFilter();
+      air.type = "highshelf"; air.frequency.value = 5000; air.gain.value = -7;
+      const out = ctx.createGain(); out.gain.value = amb.on ? 1 : 0;
+      body.connect(air); air.connect(out); out.connect(ctx.destination);
+      harpChain = { in: body, out };
+      return harpChain;
+    };
+    // The phrase: a roll up the frame fast enough that every string is still
+    // sounding under the next, then a fall back over a bass that has not
+    // stopped, closing on the open fifth. [string, seconds, force]
+    const HARP_PHRASE = [
+      [0, 0.00, 0.55], [1, 0.10, 0.60], [2, 0.19, 0.67], [3, 0.28, 0.74],
+      [4, 0.37, 0.82], [6, 0.46, 0.90], [7, 0.55, 1.00],
+      [4, 0.94, 0.70], [2, 1.18, 0.60], [0, 1.44, 0.85], [4, 1.48, 0.44],
+    ];
+    const playHarp = (level = 1) => {
       if (!amb.on) return;
       const ctx = ensureAudio();
-      const notes = [293.66, 311.13, 369.99, 392.0, 440.0, 587.33, 440.0, 369.99, 293.66];
-      notes.forEach((f, i) => {
-        const t0 = ctx.currentTime + i * 0.24;
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = "triangle"; o.frequency.value = f;
-        g.gain.setValueAtTime(0.0001, t0);
-        g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.015);
-        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.4);
-        o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 1.5);
-        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
-        o2.type = "sine"; o2.frequency.value = f * 2;
-        g2.gain.setValueAtTime(0.0001, t0);
-        g2.gain.exponentialRampToValueAtTime(0.07, t0 + 0.015);
-        g2.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.1);
-        o2.connect(g2); g2.connect(ctx.destination); o2.start(t0); o2.stop(t0 + 1.2);
+      const bus = harpBus(ctx);
+      const t0 = ctx.currentTime + 0.02;
+      const eighth = harpStrings[7].visible;
+      // Below full force this is the wind on the frame, not a hand on it: the
+      // roll alone, no melody after it.
+      const phrase = level < 0.9 ? HARP_PHRASE.slice(0, 7) : HARP_PHRASE;
+      phrase.forEach(([si, dt, vel]) => {
+        const idx = si === 7 && !eighth ? 6 : si;    // seven strings until the eighth is found
+        const src = ctx.createBufferSource();
+        src.buffer = ksString(ctx, HARP_TUNING[idx]);
+        const g = ctx.createGain();
+        g.gain.value = 0.3 * vel * level;
+        src.connect(g);
+        // strung across the frame: the long strings to the left of the player
+        if (ctx.createStereoPanner) {
+          const pan = ctx.createStereoPanner();
+          pan.pan.value = -0.42 + idx * 0.12;
+          g.connect(pan); pan.connect(bus.in);
+        } else g.connect(bus.in);
+        src.start(t0 + dt);
+        // and the string it came from blurs while it sounds
+        setTimeout(() => { harpStrings[idx].userData.amp = Math.min(1, vel * level); }, dt * 1000 + 20);
       });
     };
     const playTrumpet = () => {
@@ -1975,8 +2453,13 @@ export default function Mikdash() {
       return b;
     };
     const buildAmbience = () => {
-      if (amb.built) return;
+      // ensureAudio() runs first, above the built guard, and that ordering is
+      // the whole point: a context opened before the visitor has touched
+      // anything comes back suspended, and only a resume() inside a real
+      // gesture starts it. Guarding above this call strands that context
+      // suspended for the rest of the session — the bed built, wired, silent.
       const ctx = ensureAudio();
+      if (amb.built) return;
       amb.built = true;
       amb.buf = noiseBuf(ctx, 6);
       amb.master = ctx.createGain();
@@ -2065,7 +2548,11 @@ export default function Mikdash() {
         s.start(t0, Math.random() * 5, 0.12); s.stop(t0 + 0.13);
       }
 
-      const songAmt = clamp01(1 - (p.distanceTo(STEPS_POS) - 30) / 200);
+      // Carried, not local: the ascent should reach the far side of the court
+      // and the opening view from above, where the old 200-amah falloff put it
+      // at exactly zero. 800 keeps the near mix as it was and lengthens the
+      // tail — faint from the sky, full on the steps.
+      const songAmt = clamp01(1 - (p.distanceTo(STEPS_POS) - 30) / 800);
       glide(amb.song, songAmt, dt);
       if (songAmt > 0.07 && t > amb.songAt) {
         amb.songAt = t + 7 + Math.random() * 9;
@@ -2321,7 +2808,7 @@ export default function Mikdash() {
         rimonById[id].traverse((o) => { if (o.isMesh) o.material = foundGold; });
         if (rimonById[id].userData.ring) rimonById[id].userData.ring.material.color.set(0xffd24a);
       }
-      if (id === 9) playHarp();
+      if (id === 9) { revealEighth(); playHarp(); }
       if (id === 10) playShofar();
       if (id === 12) { flameTips.forEach((f, i) => setTimeout(() => { f.material.opacity = 0.95; }, i * 180)); menLight.intensity = 1.1; }
       if (id === 13) { ketoretState.active = true; playChime(); }
@@ -2361,6 +2848,9 @@ export default function Mikdash() {
       amb.on = on;
       if (on) buildAmbience();
       if (amb.master) amb.master.gain.value = on ? 1 : 0;
+      // the harp is the one voice that can still be ringing when the switch is
+      // thrown — three seconds of string does not care about a guard clause
+      if (harpChain) harpChain.out.gain.value = on ? 1 : 0;
     };
     apiRef.current.markFound = (arr) => {
       arr.forEach((id) => {
@@ -2369,16 +2859,25 @@ export default function Mikdash() {
           if (rimonById[id].userData.ring) rimonById[id].userData.ring.material.color.set(0xffd24a);
         }
         if (id === 12) { flameTips.forEach((f) => { f.material.opacity = 0.95; }); menLight.intensity = 1.1; }
+        if (id === 9) revealEighth();
         if (id === 13) ketoretState.active = true;
         if (id === 14) nicanor.userData.target = 1;
       });
     };
     const lerp = (a, b, t) => a + (b - a) * t;
-    const dayFog = new THREE.Color(0xbfd2e2), nightFog = new THREE.Color(0x0a1122);
-    const dayHemiSky = new THREE.Color(0xcfe0ff), nightHemiSky = new THREE.Color(0x33405f);
-    const dayHemiGnd = new THREE.Color(0xc4b18a), nightHemiGnd = new THREE.Color(0x191510);
-    const daySunCol = new THREE.Color(0xfff0d2), nightSunCol = new THREE.Color(0x9fb2dd);
+    // Light and fog colours are consumed linearly, and every one of these was
+    // picked by eye back when the renderer wrote its buffer out untouched. Left
+    // alone they now read a stop and a half pale — which is what put a milky
+    // film over the far courts and washed the horizon into the sky. Linearised
+    // (≈ x^2.2), the sun keeps its warmth, the moon keeps its blue, and the
+    // haze goes back to being haze.
+    const dayFog = new THREE.Color(0x86a0b4), nightFog = new THREE.Color(0x010309);
+    const dayHemiSky = new THREE.Color(0xa0bdff), nightHemiSky = new THREE.Color(0x080d1d);
+    const dayHemiGnd = new THREE.Color(0x8e7241), nightHemiGnd = new THREE.Color(0x020101);
+    const daySunCol = new THREE.Color(0xffdea5), nightSunCol = new THREE.Color(0x5a74ba);
 
+    const harpAt = harp.position.clone();
+    let harpNext = 18;                        // the north wind is not waiting at the door
     let raf, lastT = performance.now();
     const t0 = performance.now();
     const animate = () => {
@@ -2390,7 +2889,13 @@ export default function Mikdash() {
       nowT = t;
       skyUniforms.uTime.value = t;
 
-      env.cur += (env.target - env.cur) * 0.022;
+      // Frame-rate independent. A fixed 0.022 per frame meant the sun set
+      // two and a half times faster on a 144Hz laptop than on a 60Hz one, and
+      // crawled on anything struggling — the one animation in the House that
+      // everything else keys off (every light, the fog, every emissive and
+      // sprite tint) was running at a different speed for every visitor.
+      // The constant is chosen so 60Hz behaves exactly as it always did.
+      env.cur += (env.target - env.cur) * (1 - Math.exp(-dt * 1.334));
       const nAmt = env.cur, e2 = nAmt * nAmt * (3 - 2 * nAmt);
       skyUniforms.uNight.value = e2;
       const sunDir = new THREE.Vector3(lerp(0.55, -0.72, e2), lerp(0.6, -0.28, e2), lerp(-0.42, 0.3, e2)).normalize();
@@ -2400,7 +2905,11 @@ export default function Mikdash() {
       sun.position.copy(e2 < 0.5 ? sunDir : moonDir).multiplyScalar(900);
       sun.intensity = lerp(2.35, 0.26, e2);
       sun.color.copy(daySunCol).lerp(nightSunCol, e2);
-      hemi.intensity = lerp(0.46, 0.17, e2);
+      // Linearised hemisphere colours carry roughly a third less luminance, so
+      // the fill comes back up — but not all the way. Some of that lost fill is
+      // exactly the flatness this pass is trying to remove: a shadowed wall
+      // should fall away, not sit at three-quarter brightness.
+      hemi.intensity = lerp(0.62, 0.26, e2);
       hemi.color.copy(dayHemiSky).lerp(nightHemiSky, e2);
       hemi.groundColor.copy(dayHemiGnd).lerp(nightHemiGnd, e2);
       scene.fog.color.copy(dayFog).lerp(nightFog, e2);
@@ -2608,6 +3117,31 @@ export default function Mikdash() {
       fox.position.y = LAND_Y + Math.abs(Math.sin(t * 2.6)) * 0.25;
       fox.userData.tail.rotation.x = Math.sin(t * 3) * 0.28;
       fox.rotation.y = -0.7 + Math.sin(t * 0.4) * 0.35;
+
+      // A sounding string is a blur, not a line. Swell the radius and shiver it
+      // out of the plane of the frame, then let both fall away on the same
+      // curve the note is decaying on.
+      for (let si = 0; si < harpStrings.length; si++) {
+        const sd = harpStrings[si].userData;
+        if (sd.amp > 0.004) {
+          sd.amp *= Math.exp(-dt * 2.4);
+          const w = 1 + sd.amp * 8;
+          harpStrings[si].scale.set(w, 1, w);
+          harpStrings[si].position.z = Math.sin(t * 42 + sd.ph) * sd.amp * 0.42;
+        } else if (sd.amp !== 0) {
+          sd.amp = 0;
+          harpStrings[si].scale.set(1, 1, 1);
+          harpStrings[si].position.z = 0;
+        }
+      }
+      // Berachot 3b: a kinor hung above David's bed, and when midnight came the
+      // north wind blew through it and it played of itself. So does this one —
+      // only in the dark, only for somebody standing near enough to hear it,
+      // and never twice inside half a minute.
+      if (amb.on && e2 > 0.86 && t > harpNext && camera.position.distanceTo(harpAt) < 260) {
+        harpNext = t + 24 + Math.random() * 22;
+        playHarp(0.4);
+      }
 
       flameTips.forEach((f, i) => {
         if (f.material.opacity > 0) {

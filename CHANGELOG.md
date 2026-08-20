@@ -1,5 +1,84 @@
 # Changelog
 
+## v3.9 — "Carved, Not Printed" (0.3.9)
+
+A lookdev pass. Nothing moved and nothing was added to the floor plan; what
+changed is how the stone takes light.
+
+- **Every surface was a photograph of itself.** Materials carried a colour map
+  and one scalar roughness, so a drafted margin was *painted* on: it stayed
+  painted no matter where the sun was, and a wall took the light back at
+  exactly one sharpness from end to end. Both maps are now derived from the
+  pixels already drawn — read the canvas back, treat luminance as height,
+  Sobel it into a tangent-space normal, and remap the same luminance into a
+  narrow roughness band. Fourteen colour maps, thirteen derived normal maps,
+  eight derived roughness maps, and still no texture files: `heightFromCanvas`,
+  `normalFromCanvas`, `roughFromCanvas` and `pbr()` in `Mikdash.jsx`. The
+  sampling wraps, so relief tiles with the map instead of seaming at every
+  repeat. The flutes on the Royal Stoa columns are now the only geometry in the
+  House made entirely of normal map — twenty-two grooves on a plain cylinder.
+- **The renderer was shading in the wrong colour space.** `outputEncoding` was
+  never set, so lighting maths ran on sRGB numbers and was written out without
+  conversion. That is what made the courts read milky: shadows lifted, midtones
+  flattened, and no amount of light tuning could recover the contrast. The
+  pipeline is now linear-in, sRGB-out — canvas maps declare `sRGBEncoding`,
+  derived normal/roughness maps stay linear because they are data, and both
+  hand-written shaders (sky, flame) got `#include <encodings_fragment>`, since
+  three only appends the conversion to its own materials.
+- **Everything hand-picked had to be relit.** Correct encoding brightens by
+  roughly a stop and a half, so every colour chosen by eye against the old
+  output was wrong: the sky's day and night ramps, the fog, the hemisphere and
+  sun/moon colours, the olive and river-tree greens, the pomegranates and the
+  hill tints are all linearised. Exposure came down 0.98 → 0.78 and the
+  hemisphere fill came up 0.46 → 0.62 — not all the way back, because some of
+  that lost fill was the flatness this pass set out to remove.
+- **Nothing was sitting anywhere.** A wall met the pavement at a clean bright
+  seam, because a sun plus a hemisphere has no way to know the foot of a wall
+  sees less sky than its top. Screen-space AO would mean an `EffectComposer`
+  and an import from `three/examples/jsm`, which would end this component's
+  `react` + `three` and nothing else rule — so the occlusion is baked into
+  vertex colours instead, on every box and cylinder over 16 amot tall, in world
+  units so a 60-amah retaining wall and a 20-amah gate pier get the same depth
+  of shadow at the ground. `goldPlate` and `windowMat` opt out: the day/night
+  ramp mutates them every frame and a clone would stop receiving it.
+- **The plaza was graph paper.** A perfect 8×8 grid with a hard joint at half
+  opacity, every cell the same size and value, running dead straight to the
+  horizon. Now courses of differing height, broken into slabs of differing
+  width, staggered course to course, with thin warm joints and slabs worn
+  brighter in the middle where feet have polished them.
+- **The hillside broke out in orange peel.** The ground map scattered nine
+  thousand hard specks, which is fine as colour — but once the terrain took a
+  derived normal map every speck became a pebble. Rewritten as fine grain and
+  faint short streaks, with no feature large enough to be recognisable when it
+  tiles; tiling went 10 → 26 so drawn dust is not magnified twelve-fold into
+  boulders. Its relief is nearly flat, because ground seen from above is.
+- **The hills were marshmallows.** Smooth spheres in flat paint — a perfect
+  silhouette, which is the one thing no landform has. Each is now displaced
+  along its own radius by a sum of sinusoids in spherical coordinates: cheap,
+  coherent, wraps without a seam, and the ridges catch the sun.
+- **The trees were lollipops.** A sphere on a stick has a circular outline and
+  nothing in a landscape does. Canopies are now three overlapping lobes at
+  differing size, offset, squash and rotation, so no two trees in the grove are
+  the same tree, and the trunks lean.
+- **Grazing angles were mush.** Anisotropy was left at the default of 1 across
+  a 500-amah plaza and every colonnade roof running away from the camera. Now
+  read from `renderer.capabilities` and capped at 8.
+- **Shadows.** 2048 over a 1120-amah frustum put one shadow texel every half
+  amah — coarser than the stones it was shadowing. The frustum is tightened to
+  the built precinct (±430) and the map goes to 4096 where the GPU's texture
+  cap allows it. `bias` and `normalBias` are set, which the normal maps made
+  necessary: acne that was invisible on flat shading crawls over relief.
+- **The sun set at a different speed for every visitor.** The day/night ease
+  was a fixed fraction *per frame*, so it ran two and a half times faster on a
+  144Hz laptop than a 60Hz one — and this is the animation every light, the
+  fog, and every emissive and sprite tint keys off. Now time-based, with the
+  constant chosen so 60Hz behaves exactly as it always did.
+
+Cost: about 0.2s of one-time map generation at load, and **+2 KB gzipped** —
+the maps are computed on the visitor's machine, so the "no art assets" rule
+survives the whole pass intact.
+
+
 ## v3.8 — "Out of the Roof" (0.3.8)
 
 - **Wonder 8 was inside the roof.** The eighth rimon — גלי הים, "within the
