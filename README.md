@@ -212,7 +212,7 @@ indexing the array.
     panel (locked hints show "still veiled"), toast, fact modal, completion card.
 
 ### The first step
-A visitor who cannot find wonder #1 never sees wonders 2–16, so the opening is
+A visitor who cannot find wonder #1 never sees wonders 2–36, so the opening is
 the one place where nothing is hidden. Three layers, each one cheaper to ignore
 than the last:
 
@@ -259,6 +259,25 @@ Note: written against three r128 API (works fine on newer, but
 `.github/workflows/deploy.yml`. Pages serves the site under the repository
 name, so `vite.config.js` sets `base: "/mikdash/"` for builds only — rename the
 repo and that string has to move with it, or every asset 404s.
+
+### Being found
+`index.html` carries the whole search surface, because the rendered page has
+none: a crawler that does not run scripts sees only `<div id="root">`. So the
+static markup inside `#root` is real content — title, what the House is, what
+waits in it — and React clears it on first render, which makes it a loading
+screen for everyone else. Keep it accurate when the wonder count changes; it is
+also the text Google shows.
+
+Alongside it: `<link rel="canonical">`, Open Graph and Twitter card tags,
+`schema.org/WebApplication` JSON-LD, and `public/og.png` (1200 × 630, a real
+screenshot — regenerate it when the House changes noticeably). `public/`
+contents are copied to the site root at build, so the sitemap publishes at
+`/mikdash/sitemap.xml`.
+
+**A robots.txt would do nothing here.** Crawlers only read it at the domain
+root — `melaniesigrid.github.io/robots.txt` — which belongs to the user-site
+repo, not this one. Nothing is blocked by default, so there is nothing to fix;
+if this ever moves to its own domain, add one at the root then.
 
 ## Roadmap
 
