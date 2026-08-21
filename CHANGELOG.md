@@ -1,5 +1,82 @@
 # Changelog
 
+## v3.21 — "What Belongs Inside, Goes Inside" (0.3.21)
+
+- **הַכְנָסַת הַכֵּלִים — the kohanim carry the vessels in.** The Menorah, the
+  Shulchan and the golden altar of the ketoret were standing in the open
+  courtyard, and all three belong indoors: Shemot 26:35 puts the Shulchan on
+  the north side of the room and the Menorah opposite it on the south, both
+  inside the tent and outside the parochet, and Shemot 30:6 sets the golden
+  altar in front of the parochet between them. A Menorah standing in a
+  courtyard is not a small licence.
+  - They were out there for one honest reason — the inside of this House is not
+    built, and a wonder nobody can reach is not a wonder. That reason expires
+    the moment the thirty-sixth is found, so that is when the procession comes:
+    eighteen bearers, six to a vessel, carrying on the shoulder as the sons of
+    Kehat were told to carry exactly these three (Bamidbar 7:9). The cedar doors
+    are drawn back, the vessels go in one behind the other, and the doors close.
+  - **They were already in the right places relative to one another** — Menorah
+    south, Shulchan north, ketoret between — so the procession is three straight
+    lines that never cross, and each vessel goes in on its own side.
+  - **Each one shrinks on the way to the size its own pasuk gives it**: the
+    Menorah to three amot (Menachot 28b), the Shulchan to two amot by one
+    (Shemot 25:23), the golden altar to one by one (Shemot 30:2). Outside they
+    were signposts, sized so somebody seven hundred amot away could find them.
+    Inside they are vessels, and a vessel is the size it is. The Menorah at its
+    court size would not have fitted through the doorway, which is its own
+    argument.
+  - The cedar doors got a hinge while this was being built. They were two slabs
+    rotating about their own middles, which is a turnstile.
+  - Afterwards the doorway keeps its light, day and night: what reaches the
+    court from the Menorah now comes out from under the doors, which is all
+    anybody standing in the azarah ever saw of it. A visitor who finished on an
+    earlier visit comes back to a House whose vessels are already inside — the
+    procession happened, and it does not happen again on every reload.
+
+- **The kiyor was eighty amot from where the mishnah puts it.** Middot 3:6:
+  בֵּין הָאוּלָם וְלַמִּזְבֵּחַ מָשׁוּךְ כְּלַפֵּי הַדָּרוֹם — between the Ulam and the
+  altar, and drawn toward the south. It was parked out by the southern wall,
+  nowhere near either of the two things the mishnah measures it against. It now
+  stands on that line, pulled south of the walked route from the ramp to the
+  door, and still far enough south that a kohen going from the water to the
+  altar crosses the אַמָּה. Ben Katin's wheel went with it: it is that laver's
+  own machinery, and it was left behind on the first pass.
+
+- **The Levites are dressed in linen.** Their sash was gold, which is sourced
+  nowhere and gets drawn because it looks like a choir. Divrei HaYamim II 5:12
+  dresses the singers — Asaf, Heiman, Yedutun and their sons — מְלֻבָּשִׁים בּוּץ,
+  in fine linen, with cymbals and lyres and harps. What tells a Levite from a
+  kohen here is not his clothes; it is that he is standing on the steps.
+
+- **The eighteen who answer know four things each.** Every kohen and every
+  Levite had exactly one line, which is fine the first time somebody clicks a
+  man in a white robe and wrong the second. Seventy-two lines now — חי times
+  four — and they come round in order rather than shuffling, because a shuffle
+  can hand you the same line twice running, which is the exact thing this is
+  here to stop. There is a עוֹד button on the card, so asking again does not
+  mean hunting the same man down in a courtyard two hundred amot across.
+  - Among them, psalms and the Song, quoted where they were actually said:
+    Tehillim 122 in the mouth of the bikkurim procession that is singing it on
+    the road; 84, וּדְרוֹר קֵן לָהּ, from the man who opens the gates at dawn,
+    about the birds that are already up — and there are eighteen swifts working
+    these walls; 134, הָעֹמְדִים בְּבֵית ה' בַּלֵּילוֹת, from the watches; 137 from
+    the harpist, about these instruments; 24 and 26 at the gate and the laver;
+    150 from the man with the loudest instrument in Jerusalem, whose last line
+    has no instrument in it at all. And Shir HaShirim 2:9, מַשְׁגִּיחַ מִן
+    הַחַלֹּנוֹת, from the man who trims the lamps behind windows that are narrow
+    outside and wide within — and 4:13–14, whose list of spices is the list in
+    the chamber where the ketoret is compounded.
+
+- **A halachic audit, written down.** TODO.md now carries what was checked and
+  what was found, so the question does not have to be re-derived: what is fixed
+  (these three, plus the Menorah's shape in v3.20), what was checked and is
+  correct (the slaughtering tables north of the altar, the arrangement of the
+  three vessels, no tree in the azarah, the chanukiah outside the walls), and
+  what is still open — Yachin and Boaz are Shlomo's pillars standing at
+  Yechezkel's porch, the kiyor has none of its twelve spouts, and there is no
+  soreg anywhere, which is the one piece of this precinct that says where a
+  visitor may and may not walk.
+
 ## v3.20 — "Seven Lamps, All of Them Level" (0.3.20)
 
 - **The Menorah had a shamash, and now it does not.** What stood in the court

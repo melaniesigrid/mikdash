@@ -577,46 +577,133 @@ function meteorShowerOn(rd) {
   return best;
 }
 
+// ── The eighteen who answer ──
+//
+// Twelve kohanim and six Levites, and every one of them had exactly one thing
+// to say — which is fine the first time somebody clicks a man in a white robe
+// and wrong the second. Each carries four now: seventy-two lines, which is חי
+// times four and the number of letters in the Name that is spelled out of
+// three verses of the sea. They come round in order, so a visitor who asks the
+// same man again gets the next thing he knows rather than a shuffle that can
+// repeat itself.
+//
+// Some of what they say is a psalm or a line of the Song, because that is what
+// was actually going on in this courtyard: the Levites sang Tehillim over the
+// wine, the pilgrims came up the road singing the fifteen שִׁיר הַמַּעֲלוֹת, and
+// the Song of Songs is read by the Midrash as being about this House and the
+// One who lives in it. A verse is quoted where a verse was said.
 const KOHEN_VOICES = [
-  { name: "תרומת הדשן", role: "The lifting of the ashes",
-    text: "Before first light I went up in linen and lifted one shovelful of ash from the fire, and set it down beside the altar. Vayikra 6:3–4. The day's first act is to carry away what yesterday burned.", src: "Vayikra 6:3–4 · Tamid 1:2" },
-  { name: "סידור המערכה", role: "The arrangement of the wood",
-    text: "Two logs of fig-wood, laid so the air runs between them — a great arrangement for the offerings and a second beside it for the ketoret. The fire never goes out: אש תמיד תוקד.", src: "Vayikra 6:6 · Yoma 26b · Tamid 2:3" },
-  { name: "הפייס", role: "The lottery",
-    text: "Once we raced up the ramp for the honour of the service, until one kohen was pushed and broke his leg. From that day we draw lots. Even eagerness needs a fence.", src: "Yoma 22a · Tamid 1:2" },
-  { name: "הכיור", role: "The laver",
-    text: "Hands and feet before any service. Ben Katin made a wheel for the kiyor so it could be lowered into the water overnight — water left standing would have made it unfit by morning.", src: "Shemot 30:19 · Yoma 37a · Middot 3:6" },
-  { name: "התמיד", role: "The daily offering",
-    text: "One lamb at dawn and one between the evenings, every day, in every generation. Ben Zoma said the whole Torah hangs on this verse — not on any grand principle, but on the offering that simply does not stop.", src: "Bamidbar 28:3–4 · Ein Yaakov, Introduction" },
-  { name: "ניסוך המים", role: "The water libation",
-    text: "Drawn from the Shiloach in a flask of gold and poured at dawn through the silver bowl at the altar's corner. For Sukkot the whole city came out with torches, and no one slept.", src: "Sukkah 48a–b · Sukkah 51a" },
-  { name: "לחם הפנים", role: "The showbread",
-    text: "Twelve loaves set out each Shabbat and lifted the next — and they came away as warm as the hour they were baked. That warmth was the sign, week after week, that the House was not empty.", src: "Vayikra 24:5–9 · Chagigah 26b · Menachot 29a" },
-  { name: "ברכת כהנים", role: "The priestly blessing",
-    text: "We stand on the steps of the Ulam, hands lifted and fingers parted, and say the Name as it is written. Not our blessing — we are only the hands. וְשָׂמוּ אֶת שְׁמִי, and I shall bless them.", src: "Bamidbar 6:23–27 · Sotah 38a" },
-  { name: "פתיחת השערים", role: "The opening of the gates",
-    text: "It takes several of us to draw back the great door, and they say the sound of it carries as far as Jericho. Nothing about this House was built to be done quietly, or alone.", src: "Tamid 3:7–8 · Yoma 39b" },
-  { name: "הטבת הנרות", role: "The trimming of the lamps",
-    text: "I clean the cups and lay fresh wicks and oil, the same measure in each. And still the westernmost lamp is burning when I come back at dusk — from it I kindle all the rest.", src: "Tamid 3:9 · Shabbat 22b" },
-  { name: "בגדי כהונה", role: "The garments",
-    text: "Four garments of white linen, and nothing on me that is my own — not my family's wealth, not my name. While the garments are upon us the priesthood is upon us; without them, we are ordinary men.", src: "Shemot 28:2 · Zevachim 17b" },
-  { name: "ביכורים", role: "The first fruits",
-    text: "They come up with the ox before them, its horns overlaid with gold and an olive wreath on its head, and a flute playing all the way. The craftsmen of Jerusalem stand up as they pass — work stops for farmers carrying figs.", src: "Bikkurim 3:2–4" },
+  { name: "תרומת הדשן", role: "The lifting of the ashes", lines: [
+    { text: "Before first light I went up in linen and lifted one shovelful of ash from the fire, and set it down beside the altar. The day's first act is to carry away what yesterday burned.", src: "Vayikra 6:3–4 · Tamid 1:2" },
+    { text: "There is no clock. The officer sends a man up to look east, and when the light has reached as far as Chevron he calls down בָּרְקַאי — it has lit up — and only then may the day begin. As far as Chevron, so that we start every morning by remembering whose merit we are standing on.", src: "Yoma 28b · Tamid 3:2" },
+    { text: "The ash is not thrown out. It is set down beside the altar in a place of its own and rests there, and only afterwards is it carried outside. Even what has finished burning is put down gently.", src: "Vayikra 6:3–4 · Tamid 2:2" },
+    { text: "מִי־יַעֲלֶה בְהַר־ה' וּמִי־יָקוּם בִּמְקוֹם קָדְשׁוֹ — who may go up the mountain of Hashem, and who may stand in His holy place? נְקִי כַפַּיִם וּבַר־לֵבָב, clean of hands and pure of heart. I am up at four in the morning with a shovel. The verse is about the hands.", src: "Tehillim 24:3–4" },
+  ] },
+  { name: "סידור המערכה", role: "The arrangement of the wood", lines: [
+    { text: "Two logs of fig-wood, laid so the air runs between them — a great arrangement for the offerings and a second beside it for the ketoret. The fire never goes out: אֵשׁ תָּמִיד תּוּקַד.", src: "Vayikra 6:6 · Yoma 26b · Tamid 2:3" },
+    { text: "Any wood is fit for the altar except olive and vine. Not because they burn badly — because a land is not stripped of the trees that feed it in order to feed a fire.", src: "Tamid 2:3 · Tamid 29b" },
+    { text: "Rain fell on this fire and never put it out, and no wind ever bent the column of its smoke. Two of the ten things they count as miracles here, and both of them are about weather that behaved itself.", src: "Avot 5:5" },
+    { text: "Fire came down from above and crouched on the altar like a lion. And still it is a mitzvah to bring ordinary fire up from below — a man is asked to strike his own flame even in the one place where fire is already burning.", src: "Yoma 21b" },
+  ] },
+  { name: "הפייס", role: "The lottery", lines: [
+    { text: "Once we raced up the ramp for the honour of the service, until one kohen was pushed and broke his leg. From that day we draw lots. Even eagerness needs a fence.", src: "Yoma 22a · Tamid 1:2" },
+    { text: "The officer takes the turban off one man's head and says a number, and we put out fingers, and he counts round the ring from that man. Nobody is counted by name, and nobody counts himself.", src: "Tamid 1:2 · Yoma 22a" },
+    { text: "Four lotteries a day. Not because the work is scarce — because there were always more of us who wanted it than there was of it.", src: "Yoma 22a · Tamid 3:1, 5:2" },
+    { text: "A kohen has no field. Twenty-four cities and their open land were given to us and nothing else: a tribe with no portion in the country, whose portion is this House.", src: "Bamidbar 18:20 · Yehoshua 21" },
+  ] },
+  { name: "הכיור", role: "The laver", lines: [
+    { text: "Hands and feet before any service. Ben Katin made a wheel for the kiyor so it could be lowered into the water overnight — water left standing would have made it unfit by morning.", src: "Shemot 30:19 · Yoma 37a · Middot 3:6" },
+    { text: "Twelve spouts, one for each kohen of the daily offering, so that nobody stands waiting at dawn with his hands held out.", src: "Yoma 37a · Middot 3:6" },
+    { text: "It stands between the Ulam and the altar, drawn a little to the south — off the line a man walks from the ramp to the door, so that the thing you must stop at is never the thing in your way.", src: "Middot 3:6" },
+    { text: "אֶרְחַץ בְּנִקָּיוֹן כַּפָּי וַאֲסֹבְבָה אֶת־מִזְבַּחֲךָ ה' — I wash my hands in cleanness, and then go round Your altar. The psalm puts them in that order and so do we.", src: "Tehillim 26:6" },
+  ] },
+  { name: "התמיד", role: "The daily offering", lines: [
+    { text: "One lamb at dawn and one between the evenings, every day, in every generation. Ben Zoma said the whole Torah hangs on this verse — not on a grand principle, but on the offering that simply does not stop.", src: "Bamidbar 28:3–4 · Ein Yaakov, Introduction" },
+    { text: "Nothing is offered before the morning tamid and nothing after the evening one. The whole day is held between two lambs, and everything else in this House happens inside that bracket.", src: "Pesachim 58a" },
+    { text: "It is given water from a cup of gold before it goes up, and four of us hold it, and nothing is done to it roughly. There is no version of this work where the animal is handled carelessly.", src: "Tamid 3:4" },
+    { text: "עֹלַת תָּמִיד הָעֲשֻׂיָה בְּהַר סִינַי — the verse ties this lamb to the mountain. Whatever happened there once happens here twice a day, and the second time is not smaller than the first.", src: "Bamidbar 28:6" },
+  ] },
+  { name: "ניסוך המים", role: "The water libation", lines: [
+    { text: "Drawn from the Shiloach in a flask of gold and poured at dawn through the silver bowl at the altar's corner — water, on the one festival that asks for rain.", src: "Sukkah 48a–b · Sukkah 51a" },
+    { text: "וּשְׁאַבְתֶּם־מַיִם בְּשָׂשׂוֹן מִמַּעַיְנֵי הַיְשׁוּעָה — you shall draw water with joy from the wells of salvation. That is the verse the drawing is named for, and why it is called the House of the Drawing.", src: "Yeshayahu 12:3 · Sukkah 48b" },
+    { text: "Two bowls at the southwest corner, one for the wine and one for the water, and the water's hole is the narrower of the two — wine runs thick and water runs thin, and they are cut so that both finish together.", src: "Sukkah 48a" },
+    { text: "Whoever has not seen the rejoicing of the Beit HaSho'evah has never seen rejoicing. The pious danced here with torches all night, and there was not a courtyard in Jerusalem that was not lit from this one.", src: "Sukkah 51a–b" },
+  ] },
+  { name: "לחם הפנים", role: "The showbread", lines: [
+    { text: "Twelve loaves set out each Shabbat and lifted the next — and they came away as warm as the hour they were baked. That warmth was the sign, week after week, that the House was not empty.", src: "Vayikra 24:5–9 · Chagigah 26b · Menachot 29a" },
+    { text: "Twelve, in two arrangements of six, with a bowl of frankincense beside each stack. לֶחֶם הַפָּנִים — the bread of the face: bread whose whole purpose is to be set in front of Somebody.", src: "Vayikra 24:5–9" },
+    { text: "The house of Garmu knew how to bake it and would not teach anybody. The sages were angry and sent to Alexandria for bakers, who could bake the loaves and could not get them out of the oven whole — and Garmu were asked back.", src: "Yoma 38a" },
+    { text: "The Shulchan stands in the north and the Menorah in the south, and the golden altar between them. Whoever wants wisdom turns south and whoever wants wealth turns north — and the sign for remembering which is which is the furniture of this room.", src: "Yoma 33b · Bava Batra 25b" },
+  ] },
+  { name: "ברכת כהנים", role: "The priestly blessing", lines: [
+    { text: "We stand on the steps of the Ulam, hands lifted and fingers parted, and say the Name as it is written. Not our blessing — we are only the hands. וְשָׂמוּ אֶת שְׁמִי, and I shall bless them.", src: "Bamidbar 6:23–27 · Sotah 38a" },
+    { text: "In this House the Name is said as it is written, and anywhere else in the world it is not. The same words in the same order, and it is not the same act.", src: "Sotah 38a" },
+    { text: "Nobody looks up while we say it. Whoever is standing in front of us drops his eyes, because what is happening above our hands is not ours and is not for looking at. We are a window, not a view.", src: "Chagigah 16a" },
+    { text: "יְבָרֶכְךָ ה' מִצִּיּוֹן וּרְאֵה בְּטוּב יְרוּשָׁלִָם — the blessing goes out from this place and follows a man all the days of his life. We only lift our arms; it is sent from here.", src: "Tehillim 128:5" },
+  ] },
+  { name: "פתיחת השערים", role: "The opening of the gates", lines: [
+    { text: "It takes several of us to draw back the great door, and they say the sound of it carries as far as Jericho. Nothing about this House was built to be done quietly, or alone.", src: "Tamid 3:7–8 · Yoma 39b" },
+    { text: "גַּם־צִפּוֹר מָצְאָה בַיִת וּדְרוֹר קֵן לָהּ — even the sparrow has found a house and the swallow a nest for herself, where she may lay her young: Your altars. They are up before we are. Watch the walls at dusk and you will see them still working.", src: "Tehillim 84:4" },
+    { text: "שְׂאוּ שְׁעָרִים רָאשֵׁיכֶם וְהִנָּשְׂאוּ פִּתְחֵי עוֹלָם — lift up your heads, O gates. The doors here are twenty amot high and the psalm still asks them to make themselves taller.", src: "Tehillim 24:7" },
+    { text: "The great gate has a small door cut into it, so that a man can go in through the little one and open the big one from inside. Nobody comes into this House by forcing it — not even the man holding the key.", src: "Middot 4:2 · Tamid 3:7" },
+  ] },
+  { name: "הטבת הנרות", role: "The trimming of the lamps", lines: [
+    { text: "I clean the cups and lay fresh wicks and the same measure of oil in each. And still the westernmost lamp is burning when I come back at dusk — from it I kindle all the rest.", src: "Tamid 3:9 · Shabbat 22b" },
+    { text: "מַשְׁגִּיחַ מִן־הַחַלֹּנוֹת מֵצִיץ מִן־הַחֲרַכִּים — He looks in at the windows, peers through the lattices. Ours are narrow on the outside and wide within, which is backwards for a window, because this House was never asking for light. It gives it.", src: "Shir HaShirim 2:9 · Melachim I 6:4 · Menachot 86b" },
+    { text: "Beaten olive oil, the first drop pressed from each olive and nothing after it — that grade is for the lamp only. What is offered on the altar may be second pressing; what is burned for light may not.", src: "Shemot 27:20 · Menachot 86a" },
+    { text: "Does He need our light? He led Israel through the wilderness by light for forty years. The lamp is not for Him to see by. It is testimony, to everyone who comes in, that the Presence rests in Israel.", src: "Shabbat 22b" },
+  ] },
+  { name: "בגדי כהונה", role: "The garments", lines: [
+    { text: "Four garments of white linen, and nothing on me that is my own — not my family's wealth, not my name. While the garments are upon us the priesthood is upon us; without them, we are ordinary men.", src: "Shemot 28:2 · Zevachim 17b" },
+    { text: "Four for me and eight for the Kohen Gadol, and each garment is said to atone for something — the sash for the thoughts of the heart, and so down the list. A man puts on his own repairs and goes to work in them.", src: "Zevachim 88b · Arachin 16a" },
+    { text: "We serve barefoot. The floor is stone and in Tevet it is bitter, and there is no version of this where a man stands on the floor of this House in shoes.", src: "Shemot 3:5 · Berachot 62b" },
+    { text: "When they are worn out they are not thrown away. They are unravelled into wicks for the lamps of the Beit HaSho'evah — the whole city was lit, on those nights, by what we could no longer wear.", src: "Sukkah 51a · Shabbat 21a" },
+  ] },
+  { name: "ביכורים", role: "The first fruits", lines: [
+    { text: "They come up with the ox before them, its horns overlaid with gold and an olive wreath on its head, and a flute playing all the way. The craftsmen of Jerusalem stand up as they pass — work stops for farmers carrying figs.", src: "Bikkurim 3:2–4" },
+    { text: "שָׂמַחְתִּי בְּאֹמְרִים לִי בֵּית ה' נֵלֵךְ. עֹמְדוֹת הָיוּ רַגְלֵינוּ בִּשְׁעָרַיִךְ יְרוּשָׁלִָם — I rejoiced when they said to me, let us go to the House of Hashem; our feet were standing in your gates, Jerusalem. They begin it on the road and finish it standing in the gate.", src: "Tehillim 122:1–2" },
+    { text: "The rich bring their fruit in baskets of silver and gold and take the baskets home again. The poor bring theirs in plaited willow, and the basket is given away with the fruit — so the smaller gift is the larger one.", src: "Bikkurim 3:8" },
+    { text: "A man used to say the whole declaration himself, and if he could not read it, it was read and he repeated it. Then men who could not read stopped coming out of shame — so from that day it is read aloud for everyone, the scholar too.", src: "Bikkurim 3:7" },
+  ] },
 ];
 
 const LEVI_VOICES = [
-  { name: "שיר המעלות", role: "On the fifteen steps",
-    text: "Fifteen steps between the courts and fifteen songs of ascent — one for each. We stood upon them with harps and lyres and cymbals. Try them: they still hold their notes.", src: "Middot 2:5 · Sukkah 51b" },
-  { name: "כינור", role: "The harp of the Sanctuary",
-    text: "The kinor of the Sanctuary carried seven strings, and in the days of Mashiach it will carry eight. One more string, for a song we cannot yet sing.", src: "Arachin 13b" },
-  { name: "שיר של יום", role: "The song of the day",
-    text: "Every day has its psalm, sung over the wine libation, and the trumpets sound between its parts while all Israel bows. Today is not the same song as yesterday.", src: "Tamid 7:3–4" },
-  { name: "אין שירה", role: "No song without an offering",
-    text: "There is no song except over a sacrifice, and no sacrifice complete without song. The two were never meant to stand apart.", src: "Arachin 11a" },
-  { name: "מעמדות", role: "The men who stand by",
-    text: "A person's offering cannot be brought while he is not standing over it — so all Israel was divided into watches, and while one watch served here the rest read the account of Creation at home. Nobody was meant to be absent from this.", src: "Ta'anit 26a · Ta'anit 27b" },
-  { name: "המגרפה", role: "The instrument no one could speak over",
-    text: "When it sounded, no one in Jerusalem could hear his fellow speak. Three things it announced: a kohen entering to burn the ketoret, his brothers coming to bow, and the Levites rising to sing.", src: "Tamid 3:8 · Arachin 10b–11a" },
+  { name: "שיר המעלות", role: "On the fifteen steps", lines: [
+    { text: "Fifteen steps between the courts and fifteen songs of ascent — one for each. We stood upon them with harps and lyres and cymbals. Try them: they still hold their notes.", src: "Middot 2:5 · Sukkah 51b" },
+    { text: "They say David said the fifteen when he dug the shitin and the deep rose to drown the world, and sang it back down a step at a time. Every one of the fifteen begins with going up.", src: "Sukkah 53a–b · Tehillim 120–134" },
+    { text: "אַפִּרְיוֹן עָשָׂה לוֹ הַמֶּלֶךְ שְׁלֹמֹה מֵעֲצֵי הַלְּבָנוֹן — a palanquin of the cedars of Lebanon, its pillars silver and its inside paved with love. The Midrash reads the whole verse as this House, and the paving is the last word of it.", src: "Shir HaShirim 3:9–10 · Bamidbar Rabbah 12:4" },
+    { text: "No fewer than twelve of us stand on the platform, and there is no maximum. A Levite does not sing sitting down, and he never sings alone.", src: "Arachin 13b" },
+  ] },
+  { name: "כינור", role: "The harp of the Sanctuary", lines: [
+    { text: "The kinnor of the Sanctuary carried seven strings, and in the days of Mashiach it will carry eight, and in the world to come ten. One more string, for a song we cannot yet sing.", src: "Arachin 13b" },
+    { text: "The wood came up from Ofir in Shlomo's ships — almug, for the harps and the lyres of the singers. None like it has come into this country since, and none has been seen.", src: "Melachim I 10:12" },
+    { text: "There was a water organ here, the magrefah, and they say each of its holes gave ten kinds of sound. They stopped using it in the Sanctuary: it was so loud that it spoiled the sweetness of the singing.", src: "Arachin 10b–11a" },
+    { text: "עַל־נַהֲרוֹת בָּבֶל שָׁם יָשַׁבְנוּ גַּם־בָּכִינוּ — by the rivers of Babylon we sat and wept, and hung our lyres on the willows, because they asked us there for the songs of Zion. These are those instruments. They are back.", src: "Tehillim 137:1–3" },
+  ] },
+  { name: "שיר של יום", role: "The song of the day", lines: [
+    { text: "Every day has its psalm, sung over the wine libation, and the trumpets sound between its parts while all Israel bows. Today is not the same song as yesterday.", src: "Tamid 7:3–4" },
+    { text: "Sunday, לַה' הָאָרֶץ וּמְלוֹאָהּ. Monday, גָּדוֹל ה' וּמְהֻלָּל מְאֹד. Tuesday, אֱלֹקִים נִצָּב בַּעֲדַת אֵל. Wednesday, אֵל־נְקָמוֹת ה'. Thursday, הַרְנִינוּ לֵאלֹקִים עוּזֵּנוּ. Friday, ה' מָלָךְ גֵּאוּת לָבֵשׁ. And Shabbat, מִזְמוֹר שִׁיר לְיוֹם הַשַּׁבָּת — for the day that is entirely Shabbat.", src: "Tamid 7:4 · Tehillim 24, 48, 82, 94, 81, 93, 92" },
+    { text: "The song is sung in three parts, and at each break the trumpets sound and everybody in the court bows. Nobody sings through the bowing and nobody bows through the song.", src: "Tamid 7:3" },
+    { text: "On the festivals the whole court answers the Hallel line by line, and at אָנָּא ה' הוֹשִׁיעָה נָּא the lulavim go up together — from the steps it looks as though the courtyard itself has moved.", src: "Sukkah 37b–38a" },
+  ] },
+  { name: "אין שירה", role: "No song without an offering", lines: [
+    { text: "There is no song except over a sacrifice, and no sacrifice complete without song. The two were never meant to stand apart.", src: "Arachin 11a" },
+    { text: "The song goes over the wine, so an offering that comes without wine comes without music. The singing is not laid on top of the service. It is poured with it.", src: "Arachin 11a–b" },
+    { text: "A Levite who took a kohen's work, or a kohen who took ours, was liable. Everybody in this court has one thing that is his, and the singing is the thing of the men on the steps.", src: "Arachin 11b" },
+    { text: "עִבְדוּ אֶת־ה' בְּשִׂמְחָה בֹּאוּ לְפָנָיו בִּרְנָנָה — serve with gladness, come before Him with singing. The verse makes the gladness part of the work rather than a mood you happen to be in while doing it.", src: "Tehillim 100:2" },
+  ] },
+  { name: "מעמדות", role: "The men who stand by", lines: [
+    { text: "A person's offering cannot be brought while he is not standing over it — so all Israel was divided into watches, and while one watch served here the rest read the account of Creation at home. Nobody was meant to be absent from this.", src: "Ta'anit 26a · Ta'anit 27b" },
+    { text: "Twenty-four watches, and each one a week in its turn. For one week in the year this House is yours, and for the other fifty-one you are a farmer who has been here.", src: "Ta'anit 27a" },
+    { text: "They read the six days of Creation, a portion for each day of their week. A world made in six days is what all of this is for, and the men at home read the reason while we do the work.", src: "Ta'anit 27b" },
+    { text: "שִׁיר הַמַּעֲלוֹת, הִנֵּה בָּרְכוּ אֶת־ה' כָּל־עַבְדֵי ה', הָעֹמְדִים בְּבֵית־ה' בַּלֵּילוֹת — you who stand in the House of Hashem in the nights. There is somebody awake in here at every hour, and that psalm is addressed to them.", src: "Tehillim 134:1" },
+  ] },
+  { name: "המגרפה", role: "The instrument no one could speak over", lines: [
+    { text: "When it sounded, no one in Jerusalem could hear his fellow speak. Three things it announced: a kohen entering to burn the ketoret, his brothers coming to bow, and the Levites rising to sing.", src: "Tamid 3:8 · Arachin 10b–11a" },
+    { text: "From Jericho they heard the gate, and the magrefah, and the flute. And from Jericho they smelled the ketoret — a bride in Jerusalem never had to perfume herself.", src: "Yoma 39b · Tamid 3:8" },
+    { text: "נֵרְדְּ וְכַרְכֹּם, קָנֶה וְקִנָּמוֹן... מֹר וַאֲהָלוֹת — read the spices in the Song slowly and you are reading the chamber where the ketoret is compounded. Eleven of them, and one that nobody will name outside this House.", src: "Shir HaShirim 4:13–14 · Keritot 6a" },
+    { text: "הַלְלוּהוּ בְּתֵקַע שׁוֹפָר, הַלְלוּהוּ בְּנֵבֶל וְכִנּוֹר... הַלְלוּהוּ בְּמִנִּים וְעֻגָב — the last psalm is a list of instruments, and then the last line of it has no instrument in it at all: כֹּל הַנְּשָׁמָה תְּהַלֵּל יָ-הּ.", src: "Tehillim 150" },
+  ] },
 ];
 
 // Eighteen rimonim of silver — chai. Each carries the id of its teaching in
@@ -1294,6 +1381,8 @@ export default function Mikdash() {
   const [storageReady, setStorageReady] = useState(false);
   const [noWebGL, setNoWebGL] = useState(false);
   const [speech, setSpeech] = useState(null);
+  // name → how many times this voice has been asked, this visit
+  const heard = useRef(new Map());
   // The pesichah — the opening card. Shown once, ever; the first visit is the
   // only one that needs it, and a returning visitor should land straight in
   // the courts. Persisted alongside progress.
@@ -3070,6 +3159,16 @@ export default function Mikdash() {
     );
     courtFloor.rotation.x = -Math.PI / 2;
     courtFloor.position.set(-60, IC_H + 0.04, 0);   // clear of the block's top face
+    // Four hundredths of an amah is under two centimetres, and two centimetres
+    // is below what the depth buffer can still tell apart two hundred amot
+    // away — a phone, which often runs the depth test at lower precision than
+    // a desktop, loses it sooner still. The floor and the top face of the block
+    // underneath it then swap places from frame to frame, which reads as the
+    // court flickering. The offset settles it in depth rather than in space, so
+    // the floor stays where it was laid and simply always wins.
+    courtFloor.material.polygonOffset = true;
+    courtFloor.material.polygonOffsetFactor = -2;
+    courtFloor.material.polygonOffsetUnits = -2;
     courtFloor.receiveShadow = true;
     scene.add(courtFloor);
     const IC_E = -60 + (IC + 50) / 2; // = 70, eastern edge of inner court
@@ -3138,12 +3237,26 @@ export default function Mikdash() {
       box(8, 0.9, 6, marble, tx, IC_H + 3.4, tz);
       box(6, 3, 4, stoneDarkM, tx, IC_H + 1.5, tz);
     }
-    cyl(5, 3.4, 2.4, 14, bronze, -20, IC_H + 4.4, IC / 2 - 22);
-    cyl(1.6, 2.4, 3.4, 10, bronze, -20, IC_H + 1.7, IC / 2 - 22);
+    // ── הַכִּיּוֹר — and where it actually stood ──
+    //
+    // Middot 3:6 gives it a place and the place is not vague: הכיור היה בין
+    // האולם ולמזבח ומשוך כלפי הדרום — between the Ulam and the altar, and
+    // drawn toward the south. It was parked out by the southern wall here,
+    // eighty amot from the line it belongs on, which is nowhere near either of
+    // the two things the mishnah measures it against.
+    //
+    // So: on the axis between the porch and the altar, and pulled south of it
+    // — south enough to be out of the walked line from the ramp to the door,
+    // which is what משוך כלפי הדרום is for, and far enough south that a kohen
+    // going from the water to the altar still crosses the אַמָּה, the channel
+    // that cuts this court end to end.
+    const KIYOR_X = -60, KIYOR_Z = 36;
+    cyl(5, 3.4, 2.4, 14, bronze, KIYOR_X, IC_H + 4.4, KIYOR_Z);
+    cyl(1.6, 2.4, 3.4, 10, bronze, KIYOR_X, IC_H + 1.7, KIYOR_Z);
     const laverWaterMat = new THREE.MeshStandardMaterial({ color: 0x22809f, metalness: 0.4, roughness: 0.08, envMap, envMapIntensity: 1 });
     metals.push(laverWaterMat);
     const laverWater = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 0.3, 14), laverWaterMat);
-    laverWater.position.set(-20, IC_H + 5.5, IC / 2 - 22);
+    laverWater.position.set(KIYOR_X, IC_H + 5.5, KIYOR_Z);
     scene.add(laverWater);
 
     // ═══════════ Altar body ═══════════
@@ -3441,9 +3554,15 @@ export default function Mikdash() {
         figures.push(f);
       }
     });
-    // Levites: standing on the fifteen steps, swaying in song (white with gold sash)
+    // Levites: standing on the fifteen steps, swaying in song. Their sash was
+    // gold, which is not sourced anywhere and is the sort of thing that gets
+    // drawn because it looks like a choir. Divrei HaYamim II 5:12 dresses the
+    // singers — Asaf, Heiman, Yedutun and their sons — מְלֻבָּשִׁים בּוּץ, in fine
+    // linen, holding cymbals and lyres and harps. Linen it is. What tells them
+    // from the kohanim is not their clothes; it is that they are the men
+    // standing on the steps.
     for (let l = 0; l < 6; l++) {
-      const f = makeFigure(0xefe9d6, 0xb8912f);
+      const f = makeFigure(0xefe9d6, 0xdcd0b4);
       const step = 2 + l * 2;
       const sx = IC_E + (14 - step) * 2.6;
       f.position.set(sx, stepTop(step), -30 + l * 12);
@@ -3994,7 +4113,10 @@ export default function Mikdash() {
     // 26 · מוכני בן קטין — the wheel that lowered the kiyor into its well each
     // night, so that morning water would not be pasul (Yoma 37a; Middot 3:6).
     const mukhani = new THREE.Group();
-    mukhani.position.set(-20, IC_H, IC / 2 - 14);
+    // Beside the kiyor, because it is the kiyor's own machinery: the wheel
+    // lowers this laver into this well. It followed the laver when the laver
+    // was moved onto the line Middot 3:6 puts it on.
+    mukhani.position.set(-72, IC_H, 44);
     for (const s2 of [-1, 1]) box(1.1, 8, 1.1, cedar, s2 * 3.6, 4, 0, mukhani);
     box(9, 1, 1.2, cedar, 0, 8.4, 0, mukhani);
     const wheelRim = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.3, 8, 22), bronze);
@@ -4456,6 +4578,154 @@ export default function Mikdash() {
     dR.userData.sealed = true;
     clickables.push(dL, dR);
 
+    // ═══════════ הַכְנָסַת הַכֵּלִים — the vessels are carried in ═══════════
+    //
+    // Three of the things standing in this court have no business standing in
+    // it. The Menorah, the Shulchan and the golden altar of the ketoret are
+    // כְּלֵי הַהֵיכָל, and the Torah says where each one goes: Shemot 26:35 puts
+    // the Shulchan on the north side of the room and the Menorah opposite it on
+    // the south, both inside the tent and outside the parochet, and Shemot 30:6
+    // sets the golden altar in front of the parochet between them. Not one of
+    // the three belongs in the open air. A Menorah standing in a courtyard is
+    // not a small licence.
+    //
+    // They were out here for one honest reason: the inside of this House is not
+    // built, and a wonder nobody can reach is not a wonder. That reason expires
+    // the moment the thirty-sixth is found — there is nothing left to look for,
+    // and the excuse for keeping the vessels where they can be looked for goes
+    // with it. So the kohanim come, six to a vessel, and carry them in, and the
+    // cedar doors close behind them.
+    //
+    // Two things on the way are worth watching. They are already standing in
+    // their right places relative to one another out here — Menorah south,
+    // Shulchan north, ketoret between — so the procession is three straight
+    // lines that never cross. And each one shrinks as it goes, back to the size
+    // its own pasuk gives it: outside they were signposts, sized so that
+    // somebody standing seven hundred amot away could find them; inside they
+    // are vessels, and a vessel is the size it is.
+    //
+    // Bearers: eighteen of them, six to a vessel, and they carry on the
+    // shoulder — בַּכָּתֵף יִשָּׂאוּ, which is how the sons of Kehat were told to
+    // move exactly these three (Bamidbar 7:9).
+    const DOOR_IN = new THREE.Vector3(-127, IC_H + 6, 0);   // the threshold, in world space
+    const bearers = [];
+    const KELIM = [
+      // The end scale brings each vessel to its sourced size, in a court drawn
+      // one unit to the amah: the Menorah three amot (Menachot 28b, eighteen
+      // tefachim); the Shulchan two amot by one, a cubit and a half high
+      // (Shemot 25:23); the golden altar one by one, two amot high (Shemot 30:2).
+      { o: men, end: 0.167, hold: 0.0, lift: 3.0 },
+      { o: shulchan, end: 0.20, hold: 3.2, lift: 2.0 },
+      { o: ketoret, end: 0.31, hold: 6.4, lift: 2.4 },
+    ];
+    const TRAVEL = 9.4;
+    KELIM.forEach((k) => {
+      k.p0 = k.o.position.clone();
+      k.s0 = k.o.scale.x;
+      // The control point pulls each vessel onto the axis of the House before
+      // it turns west, so that nothing walks diagonally through the altar.
+      k.c = new THREE.Vector3(Math.min(k.p0.x - 10, -66), k.p0.y, k.p0.z * 0.3);
+      k.crew = [];
+      for (let i = 0; i < 6; i++) {
+        const f = makeFigure(0xf3efe2, 0x3a5f9e);
+        f.visible = false;
+        // three a side, and their arms stay up: they are carrying, not walking
+        for (const sd of [-1, 1]) {
+          const arm = f.userData["arm" + (sd === -1 ? "L" : "R")];
+          if (arm) arm.rotation.x = sd * 1.15;
+        }
+        f.userData.side = i < 3 ? -1 : 1;
+        f.userData.along = (i % 3) - 1;
+        scene.add(f);
+        k.crew.push(f);
+        bearers.push(f);
+      }
+    });
+    // ── The cedar doors get a hinge ──
+    // They were two slabs rotated about their own middles, which is a
+    // turnstile and not a door. Each leaf now hangs off the jamb it is
+    // actually hung on; at rest the world transform is the one it always had.
+    const hingeL = new THREE.Group(); hingeL.position.set(23.3, 6 + 13.5, -8.8); T.add(hingeL);
+    const hingeR = new THREE.Group(); hingeR.position.set(23.3, 6 + 13.5, 8.8); T.add(hingeR);
+    T.remove(dL); dL.position.set(0, 0, 4.2); hingeL.add(dL);
+    T.remove(dR); dR.position.set(0, 0, -4.2); hingeR.add(dR);
+
+    const hach = { on: false, t: 0, door: 0, in: 0 };
+    const bezPt = (p0, c, p1, u, out) => out.set(
+      (1 - u) * (1 - u) * p0.x + 2 * (1 - u) * u * c.x + u * u * p1.x,
+      (1 - u) * (1 - u) * p0.y + 2 * (1 - u) * u * c.y + u * u * p1.y,
+      (1 - u) * (1 - u) * p0.z + 2 * (1 - u) * u * c.z + u * u * p1.z);
+    const bpA = new THREE.Vector3(), bpB = new THREE.Vector3();
+    // A vessel that has gone in must stop being clickable. Three.js will
+    // happily raycast a mesh whose `visible` is false, so hiding it is not
+    // enough — it comes out of the list.
+    const unclick = (obj) => {
+      const ci = clickables.indexOf(obj);
+      if (ci >= 0) clickables.splice(ci, 1);
+    };
+    // A visitor who finished on an earlier visit comes back to a House whose
+    // vessels are already inside. No procession — that happened, and it does
+    // not happen again every time the page loads.
+    const stowKelim = () => {
+      for (const k of KELIM) { k.o.visible = false; unclick(k.o); }
+      for (const f of bearers) f.visible = false;
+      hach.in = 1; hach.on = false;
+      menLight.position.set(-133, IC_H + 14, 0);
+      menLight.intensity = 1.7;
+    };
+    const stepHachnasah = (dt2) => {
+      if (!hach.on) return;
+      hach.t += dt2;
+      const LAST = KELIM[KELIM.length - 1].hold + TRAVEL;
+      // Drawn back before the first vessel reaches them, shut once the last is
+      // through. Tamid 3:7 has it taking several men and being heard in
+      // Jericho; here it takes about two seconds.
+      const want = hach.t > 2.2 && hach.t < LAST + 1.0 ? 1 : 0;
+      hach.door += (want - hach.door) * Math.min(1, dt2 * 1.3);
+      hingeL.rotation.y = -1.35 * hach.door;
+      hingeR.rotation.y = 1.35 * hach.door;
+      for (const k of KELIM) {
+        if (!k.o.visible) continue;
+        const u = clamp01((hach.t - k.hold) / TRAVEL);
+        if (u >= 1) { k.o.visible = false; unclick(k.o); for (const f of k.crew) f.visible = false; continue; }
+        if (u <= 0) continue;
+        const e = u * u * (3 - 2 * u);
+        bezPt(k.p0, k.c, DOOR_IN, e, bpA);
+        bezPt(k.p0, k.c, DOOR_IN, Math.min(1, e + 0.014), bpB);
+        // The porch is six amot above the court, and they climb it in the last
+        // third; the lift is the vessel coming up onto shoulders and going
+        // down again at the door.
+        const climb = sstep(0.66, 0.93, e);
+        const bump = sstep(0, 0.11, e) * (1 - sstep(0.9, 1, e));
+        k.o.position.set(bpA.x, lerp(k.p0.y, IC_H + 6, climb) + k.lift * bump, bpA.z);
+        k.o.scale.setScalar(lerp(k.s0, k.end, sstep(0.12, 0.96, e)));
+        const dx = bpB.x - bpA.x, dz = bpB.z - bpA.z;
+        const dl = Math.hypot(dx, dz) || 1;
+        const fx = dx / dl, fz = dz / dl;
+        const yaw = Math.atan2(-dz, dx) + Math.PI / 2;
+        for (let bi = 0; bi < k.crew.length; bi++) {
+          const f = k.crew[bi];
+          f.visible = true;
+          const along = f.userData.along * 3.6, side = f.userData.side * 3.4;
+          const bob = Math.abs(Math.sin(hach.t * 5.2 + bi * 1.7)) * 0.13;
+          f.position.set(bpA.x + fx * along - fz * side,
+                         lerp(k.p0.y, IC_H + 6, climb) - (k.p0.y - IC_H) * (1 - climb) + bob,
+                         bpA.z + fz * along + fx * side);
+          f.rotation.y = yaw;
+        }
+      }
+      if (hach.t > LAST + 1.6) {
+        hach.on = false; hach.in = 1;
+        for (const f of bearers) f.visible = false;
+        // The Menorah's light goes with it: from now on what reaches the court
+        // comes out under the doors, which is all anybody standing outside the
+        // Heichal ever saw of it.
+        menLight.position.set(-133, IC_H + 14, 0);
+        menLight.intensity = 1.7;
+        apiRef.current.toast?.("הַכְנָסַת הַכֵּלִים — the Menorah to the south, the Shulchan to the north, the golden altar between them (שמות כ״ו:ל״ה). They are in their places.");
+      }
+    };
+
     // Nicanor's doors are wonder 14 themselves. They were built long before
     // `clickables` exists, so the registration has to happen down here — and
     // when it was missing they carried a halo and a hint but nothing to strike,
@@ -4623,8 +4893,19 @@ export default function Mikdash() {
       if (silentTag.paused) silentTag.play().catch(() => {});
     };
 
+    // A context is only ever opened inside a gesture. Desktop is forgiving —
+    // open one at load, resume it on the first click and it starts — but iOS
+    // will not start a context that was born before the visitor touched
+    // anything, however many times it is resumed afterwards. A restored sound
+    // setting used to open one during first paint, which is exactly that case:
+    // the bed built, wired, and silent for the rest of the visit. Callers get
+    // null until the first touch, and the unlock below builds the bed then.
+    let gestured = false;
     const ensureAudio = () => {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtx) {
+        if (!gestured && !navigator.userActivation?.hasBeenActive) return null;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
       if (audioCtx.state === "suspended") audioCtx.resume();
       holdSession();
       return audioCtx;
@@ -4639,9 +4920,10 @@ export default function Mikdash() {
     // Held on the window in the capture phase so nothing on the page can eat
     // the gesture first, and held until a context is actually running: resume()
     // is a promise, and the first one does not always take.
-    const UNLOCK_EVENTS = ["pointerdown", "touchend", "mousedown", "keydown"];
+    const UNLOCK_EVENTS = ["pointerdown", "touchstart", "touchend", "mousedown", "keydown"];
     const dropUnlock = () => UNLOCK_EVENTS.forEach((n) => window.removeEventListener(n, unlock, true));
     function unlock() {
+      gestured = true;
       if (!amb.on) return;
       buildAmbience();
       if (audioCtx && audioCtx.state === "running") dropUnlock();
@@ -4693,6 +4975,7 @@ export default function Mikdash() {
     const playShofar = () => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       hornBlast(ctx, ctx.currentTime, 1.6, true);
     };
     // ── The kinnor: a plucked string, not an oscillator ──
@@ -4768,6 +5051,7 @@ export default function Mikdash() {
     const playHarp = (level = 1) => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       const bus = harpBus(ctx);
       const t0 = ctx.currentTime + 0.02;
       const eighth = harpStrings[7].visible;
@@ -4795,6 +5079,7 @@ export default function Mikdash() {
     const playTrumpet = () => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       [[392, 0, 0.5], [523.25, 0.45, 0.9], [392, 1.3, 0.35], [523.25, 1.6, 1.3]].forEach(([f, dt, dur]) => {
         const t0 = ctx.currentTime + dt;
         const o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter();
@@ -4811,6 +5096,7 @@ export default function Mikdash() {
     const playChime = () => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       [660, 990, 1320].forEach((f, i) => {
         const t0 = ctx.currentTime + i * 0.12;
         const o = ctx.createOscillator(), g = ctx.createGain();
@@ -4826,6 +5112,7 @@ export default function Mikdash() {
     const playFlute = () => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       const drone = ctx.createOscillator(), dg = ctx.createGain();
       drone.type = "sine"; drone.frequency.value = 146.83;
       dg.gain.setValueAtTime(0.0001, ctx.currentTime);
@@ -4853,7 +5140,9 @@ export default function Mikdash() {
                         311.13, 369.99, 392.0, 440.0, 466.16, 523.25, 587.33];
     const playStep = (i) => {
       if (!amb.on) return;
-      const ctx = ensureAudio(); const t0 = ctx.currentTime;
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const t0 = ctx.currentTime;
       const f = STEP_SCALE[Math.max(0, Math.min(14, i))];
       [[1, "triangle", 0.17], [2, "sine", 0.055], [3, "sine", 0.02]].forEach(([mul, type, peak]) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
@@ -4886,6 +5175,7 @@ export default function Mikdash() {
     // what a wrong melody actually sounded like.
     const playPitch = (midi, at, dur, dest, voices) => {
       const ctx = ensureAudio();
+      if (!ctx) return;
       const f = NOTE_HZ(midi);
       // Release. Every note used to ring for a fixed half-second past its own
       // length, which at a quaver of a third of a second meant three notes
@@ -4922,6 +5212,7 @@ export default function Mikdash() {
       apiRef.current.stopMelody?.();
       if (!amb.on) return false;
       const ctx = ensureAudio();
+      if (!ctx) return false;
       const spb = 60 / mel.bpm;
       const start = ctx.currentTime + 0.25;
       const bus = ctx.createGain();
@@ -5029,12 +5320,13 @@ export default function Mikdash() {
     };
     const buildAmbience = () => {
       // ensureAudio() runs first, above the built guard, and that ordering is
-      // the whole point: a context opened before the visitor has touched
-      // anything comes back suspended, and only a resume() inside a real
-      // gesture starts it. Guarding above this call strands that context
-      // suspended for the rest of the session — the bed built, wired, silent.
+      // the whole point: a context that is already open still needs a resume()
+      // inside a real gesture to start, and guarding above this call strands
+      // it suspended for the rest of the session. It hands back null before
+      // the first touch, which is the one case where there is nothing to
+      // build yet — the unlock listener comes back the moment there is.
       const ctx = ensureAudio();
-      if (amb.built) return;
+      if (!ctx || amb.built) return;
       amb.built = true;
       amb.buf = noiseBuf(ctx, 6);
       amb.master = ctx.createGain();
@@ -5437,6 +5729,7 @@ export default function Mikdash() {
     const tekiahGedolah = (startAt) => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       const t0 = typeof startAt === "number" ? Math.max(startAt, ctx.currentTime) : ctx.currentTime + 0.15;
       const LEN = 6.4;
       const filt = ctx.createBiquadFilter(), gain = ctx.createGain();
@@ -5497,6 +5790,7 @@ export default function Mikdash() {
     const shofarSequence = () => {
       if (!amb.on) return;
       const ctx = ensureAudio();
+      if (!ctx) return;
       let at = ctx.currentTime + 0.12;
       at += hornBlast(ctx, at, 1.5, true) + 0.34;                       // תְּקִיעָה
       for (let i = 0; i < 3; i++) at += hornBlast(ctx, at, 0.4) + 0.1;  // שְׁבָרִים
@@ -5793,6 +6087,9 @@ export default function Mikdash() {
         if (id === 13) ketoretState.active = true;
         if (id === 14) nicanor.userData.target = 1;
       });
+      // Everything found on an earlier visit means the procession has already
+      // happened. The vessels are in the Heichal and stay there.
+      if (arr.length >= DISCOVERIES.length) stowKelim();
     };
     const lerp = (a, b, t) => a + (b - a) * t;
     // Light and fog colours are consumed linearly, and every one of these was
@@ -5890,7 +6187,7 @@ export default function Mikdash() {
       fogA.copy(dayFog).lerp(duskFog, low * low);
       scene.fog.color.copy(fogA).lerp(nightFog, 1 - skyAmt);
       windowMat.emissiveIntensity = e2 * 1.6;
-      doorGlow.intensity = e2 * 1.5;
+      doorGlow.intensity = e2 * 1.5 + hach.in * 1.5;   // once the Menorah is inside, the doorway is lit at noon too
       goldPlate.emissiveIntensity = e2 * 0.18;
       // at night there is far less sky for the gold to reflect
       const envI = lerp(1.05, 0.26, e2);
@@ -5946,6 +6243,12 @@ export default function Mikdash() {
       const dusk = low * low * sstep(-0.16, 0.10, sunY);
       stepSheep(dt);
       stepConfetti(dt);
+      stepHachnasah(dt);
+      // Seven seconds after the thirty-sixth: the shofar has been blown and
+      // the gold is still coming down, and that is when the kohanim come out
+      // for the vessels. Hung on the loop's own clock rather than a timer, so
+      // it cannot outlive the scene it belongs to.
+      if (finaleAt > 0 && !hach.on && !hach.in && nowT - finaleAt > 7) { hach.on = true; hach.t = 0; }
       // ── The ox breathes ──
       // Four small motions on four unrelated periods, so they never line up
       // into a loop: the barrel fills and empties, the tail swings and
@@ -6437,7 +6740,15 @@ export default function Mikdash() {
       setFound((f) => (f.includes(id) ? f : [...f, id]));
     };
     apiRef.current.toast = showToast;
-    apiRef.current.speak = (v) => setSpeech(v);
+    // ── A man asked twice does not repeat himself ──
+    // Which line each of the eighteen is up to, kept for the length of a
+    // visit. It goes round rather than shuffling: a shuffle can hand you the
+    // same line twice running, which is the exact thing this is here to stop.
+    apiRef.current.speak = (v) => {
+      const n = heard.current.get(v.name) || 0;
+      heard.current.set(v.name, n + 1);
+      setSpeech({ v, i: n % v.lines.length });
+    };
   }, [showToast]);
   useEffect(() => { apiRef.current.setNight?.(night); }, [night]);
   // Skip the mount call when sound is already on: building the bed here would
@@ -7350,7 +7661,13 @@ export default function Mikdash() {
               “Greater shall be the glory of this latter House than the former, and in this place I will grant peace.”
               <div style={{ fontSize: 12.5, fontStyle: "normal", letterSpacing: ".08em", color: "#c9ad74", marginTop: 3 }}>חגי ב׳:ט׳ · Chaggai 2:9</div>
             </div>
-            <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#e0c98f", marginTop: 18, fontStyle: "italic" }}>
+            {/* What happens outside this card while it is being read, so that
+                somebody who closes it is looking for the right thing. */}
+            <div style={{ fontSize: 13.5, lineHeight: 1.62, color: "#f0dcaa", marginTop: 18, padding: "12px 14px", borderRadius: 13,
+              background: "rgba(212,164,55,.10)", border: "1px solid rgba(212,164,55,.32)" }}>
+              Close this and watch the court: the kohanim are coming for the Menorah, the Shulchan and the golden altar. Those three are כְּלֵי הַהֵיכָל — the Shulchan to the north, the Menorah opposite it to the south, the altar of the ketoret between them, all of it inside (שמות כ״ו:ל״ה, ל׳:ו׳). They stood out here so you could find them. There is nothing left to find.
+            </div>
+            <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#e0c98f", marginTop: 14, fontStyle: "italic" }}>
               Eighteen silver rimonim and eighteen living wonders, and nothing here that is not sourced to a pasuk, a daf, or a stone somebody measured. The House stays open. Nothing you found is taken back.
             </div>
             {confirmReset ? (
@@ -7424,12 +7741,27 @@ export default function Mikdash() {
       {speech && (
         <div className="panel card-frame" style={{ position: "absolute", left: "50%", bottom: 96, transform: "translateX(-50%)", width: "min(560px, 88vw)", background: "linear-gradient(160deg, rgba(251,246,232,.97), rgba(238,226,196,.97))", border: "1px solid rgba(140,110,50,.5)", borderRadius: 18, boxShadow: "0 22px 60px rgba(0,0,0,.45)", padding: "18px 22px 16px", zIndex: 6, animation: "rise .28s ease" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 7 }}>
-            <span style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 18, fontWeight: 700, color: "#4a3a18" }}>{speech.name}</span>
-            <span style={{ fontSize: 13, fontStyle: "italic", color: "#7a6634" }}>{speech.role}</span>
+            <span style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 18, fontWeight: 700, color: "#4a3a18" }}>{speech.v.name}</span>
+            <span style={{ fontSize: 13, fontStyle: "italic", color: "#7a6634" }}>{speech.v.role}</span>
             <button onClick={() => setSpeech(null)} aria-label="Close" style={{ marginLeft: "auto", background: "none", border: "none", color: "#7a6634", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>×</button>
           </div>
-          <div style={{ fontSize: 16.5, lineHeight: 1.62, color: "#544729" }}>“{speech.text}”</div>
-          <div style={{ marginTop: 9, fontSize: 12, letterSpacing: ".05em", color: "#8a7440" }}>{speech.src}</div>
+          <div style={{ fontSize: 16.5, lineHeight: 1.62, color: "#544729" }}>“{speech.v.lines[speech.i].text}”</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 9 }}>
+            <div style={{ fontSize: 12, letterSpacing: ".05em", color: "#8a7440" }}>{speech.v.lines[speech.i].src}</div>
+            {/* He knows four things. Asking again should not mean hunting the
+                same man down in a courtyard of two hundred amot. */}
+            <button
+              onClick={() => {
+                const n = (heard.current.get(speech.v.name) || 0);
+                heard.current.set(speech.v.name, n + 1);
+                setSpeech({ v: speech.v, i: n % speech.v.lines.length });
+              }}
+              style={{ marginLeft: "auto", flex: "0 0 auto", fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12,
+                letterSpacing: ".06em", background: "rgba(74,58,24,.10)", color: "#6d5c30",
+                border: "1px solid rgba(150,120,50,.4)", borderRadius: 999, padding: "4px 12px", cursor: "pointer" }}>
+              עוֹד — tell me more
+            </button>
+          </div>
         </div>
       )}
 

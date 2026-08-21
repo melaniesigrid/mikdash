@@ -173,6 +173,53 @@ preferences.
       reason it has not been done is that some of them carry colliders and
       clickable ids, which merging would flatten.
 
+## Halacha — audited, fixed, and still open
+
+Written down as a list because the question keeps being asked and the answer
+should not have to be re-derived. Everything here was checked against a source,
+not against a memory of a picture.
+
+- [x] **The three vessels of the Heichal were standing in the open court.**
+      Shemot 26:35 puts the Shulchan on the north side of the room and the
+      Menorah opposite it on the south, both inside the tent; Shemot 30:6 sets
+      the golden altar in front of the parochet between them. All three were out
+      in the azarah, which is not a small licence. They are carried in by the
+      kohanim once the thirty-sixth wonder is found — six bearers to a vessel,
+      בַּכָּתֵף יִשָּׂאוּ (Bamidbar 7:9) — and each shrinks on the way to the size
+      its own pasuk gives it. The real fix is the Heichal interior; this is the
+      honest version of the answer until that is built.
+- [x] **The kiyor was eighty amot from where Middot 3:6 puts it.** בֵּין הָאוּלָם
+      וְלַמִּזְבֵּחַ מָשׁוּךְ כְּלַפֵּי הַדָּרוֹם — between the Ulam and the altar and
+      drawn to the south. It was parked out by the southern wall, nowhere near
+      either of the two things the mishnah measures it against. On the line now,
+      with Ben Katin's wheel beside it where it belongs.
+- [x] **The Levites' sash was gold**, which is not sourced anywhere. Divrei
+      HaYamim II 5:12 dresses the singers מְלֻבָּשִׁים בּוּץ, in fine linen.
+- [x] **The Menorah had a shamash and vertical branches** — see the entry below;
+      fixed in v3.20.
+- Checked and correct, so that nobody re-checks them: the slaughtering tables
+      stand north of the altar (Middot 3:5); the Menorah, Shulchan and golden
+      altar are in the right places *relative to one another*, south, north and
+      between (Yoma 33b; Bava Batra 25b); no tree stands in the azarah and
+      `plantable()` enforces it (Devarim 16:21; Rambam, Avodah Zarah 6:9); the
+      chanukiah is outside the walls and its shamash is raised, which is right
+      for a chanukiah and wrong only for a Menorah; the kohanim's sash carries
+      techelet (Shemot 39:29).
+- [ ] **Yachin and Boaz are Shlomo's.** Melachim I 7:21 stands them at the porch
+      of the first House. Yechezkel's porch has none, and the Second Temple had
+      none. They are sourced, and they are in the wrong House — the choice
+      should either be defended in the plaque or the pillars should come down.
+- [ ] **The kiyor has no spouts.** Yoma 37a: twelve of them, one for each kohen
+      of the daily offering, which is the detail the wonder beside it is about.
+- [ ] **No soreg.** Middot 2:3: a lattice ten tefachim high ran round the
+      precinct, with thirteen breaches the Greek kings made in it and thirteen
+      places to bow opposite them. It is missing entirely, and it is the one
+      piece of this precinct that says where a visitor may and may not walk.
+- [ ] **The altar is climbed from the east** (Yechezkel 43:17) rather than by
+      Middot's southern ramp — a deliberate choice of the vision this House is
+      built on, and it should be said out loud somewhere a visitor can read it,
+      because to anybody holding Middot it looks like an error.
+
 ## Found while doing the above
 
 - [x] **The Menorah had a shamash.** The middle lamp stood half a tefach above
@@ -190,6 +237,14 @@ preferences.
       of seven even; parallel branches at a single angle would put the outer
       three at two tefachim and leave a gap of five and a half beside the shaft.
       If a source turns up, it outranks the choice.
+- [x] **The eighteen who answer had one line each.** Four now — seventy-two,
+      which is חי times four — and they come round in order rather than
+      shuffling, because a shuffle can hand you the same line twice running,
+      which is the exact thing the change is for. Psalms and Shir HaShirim are
+      among them, quoted where they were actually said: Tehillim 122 in the
+      mouth of the bikkurim procession, 84 with the swifts on the walls, 134
+      from the men who stand here at night, and the spices of Shir HaShirim 4
+      from the man who can smell the ketoret from Jericho.
 - [ ] **The lamps are cups, not נֵרוֹת.** Each lamp is a small goblet with a
       flame over it. A real ner is a closed boat with a spout at one end, and
       the spout is what carries Bamidbar 8:2 — the wick, and therefore the
