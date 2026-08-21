@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
+import { track } from "./analytics.js";
 
 /*
   ═══════════════════════════════════════════════════════════════════════════
@@ -92,12 +93,17 @@ const DISCOVERIES = [
 //
 // ─── On accuracy ───
 // `nigun` is composed for this House, so it is right by definition. The three
-// borrowed tunes were first written down here by ear, and they were wrong —
-// outlines with the right shape and the wrong notes. Hatikvah and Ma'oz Tzur
-// have since been read note for note off the engraved scores in their
-// Wikipedia articles and carry `verified: true`. Shalom Aleichem is still by
-// ear: Goldfarb's 1918 setting is public domain but no engraving of it turned
-// up to read from, so it keeps `verified: false` and says so in the panel.
+// borrowed tunes were first written down here by ear, and all three were
+// wrong — outlines with the right shape and the wrong notes. All three have
+// now been read note for note off an engraved score: Hatikvah and Ma'oz Tzur
+// off the LilyPond in their Wikipedia articles, Shalom Aleichem off Goldfarb's
+// sixteen bars, which did eventually turn up. Every one carries
+// `verified: true`, and the by-ear warning in the panel is kept for whatever
+// is added next rather than deleted.
+//
+// Tempi are the tunes' own, not a house style — the crotchet mark where the
+// score carries one, the speed the thing is actually sung at where it does
+// not. They were all set roughly a fifth too slow when first entered.
 // Each melody is one line of data; fixing a note is editing a number.
 const NOTE_HZ = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // Step index → MIDI, matching STEP_SCALE exactly. Used to light the tread a
@@ -110,10 +116,19 @@ const MELODIES = [
     heb: "נִגּוּן הַמַּעֲלוֹת",
     title: "A Nigun of Ascent",
     verified: true,
-    bpm: 84,
+    // Tempo. Every one of these was set a fifth under the speed the tune is
+    // actually sung at, and four songs in a row at a funeral pace is what
+    // "the songs play too slow" meant. A nigun of ascent is danced, not
+    // mourned: 108 is a walking-up pulse.
+    bpm: 108,
     blurb: "Wordless, and composed for this House rather than borrowed. It is built only from the fifteen notes the steps are tuned to — D Ahava Rabbah, the mode of the ba'al tefillah — and it climbs, because a Song of Ascent should.",
     source: "Mode: Ahava Rabbah · the steps: Middot 2:5; Sukkah 51b",
     // Rises the full two octaves of the ascent, then settles home.
+    // ── מִלִּים — the words ──
+    // A nigun has none, and that is the claim it makes: the Baal Shem Tov's
+    // circle held that a wordless melody goes where a worded one cannot,
+    // because words fix a thought and a nigun does not have to.
+    lyrics: { wordless: "It has no words. That is the point of it — a nigun is what is left when the words run out, and the chassidim held it goes higher for having been left.", stanzas: [] },
     notes: [[50,1],[51,1],[54,1],[55,1],[57,2],[55,1],[54,1],[51,2],[50,2],[0,1],
             [57,1],[58,1],[60,1],[62,2],[60,1],[58,1],[57,2],[0,1],
             [55,1],[57,1],[58,1],[57,1],[55,3],[0,1],
@@ -125,11 +140,31 @@ const MELODIES = [
     heb: "הַתִּקְוָה",
     title: "Hatikvah — The Hope",
     verified: true,
-    bpm: 72,
+    // Twenty bars of 4/4. Ceremonial performances run the anthem in a little
+    // under a minute, which puts the crotchet near 94; at 72 it took sixty-six
+    // seconds and sagged in the middle of every held A.
+    bpm: 94,
     blurb: "The tune is far older than the words and was never Jewish to begin with: it descends from \"La Mantovana,\" printed by Giuseppe Cenci around 1600, a wandering European melody that also surfaces in Smetana's Vltava. Samuel Cohen set it to Naftali Herz Imber's poem Tikvatenu in 1888. Imber's hope was two thousand years old when he wrote it down; the melody had been drifting for three hundred.",
     source: "Melody: Cenci, c. 1600, via Samuel Cohen 1888 · Text: N. H. Imber, 1878 — all public domain. Notes read off the engraved score in the Wikipedia article, D minor, 4/4.",
     // Sixteen bars, and the last four sung twice — the anthem as engraved, not
     // the flattened outline that used to stand here.
+    // Imber's poem, 1878, in the two-stanza form the anthem settled into. The
+    // beat spans are where the words sit in the tune, so the panel can light
+    // the line being sung — beats, not seconds, so it stays right at any tempo.
+    lyrics: { stanzas: [
+      { from: 0, to: 32,
+        he: "כָּל עוֹד בַּלֵּבָב פְּנִימָה\nנֶפֶשׁ יְהוּדִי הוֹמִיָּה,\nוּלְפַאֲתֵי מִזְרָח קָדִימָה,\nעַיִן לְצִיּוֹן צוֹפִיָּה;",
+        tl: "Kol od balevav p'nima / nefesh yehudi homiya, / ul'fa'atei mizrach kadima, / ayin l'Tzion tzofiya;",
+        en: "So long as within the heart a Jewish soul still stirs, and onward toward the ends of the east an eye still looks to Zion —" },
+      { from: 32, to: 48,
+        he: "עוֹד לֹא אָבְדָה תִּקְוָתֵנוּ,\nהַתִּקְוָה בַּת שְׁנוֹת אַלְפַּיִם,",
+        tl: "Od lo avda tikvatenu, / hatikvah bat shnot alpayim,",
+        en: "our hope is not yet lost, the hope two thousand years old —" },
+      { from: 48, to: 80,
+        he: "לִהְיוֹת עַם חָפְשִׁי בְּאַרְצֵנוּ,\nאֶרֶץ צִיּוֹן וִירוּשָׁלַיִם.",
+        tl: "lihyot am chofshi b'artzenu, / eretz Tzion virushalayim.",
+        en: "to be a free people in our own land, the land of Zion and Jerusalem." },
+    ] },
     notes: [[62,0.5],[64,0.5],[65,0.5],[67,0.5],[69,1],[69,1],
             [70,0.5],[69,0.5],[70,0.5],[74,0.5],[69,2],
             [67,1],[67,0.5],[67,0.5],[65,1],[65,1],
@@ -153,23 +188,52 @@ const MELODIES = [
   },
   {
     id: "shalom",
-    heb: "שָׁלוֹם עֲלֵיכֶם",
+    heb: "שָׁלוֹם עֲלֵיכֶם",
     title: "Shalom Aleichem — Peace Be Upon You",
-    verified: false,
-    bpm: 66,
-    blurb: "Peace greeted at the door. The words come from the kabbalists of Tzfat and were first printed in Tikkunei Shabbat (Prague, 1641), built on Shabbat 119b: two angels walk a person home on Shabbat eve. The melody almost everyone sings is Israel Goldfarb's, written in 1918 — by his own account sitting near the Statue of Liberty at Columbia University, which is a strange and lovely place for a Shabbat hymn to have been born.",
-    source: "Text: Tzfat, printed Prague 1641 · Shabbat 119b · Melody: Israel Goldfarb, 1918 (public domain)",
-    notes: [[69,1],[69,1],[70,1],[69,1],[67,1],[65,2],[0,0.5],
-            [65,1],[67,1],[69,1],[70,1],[69,2],[0,0.5],
-            [69,1],[70,1],[72,1],[70,1],[69,1],[67,2],[0,0.5],
-            [67,1],[65,1],[64,1],[65,1],[62,3]],
+    verified: true,
+    bpm: 78,
+    blurb: "Peace greeted at the door. The words come from the kabbalists of Tzfat and were first printed in Tikkunei Shabbat (Prague, 1641), built on Shabbat 119b: two angels walk a person home on Shabbat eve. The melody almost everyone sings is Israel Goldfarb's, written in 1918 — by his own account sitting near the Alma Mater statue at Columbia University, which is a strange and lovely place for a Shabbat hymn to have been born.",
+    source: "Text: Tzfat, printed Prague 1641 · Shabbat 119b · Melody: Israel Goldfarb, 1918 (public domain). Sixteen bars read off the engraved score, D minor, 4/4, marked ♩=66; dropped an octave so it sits on the steps.",
+    // What stood here was written from memory and was not Goldfarb's tune at
+    // all — a plausible A–B♭–A shape in the right mode and the wrong song.
+    // The engraving turned up (flutetunes.com, sixteen bars, ♩=66) and this is
+    // it note for note: the pickup A, the fall F–E–D, and the C♯ of the
+    // harmonic minor that the memory version had quietly flattened away. Its
+    // written register runs G4–B♭5, above every tread the steps are tuned to,
+    // so the whole line is moved down an octave to land on them.
+    // Tikkunei Shabbat, Prague 1641, on Shabbat 119b. Four stanzas to one tune:
+    // the angels are greeted, asked in, asked for a blessing, and sent out
+    // again — which is the whole of Friday night in twelve lines.
+    lyrics: { stanzas: [
+      { from: 0, to: 32,
+        he: "שָׁלוֹם עֲלֵיכֶם מַלְאֲכֵי הַשָּׁרֵת\nמַלְאֲכֵי עֶלְיוֹן,",
+        tl: "Shalom aleichem, malachei hashareit, malachei Elyon,",
+        en: "Peace be upon you, ministering angels, angels of the Most High," },
+      { from: 32, to: 64,
+        he: "מִמֶּלֶךְ מַלְכֵי הַמְּלָכִים\nהַקָּדוֹשׁ בָּרוּךְ הוּא.",
+        tl: "mimelech malchei ham'lachim, HaKadosh Baruch Hu.",
+        en: "from the King who is King of kings, the Holy One, blessed be He." },
+    ], more: [
+      { he: "בּוֹאֲכֶם לְשָׁלוֹם ...", tl: "Bo'achem l'shalom …", en: "Come in peace …" },
+      { he: "בָּרְכוּנִי לְשָׁלוֹם ...", tl: "Barchuni l'shalom …", en: "Bless me with peace …" },
+      { he: "צֵאתְכֶם לְשָׁלוֹם ...", tl: "Tzeitchem l'shalom …", en: "Go out in peace …" },
+    ] },
+    notes: [[57,1],[65,0.5],[64,0.5],[62,1],[62,1],[61,0.5],[62,0.5],[64,0.5],[62,0.5],[61,0.5],[58,0.5],[57,1],
+            [61,0.5],[61,0.5],[61,1],[62,0.5],[61,0.5],[62,0.5],[65,0.5],[64,4],
+            [57,1],[65,0.5],[64,0.5],[62,1],[62,1],[61,0.5],[62,0.5],[64,0.5],[62,0.5],[61,0.5],[58,0.5],[57,0.5],[57,0.5],
+            [55,1],[62,1],[61,1],[58,0.5],[55,0.5],[57,3],[0,1],
+            [65,1],[69,0.5],[69,0.5],[69,1],[69,1],[67,0.5],[65,0.5],[64,0.5],[65,0.5],[67,0.5],[69,0.5],[67,1],
+            [65,0.5],[64,0.5],[62,0.5],[64,0.5],[65,0.5],[69,0.5],[67,0.5],[65,0.5],[64,4],
+            [64,0.5],[65,0.5],[67,1],[67,1],[67,1],[67,0.5],[70,0.5],[69,0.5],[67,0.5],[65,0.5],[64,0.5],[62,1],
+            [62,0.5],[64,0.5],[65,1],[64,0.5],[62,0.5],[61,0.5],[64,0.5],[62,4]],
   },
   {
     id: "maoz",
     heb: "מָעוֹז צוּר",
     title: "Ma'oz Tzur — Rock of Ages",
     verified: true,
-    bpm: 92,
+    // A Chanukah table song, sung briskly and by children. 116.
+    bpm: 116,
     blurb: "The one song here that asks for this House by name: תִּכּוֹן בֵּית תְּפִלָּתִי — let my house of prayer be established — and there we will bring the thanksgiving offering. The poem is thirteenth century, signed by an acrostic reading Mordechai. The melody is a German folk tune of the fifteenth or sixteenth century that Ashkenazi Jewry took up and kept.",
     source: "Text: 13th c., acrostic 'Mordechai' · Melody: German folk, 15th–16th c. (public domain). Notes read off the engraved 'traditional version' in the Wikipedia article, written there in C and moved here to D so the whole House stays in one key.",
     // Two strains and their answers: A A' B C C'. The old line here climbed
@@ -177,6 +241,28 @@ const MELODIES = [
     // it and comes back up — D–A–D–G–F#–E–D — which is why it never landed.
     // There is no B♭ anywhere in this tune; the whole of it sits in D major
     // against Hatikvah's D minor.
+    // The first stanza, thirteenth century, acrostic מרדכי. The whole House is
+    // in the second line of it: תִּכּוֹן בֵּית תְּפִלָּתִי — let my house of
+    // prayer be established — and the last words are the dedication of the
+    // altar that stands in the middle of this court.
+    lyrics: { stanzas: [
+      { from: 0, to: 16,
+        he: "מָעוֹז צוּר יְשׁוּעָתִי,\nלְךָ נָאֶה לְשַׁבֵּחַ.",
+        tl: "Ma'oz tzur yeshu'ati, lecha na'eh l'shabe'ach.",
+        en: "Rock of my salvation — it is fitting to praise You." },
+      { from: 16, to: 32,
+        he: "תִּכּוֹן בֵּית תְּפִלָּתִי,\nוְשָׁם תּוֹדָה נְזַבֵּחַ.",
+        tl: "Tikon beit tefilati, v'sham toda n'zabe'ach.",
+        en: "Let my house of prayer be established, and there we will bring the thanksgiving offering." },
+      { from: 32, to: 48,
+        he: "לְעֵת תָּכִין מַטְבֵּחַ\nמִצָּר הַמְנַבֵּחַ.",
+        tl: "L'et tachin matbe'ach mitzar hamnabe'ach.",
+        en: "When You have made an end of the barking foe," },
+      { from: 48, to: 80,
+        he: "אָז אֶגְמוֹר בְּשִׁיר מִזְמוֹר\nחֲנֻכַּת הַמִּזְבֵּחַ.",
+        tl: "Az egmor b'shir mizmor chanukat hamizbe'ach.",
+        en: "then I will finish, with song and psalm, the dedication of the altar." },
+    ] },
     notes: [[62,1],[57,1],[62,1],[67,1],[66,1],[64,1],[62,1.5],[69,0.5],
             [69,1],[71,1],[64,1],[66,0.5],[67,0.5],[66,1],[64,1],[62,2],
             [62,1],[57,1],[62,1],[67,1],[66,1],[64,1],[62,1.5],[69,0.5],
@@ -189,6 +275,245 @@ const MELODIES = [
             [66,1],[62,1],[71,1],[69,0.5],[67,0.5],[66,1],[64,1],[62,2]],
   },
 ];
+
+// ═══════════ לוּחַ — the calendar ═══════════
+//
+// Everything date-aware in this House comes out of the next hundred lines: the
+// chag it is today, whether the almond is in flower, how many lights are in the
+// chanukiah, which day of the Omer, and the parshah of anybody's birthday.
+//
+// It is arithmetic, not a lookup: the Hebrew calendar has been computable since
+// Hillel II fixed it in the fourth century, and the whole of it is the molad
+// (the mean lunation, 29d 12h 793p — which is 29.530594 days, and is wrong by
+// about half a second a century) plus four dechiyot that push Rosh Hashanah off
+// the days it may not fall on. No table, no network, no dependency.
+//
+// Days are counted in RD — Rata Die — where RD 1 is 1 January 1 CE in the
+// proleptic Gregorian calendar. Months are numbered from Nisan, because that is
+// how the Torah counts them (Shemot 12:2 — הַחֹדֶשׁ הַזֶּה לָכֶם רֹאשׁ
+// חֳדָשִׁים), even though the year turns at Tishrei, which is month 7.
+const HEB_EPOCH = -1373427;
+const gLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+const gMonthLen = (y, m) => (m === 2 ? (gLeap(y) ? 29 : 28) : [1, 3, 5, 7, 8, 10, 12].includes(m) ? 31 : 30);
+function gregToRD(y, m, d) {
+  return 365 * (y - 1) + Math.floor((y - 1) / 4) - Math.floor((y - 1) / 100)
+    + Math.floor((y - 1) / 400) + Math.floor((367 * m - 362) / 12)
+    + (m <= 2 ? 0 : (gLeap(y) ? -1 : -2)) + d;
+}
+function rdToGreg(rd) {
+  let y = Math.floor((rd - 1) / 366) + 1;
+  while (gregToRD(y + 1, 1, 1) <= rd) y++;
+  let m = 1;
+  while (gregToRD(y, m, gMonthLen(y, m)) < rd) m++;
+  return { y, m, d: rd - gregToRD(y, m, 1) + 1 };
+}
+// Seven leap years in nineteen — the Metonic cycle, which is the whole reason
+// Pesach stays in the spring (Devarim 16:1: שָׁמוֹר אֶת־חֹדֶשׁ הָאָבִיב).
+const hebLeap = (y) => ((y * 7 + 1) % 19) < 7;
+const monthsInHebYear = (y) => (hebLeap(y) ? 13 : 12);
+function moladElapsed(year) {
+  const monthsElapsed = Math.floor((235 * year - 234) / 19);
+  const parts = 12084 + 13753 * monthsElapsed;
+  let day = monthsElapsed * 29 + Math.floor(parts / 25920);
+  // לא אד״ו ראש — Rosh Hashanah may not fall on a Sunday, Wednesday or
+  // Friday, or Yom Kippur would abut a Shabbat and Hoshana Rabbah would land
+  // on one.
+  if ((3 * (day + 1)) % 7 < 3) day += 1;
+  return day;
+}
+function yearCorrection(year) {
+  const a = moladElapsed(year - 1), b = moladElapsed(year), c = moladElapsed(year + 1);
+  if (c - b === 356) return 2;                 // גטר״ד
+  if (b - a === 382) return 1;                 // בט״ו תקפ״ט
+  return 0;
+}
+const hebNewYear = (y) => HEB_EPOCH + moladElapsed(y) + yearCorrection(y);
+const hebYearLen = (y) => hebNewYear(y + 1) - hebNewYear(y);
+function hebMonthLen(year, month) {
+  if ([2, 4, 6, 10, 13].includes(month)) return 29;
+  if (month === 12 && !hebLeap(year)) return 29;
+  if (month === 8 && hebYearLen(year) % 10 !== 5) return 29;   // Cheshvan, full only in a שלמה year
+  if (month === 9 && hebYearLen(year) % 10 === 3) return 29;   // Kislev, defective in a חסרה year
+  return 30;
+}
+function hebToRD(year, month, day) {
+  let d = hebNewYear(year) + day - 1;
+  if (month < 7) {
+    for (let m = 7; m <= monthsInHebYear(year); m++) d += hebMonthLen(year, m);
+    for (let m = 1; m < month; m++) d += hebMonthLen(year, m);
+  } else {
+    for (let m = 7; m < month; m++) d += hebMonthLen(year, m);
+  }
+  return d;
+}
+function rdToHeb(rd) {
+  let year = Math.floor((rd - HEB_EPOCH) / 366);
+  while (hebNewYear(year + 1) <= rd) year++;
+  let month = rd < hebToRD(year, 1, 1) ? 7 : 1;
+  while (rd > hebToRD(year, month, hebMonthLen(year, month))) month++;
+  return { year, month, day: rd - hebToRD(year, month, 1) + 1 };
+}
+const HEB_MONTHS = ["", "נִיסָן", "אִיָּיר", "סִיוָן", "תַּמּוּז", "אָב", "אֱלוּל", "תִּשְׁרֵי",
+  "חֶשְׁוָן", "כִּסְלֵו", "טֵבֵת", "שְׁבָט", "אֲדָר", "אֲדָר ב׳"];
+const hebMonthName = (y, m) => (m === 12 && hebLeap(y) ? "אֲדָר א׳" : HEB_MONTHS[m]);
+// Gematria. The two exceptions are 15 and 16, which are written טו and טז
+// rather than יה and יו, because those two spell the Name.
+function hebNum(n) {
+  const ones = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"];
+  const tens = ["", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
+  const huns = ["", "ק", "ר", "ש", "ת", "תק", "תר", "תש", "תת", "תתק"];
+  let s = "";
+  n = n % 1000;
+  s += huns[Math.floor(n / 100)];
+  const r = n % 100;
+  if (r === 15) s += "טו";
+  else if (r === 16) s += "טז";
+  else { s += tens[Math.floor(r / 10)]; s += ones[r % 10]; }
+  if (s.length === 1) return s + "׳";
+  return s.slice(0, -1) + "״" + s.slice(-1);
+}
+const hebDateStr = (h) => `${hebNum(h.day)} ${hebMonthName(h.year, h.month)} ${hebNum(h.year - 5000)}`;
+
+// ── The parshah ──
+//
+// The order never changes; what changes is how many Shabbatot there are to put
+// it in. A Shabbat that falls on a festival reads the festival, so a year with
+// its chagim badly placed runs out of Shabbatot and has to double up — and
+// which pairs double up is fixed for each of the fourteen shapes a Hebrew year
+// can take (its Rosh Hashanah weekday and its length), separately for Israel,
+// which keeps one day of yom tov and therefore has one more Shabbat free.
+//
+// The table below is those fourteen shapes, twice. It was derived rather than
+// remembered, and then checked parshah by parshah against sixty-five years of
+// published luchot in both rites — 6,207 Shabbatot, no disagreements.
+const PARSHIYOT = ["Bereshit", "Noach", "Lech-Lecha", "Vayera", "Chayei Sara", "Toldot", "Vayetzei",
+  "Vayishlach", "Vayeshev", "Miketz", "Vayigash", "Vayechi", "Shemot", "Vaera", "Bo", "Beshalach",
+  "Yitro", "Mishpatim", "Terumah", "Tetzaveh", "Ki Tisa", "Vayakhel", "Pekudei", "Vayikra", "Tzav",
+  "Shmini", "Tazria", "Metzora", "Achrei Mot", "Kedoshim", "Emor", "Behar", "Bechukotai", "Bamidbar",
+  "Nasso", "Beha'alotcha", "Sh'lach", "Korach", "Chukat", "Balak", "Pinchas", "Matot", "Masei",
+  "Devarim", "Vaetchanan", "Eikev", "Re'eh", "Shoftim", "Ki Teitzei", "Ki Tavo", "Nitzavim",
+  "Vayelech", "Ha'azinu", "V'Zot HaBerachah"];
+const PARSHIYOT_HE = ["בְּרֵאשִׁית", "נֹחַ", "לֶךְ־לְךָ", "וַיֵּרָא", "חַיֵּי שָׂרָה", "תּוֹלְדוֹת",
+  "וַיֵּצֵא", "וַיִּשְׁלַח", "וַיֵּשֶׁב", "מִקֵּץ", "וַיִּגַּשׁ", "וַיְחִי", "שְׁמוֹת", "וָאֵרָא",
+  "בֹּא", "בְּשַׁלַּח", "יִתְרוֹ", "מִשְׁפָּטִים", "תְּרוּמָה", "תְּצַוֶּה", "כִּי תִשָּׂא",
+  "וַיַּקְהֵל", "פְקוּדֵי", "וַיִּקְרָא", "צַו", "שְׁמִינִי", "תַזְרִיעַ", "מְצֹרָע",
+  "אַחֲרֵי מוֹת", "קְדֹשִׁים", "אֱמֹר", "בְּהַר", "בְּחֻקֹּתַי", "בְּמִדְבַּר", "נָשֹׂא",
+  "בְּהַעֲלֹתְךָ", "שְׁלַח־לְךָ", "קֹרַח", "חֻקַּת", "בָּלָק", "פִּינְחָס", "מַּטּוֹת", "מַסְעֵי",
+  "דְּבָרִים", "וָאֶתְחַנַּן", "עֵקֶב", "רְאֵה", "שֹׁפְטִים", "כִּי תֵצֵא", "כִּי תָבוֹא",
+  "נִצָּבִים", "וַיֵּלֶךְ", "הַאֲזִינוּ", "וְזֹאת הַבְּרָכָה"];
+// Which of the five books each falls in, for the panel.
+const PARSHAH_BOOK = (i) => (i < 12 ? "בְּרֵאשִׁית · Bereshit" : i < 23 ? "שְׁמוֹת · Shemot"
+  : i < 33 ? "וַיִּקְרָא · Vayikra" : i < 43 ? "בְּמִדְבַּר · Bamidbar" : "דְּבָרִים · Devarim");
+const PAIR_AT = [21, 26, 28, 31, 38, 41, 50];
+const MERGE_TABLE = {
+  "1-353-D": "1111011", "1-353-I": "1111011", "1-355-D": "1111111", "1-355-I": "1111011",
+  "1-383-D": "0000111", "1-383-I": "0000011", "1-385-D": "0000010", "1-385-I": "0000000",
+  "2-354-D": "1111111", "2-354-I": "1111011", "2-384-D": "0000010", "2-384-I": "0000000",
+  "4-354-D": "1111010", "4-354-I": "1110010", "4-355-D": "0111010", "4-355-I": "0111010",
+  "4-383-D": "0000000", "4-383-I": "0000000", "4-385-D": "0000001", "4-385-I": "0000001",
+  "6-353-D": "1111010", "6-353-I": "1111010", "6-355-D": "1111011", "6-355-I": "1111011",
+  "6-383-D": "0000011", "6-383-I": "0000011", "6-385-D": "0000111", "6-385-I": "0000011",
+};
+function festivalShabbat(rd, israel) {
+  const { month, day } = rdToHeb(rd);
+  if (month === 7) return day <= 2 || day === 10 || (day >= 15 && day <= (israel ? 22 : 23));
+  if (month === 1) return day >= 15 && day <= (israel ? 21 : 22);
+  if (month === 3) return day === 6 || (!israel && day === 7);
+  return false;
+}
+const nextShabbat = (rd) => { let d = rd; while (((d % 7) + 7) % 7 !== 6) d++; return d; };
+// One Torah cycle: Bereshit on the first Shabbat after Simchat Torah, then a
+// parshah every Shabbat until next year's Bereshit.
+function sedraCycle(y, israel) {
+  const merged = MERGE_TABLE[`${((hebNewYear(y) % 7) + 7) % 7}-${hebYearLen(y)}-${israel ? "I" : "D"}`];
+  if (!merged) return [];
+  const seq = [];
+  for (let i = 0; i < 53; i++) {
+    const p = PAIR_AT.indexOf(i);
+    if (p >= 0 && merged[p] === "1") { seq.push([i, i + 1]); i++; } else seq.push([i]);
+  }
+  const start = nextShabbat(hebToRD(y, 7, israel ? 22 : 23) + 1);
+  const end = nextShabbat(hebToRD(y + 1, 7, israel ? 22 : 23) + 1);
+  const out = [];
+  let k = 0;
+  for (let d = start; d < end && k < seq.length; d += 7) {
+    if (festivalShabbat(d, israel)) continue;
+    out.push({ rd: d, idx: seq[k] });
+    k++;
+  }
+  return out;
+}
+// The parshah read on the Shabbat on or after `rd` — which is exactly the
+// question a bar or bat mitzvah asks about the day they were born.
+function parshahOnOrAfter(rd, israel = false) {
+  const target = nextShabbat(rd);
+  const y = rdToHeb(target).year;
+  for (const cy of [y - 1, y, y + 1]) {
+    for (const s of sedraCycle(cy, israel)) if (s.rd === target) return { ...s, rd: target };
+  }
+  // Simchat Torah and the festival Shabbatot have their own reading; step on.
+  return parshahOnOrAfter(target + 7, israel);
+}
+
+// Which day the House thinks it is. Normally today; but ?date=2026-12-06 will
+// put the chanukiah at the gate in the middle of August, which is the only way
+// most people will ever see it — eight nights a year is not many. Bad input
+// falls back to the real date rather than throwing, because a query string is
+// something a stranger can write.
+function sceneDateRD() {
+  try {
+    const q = new URLSearchParams(window.location.search).get("date");
+    const m = q && /^(\d{4})-(\d{2})-(\d{2})$/.exec(q);
+    if (m) {
+      const y = +m[1], mo = +m[2], d = +m[3];
+      if (y >= 1500 && y <= 2199 && mo >= 1 && mo <= 12 && d >= 1 && d <= gMonthLen(y, mo)) return gregToRD(y, mo, d);
+    }
+  } catch (err) { /* no window, or a query string that is not one */ }
+  const n = new Date();
+  return gregToRD(n.getFullYear(), n.getMonth() + 1, n.getDate());
+}
+
+// ── מוֹעֲדִים — what day it is in the House ──
+//
+// Only the ones this House would have noticed. Each carries what the place did
+// on it, because a date with nothing attached is a fact and not a festival.
+function chagOn(rd, israel = false) {
+  const { year, month, day } = rdToHeb(rd);
+  const L = hebLeap(year);
+  const at = (m, d) => month === m && day === d;
+  const K = (id, he, en, note) => ({ id, he, en, note });
+  if (at(7, 1) || at(7, 2)) return K("rosh", "רֹאשׁ הַשָּׁנָה", "Rosh Hashanah", "The shofar is sounded a hundred times, and the world is judged. Here the great shofar waits on marble near the southern gate.");
+  if (at(7, 10)) return K("yom", "יוֹם הַכִּפּוּרִים", "Yom Kippur", "The one day the Kohen Gadol went behind the parochet, into the room with nothing in it but the Even HaShetiyah. He said the Name aloud, and the court fell on their faces.");
+  if (month === 7 && day >= 15 && day <= 21) return K("sukkot", "סֻכּוֹת", "Sukkot", `Day ${day - 14} of the festival. Water was poured on the altar and the Levites played all night on the fifteen steps — Sukkah 51b says whoever has not seen the Simchat Beit HaSho'evah has never seen rejoicing.`);
+  if (at(7, 22)) return K("atzeret", "שְׁמִינִי עֲצֶרֶת", "Shemini Atzeret", "One more day, said for its own sake. Rain is asked for from today.");
+  if (!israel && at(7, 23)) return K("torah", "שִׂמְחַת תּוֹרָה", "Simchat Torah", "The last words of the Torah and the first, read on the same day, so it never ends.");
+  if ((month === 9 && day >= 25) || (month === 10 && day <= (hebMonthLen(year, 9) === 30 ? 2 : 3))) {
+    const n = month === 9 ? day - 24 : day + (hebMonthLen(year, 9) === 30 ? 6 : 5);
+    return K("chanukah", "חֲנֻכָּה", "Chanukah", `Night ${n} of eight. The rededication of this altar after it was defiled — Chanukat HaMizbe'ach, the last words of Ma'oz Tzur.`);
+  }
+  if (at(11, 15)) return K("tubshvat", "ט״וּ בִּשְׁבָט", "Tu BiShvat", "The new year of the trees. The almond is the first thing in the land to flower, and it is flowering now — Shemot 25:33 carved it into the Menorah for exactly that reason.");
+  if (at(L ? 13 : 12, 14)) return K("purim", "פּוּרִים", "Purim", "The one festival whose scroll never says the Name — because the hiding is the point.");
+  if (at(1, 14)) return K("erevpesach", "עֶרֶב פֶּסַח", "Erev Pesach", "The korban pesach was brought this afternoon in three shifts, and Pesachim 64b says the court was so full that the doors were shut on the first group.");
+  if (month === 1 && day >= 15 && day <= (israel ? 21 : 22)) return K("pesach", "פֶּסַח", "Pesach", `Day ${day - 14}. On the second day the Omer of barley was cut and brought here and waved, and only then could the new grain be eaten.`);
+  if (at(2, 18)) return K("lag", "ל״ג בָּעוֹמֶר", "Lag BaOmer", "The thirty-third day of the count, and the day the dying stopped.");
+  if (at(3, 6) || (!israel && at(3, 7))) return K("shavuot", "שָׁבוּעוֹת", "Shavuot", "The bikkurim came up with an ox before them, its horns overlaid with gold and an olive wreath on its head, and a flute playing the whole way (Bikkurim 3:2–4).");
+  if (at(4, 17)) return K("tammuz", "שִׁבְעָה עָשָׂר בְּתַמּוּז", "17 Tammuz", "The walls were breached. Three weeks from here to the ninth of Av.");
+  if (at(5, 9)) return K("tisha", "תִּשְׁעָה בְּאָב", "Tisha B'Av", "Both Houses fell on this day. Makkot 24b: the sages wept at a fox in the ruin, and Rabbi Akiva laughed — because the prophecy of the ruin coming true is what makes the prophecy of the rebuilding true too.");
+  if (at(5, 15)) return K("tuav", "ט״וּ בְּאָב", "Tu B'Av", "Ta'anit 30b calls it one of the two happiest days Israel ever had. The daughters of Jerusalem went out in borrowed white, so that nobody could tell who was rich.");
+  if (month === 6) return K("elul", "אֱלוּל", "Elul", "The month of return. The shofar is blown every morning, and the King is said to be in the field.");
+  return null;
+}
+// Sefirat HaOmer. Vayikra 23:15 counts from the day the Omer was brought, and
+// the Omer was brought *here* — so the House has an opinion about what day it is.
+function omerDay(rd) {
+  const { year } = rdToHeb(rd);
+  for (const y of [year - 1, year]) {
+    const start = hebToRD(y, 1, 16);
+    const n = rd - start + 1;
+    if (n >= 1 && n <= 49) return n;
+  }
+  return 0;
+}
 
 const KOHEN_VOICES = [
   { name: "תרומת הדשן", role: "The lifting of the ashes",
@@ -661,15 +986,70 @@ function courtStoneTex() {
   });
 }
 
+// A cumulus is not a blob. It has a hard cauliflower top where the rising air
+// is still condensing and a flat grey base where it crossed the condensation
+// level — that flat bottom is the single feature that makes a painted cloud
+// read as weather rather than as smoke. So: a mound of overlapping puffs
+// biased upward, shaded from bright at the crown to dim underneath, then cut
+// off along a soft horizontal line with everything below it erased.
 function cloudTex() {
-  return makeCanvas(256, 128, (ctx, w, h) => {
+  return makeCanvas(512, 256, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
-    for (let i = 0; i < 22; i++) {
-      const g = ctx.createRadialGradient(rnd(30, w - 30), rnd(30, h - 30), 2, rnd(30, w - 30), rnd(30, h - 30), rnd(22, 52));
-      g.addColorStop(0, "rgba(255,255,255,0.5)");
+    const base = h * 0.74;                       // the condensation level
+    for (let i = 0; i < 90; i++) {
+      // Puffs cluster toward the middle and toward the top, and the ones near
+      // the crown are smaller — which is what gives the cauliflower edge.
+      const u = rnd(-1, 1);
+      const x = w * 0.5 + u * w * 0.40;
+      const lift = 1 - Math.abs(u) * 0.75;                       // a mound, not a slab
+      const y = base - rnd(0.05, 1.0) * lift * (h * 0.60);
+      const r = rnd(16, 54) * (0.5 + 0.5 * lift);
+      // Vertical shading: the crown takes the sun, the belly sits in its own
+      // shadow. Carried in the texture's luminance so a single sprite tint can
+      // still swing the whole thing to gold at dusk.
+      const k = Math.pow((base - y) / (h * 0.62), 0.7);
+      const v = Math.round(192 + 63 * k);
+      const g = ctx.createRadialGradient(x, y, r * 0.12, x, y, r);
+      g.addColorStop(0, `rgba(${v},${v},${Math.min(255, v + 6)},0.40)`);
+      g.addColorStop(0.55, `rgba(${v},${v},${Math.min(255, v + 6)},0.20)`);
       g.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
+    }
+    // Cut the flat base. A hard line would read as a crop, so it is feathered
+    // over about six percent of the height — which is roughly how ragged a
+    // real cloud base is.
+    ctx.globalCompositeOperation = "destination-out";
+    const cut = ctx.createLinearGradient(0, base - h * 0.05, 0, base + h * 0.03);
+    cut.addColorStop(0, "rgba(0,0,0,0)");
+    cut.addColorStop(1, "rgba(0,0,0,1)");
+    ctx.fillStyle = cut;
+    ctx.fillRect(0, base - h * 0.05, w, h);
+    ctx.globalCompositeOperation = "source-over";
+  });
+}
+
+// Cirrus: ice, twenty times higher, drawn out into streaks by a wind that has
+// nothing to push against. They do almost nothing by day and everything at
+// dusk, because at eight hundred amot they are still in full sunlight when the
+// courts have been in shadow for twenty minutes.
+function cirrusTex() {
+  return makeCanvas(512, 128, (ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h);
+    for (let i = 0; i < 26; i++) {
+      const y = rnd(h * 0.2, h * 0.8);
+      const len = rnd(w * 0.18, w * 0.52);
+      const x = rnd(0, w - len);
+      const g = ctx.createLinearGradient(x, 0, x + len, 0);
+      g.addColorStop(0, "rgba(255,255,255,0)");
+      g.addColorStop(0.5, `rgba(255,255,255,${rnd(0.10, 0.26).toFixed(3)})`);
+      g.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = g;
+      // Slight shear, so they hook the way wind-drawn ice does.
+      ctx.save();
+      ctx.translate(x, y); ctx.transform(1, 0, rnd(-0.35, 0.35), 1, 0, 0);
+      ctx.fillRect(-x, -rnd(1.5, 5), w, rnd(3, 10));
+      ctx.restore();
     }
   });
 }
@@ -818,6 +1198,11 @@ float fbm(vec2 p){
 }
 `;
 
+// Dashboards want the English half of a title — "שער הקדים — The Sealed
+// Eastern Gate" reads as a run of boxes in most of them, and the em dash is
+// the seam in every one of the thirty-six.
+const enTitle = (t) => t.split("—").pop().trim();
+
 // ─────────────────────────────── component ───────────────────────────────
 export default function Mikdash() {
   const mountRef = useRef(null);
@@ -829,11 +1214,17 @@ export default function Mikdash() {
   const [hints, setHints] = useState(false);
   const [music, setMusic] = useState(false);
   const [peace, setPeace] = useState(false);
+  const [cal, setCal] = useState(false);
+  const [israel, setIsrael] = useState(false);
+  const [bday, setBday] = useState("");
+  const [lyrics, setLyrics] = useState(null);
+  const [finale, setFinale] = useState(false);
   const [nowPlaying, setNowPlaying] = useState(null);
   // The pitch currently sounding, so the key strip can light it. Held in React
   // rather than the scene because the strip is DOM — the scene lights its own
   // fifteen treads from the same callback.
   const [activeNote, setActiveNote] = useState(null);
+  const [songBeat, setSongBeat] = useState(-1);
   const [questMode, setQuestMode] = useState(true);
   const [walkMode, setWalkMode] = useState(false);
   const [toast, setToast] = useState(null);
@@ -845,10 +1236,14 @@ export default function Mikdash() {
   // only one that needs it, and a returning visitor should land straight in
   // the courts. Persisted alongside progress.
   const [opened, setOpened] = useState(false);
+  // Starting over throws away thirty-six discoveries, so it asks first.
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const foundRef = useRef(found); foundRef.current = found;
   const questRef = useRef(questMode); questRef.current = questMode;
   const walkRef = useRef(walkMode); walkRef.current = walkMode;
+  // Ever walked, not walking now — the visit-end report wants the whole visit.
+  const walkedRef = useRef(false); if (walkMode) walkedRef.current = true;
 
   const closeFact = useCallback(() => setFact(null), []);
   const showToast = useCallback((msg) => {
@@ -867,18 +1262,28 @@ export default function Mikdash() {
   // ─── persistent progress ───
   useEffect(() => {
     (async () => {
+      let carried = 0, returning = false;
       try {
         if (window.storage) {
           const r = await window.storage.get(STORE_KEY);
           if (r && r.value) {
             const data = JSON.parse(r.value);
-            if (Array.isArray(data.found)) setFound(data.found.filter((n) => n >= 0 && n < DISCOVERIES.length));
+            returning = true;
+            if (Array.isArray(data.found)) {
+              const keep = data.found.filter((n) => n >= 0 && n < DISCOVERIES.length);
+              carried = keep.length;
+              setFound(keep);
+            }
             if (typeof data.night === "boolean") setNight(data.night);
             if (typeof data.sound === "boolean") setSound(data.sound);
             if (data.opened) setOpened(true);
           }
         }
       } catch (err) { /* first visit — nothing saved yet */ }
+      // Saved progress is the only thing that distinguishes a first visit from
+      // a return here — nothing identifies the visitor, so this is the whole
+      // of what retention can be measured with, and it is enough.
+      track("visit", { returning: returning ? "yes" : "no", carried });
       setStorageReady(true);
     })();
   }, []);
@@ -894,7 +1299,13 @@ export default function Mikdash() {
   useEffect(() => {
     if (!opened || !loaded || found.length > 0 || !questMode) return;
     const t = setTimeout(() => {
-      if (apiRef.current.guideTo?.(0)) showToast("בֹּא וּרְאֵה — come and see. There, inside the eastern gate.");
+      if (apiRef.current.guideTo?.(0)) {
+        // Forty seconds in the courts and nothing found: the House had to
+        // point. A rising count here is the clearest sign the first rimon is
+        // hidden too well.
+        track("auto-hint");
+        showToast("בֹּא וּרְאֵה — come and see. There, inside the eastern gate.");
+      }
     }, 40000);
     return () => clearTimeout(t);
   }, [opened, loaded, found.length, questMode, showToast]);
@@ -922,6 +1333,9 @@ export default function Mikdash() {
     } catch (err) {
       // No WebGL: an old device, a disabled setting, a headless browser. The
       // House cannot be drawn — say so rather than leaving a white page.
+      // Worth counting: this is the one failure a visitor cannot work around,
+      // and the share of visits it costs is invisible from any page-view total.
+      track("webgl-unsupported", { ua: navigator.userAgent.slice(0, 120) });
       setNoWebGL(true);
       return;
     }
@@ -949,6 +1363,13 @@ export default function Mikdash() {
       uTime: { value: 0 },
       uSunDir: { value: new THREE.Vector3(0.55, 0.6, -0.42).normalize() },
       uMoonDir: { value: new THREE.Vector3(-0.5, 0.55, 0.45).normalize() },
+      // ── The moon is the right shape tonight ──
+      // The Hebrew month *is* the moon: it begins at the molad and the day of
+      // the month is very nearly the age of the moon in days. So the phase does
+      // not have to be invented — it can be read off the date, and the moon
+      // over this House is the moon that is actually up. It is full on the
+      // fifteenth, which is why Pesach and Sukkot are on the fifteenth.
+      uMoonK: { value: 0.5 },
     };
     const sky = new THREE.Mesh(
       new THREE.SphereGeometry(2000, 32, 20),
@@ -961,58 +1382,313 @@ export default function Mikdash() {
         fragmentShader: `
           varying vec3 vDir;
           uniform float uNight; uniform float uTime;
-          uniform vec3 uSunDir; uniform vec3 uMoonDir;
+          uniform vec3 uSunDir; uniform vec3 uMoonDir; uniform float uMoonK;
+
+          // ── Why an atmosphere and not a gradient ──
+          //
+          // What stood here was three colours for day, three for night, and a
+          // cross-fade between them. It could not produce a sunset, because a
+          // sunset is not a dark blue day: it is the same air, seen through
+          // eight times as much of it, with the short wavelengths already
+          // scattered out. Mixing a blue toward a black never passes through
+          // gold, so the House went from noon to midnight without an evening.
+          //
+          // This is Preetham's analytic single-scattering model — the same one
+          // three ships in examples/jsm/objects/Sky.js, written out here rather
+          // than imported, because importing it would break the rule that this
+          // file carries no dependency beyond react and three. Two terms:
+          // Rayleigh, which is wavelength-dependent (blue scatters ~5.5× more
+          // than red) and paints the whole dome, and Mie, which is not, and
+          // makes the white aureole around the sun. Both are integrated along
+          // an optical mass that grows without bound at the horizon. That is
+          // the whole trick: at noon you look through one atmosphere and see
+          // blue; at dusk you look through forty and the blue is gone before
+          // it reaches you.
+          //
+          // Everything below — dusk, the gold band, the deepening zenith, the
+          // second blue after the sun is down — now comes out of uSunDir on
+          // its own. Nothing about the sky is keyed off uNight any more except
+          // what is genuinely nocturnal: stars, the moon, the galaxy.
+          const float PI = 3.141592653589793;
+          const vec3 UP = vec3(0.0, 1.0, 0.0);
+          const float RAYLEIGH_ZENITH = 8.4E3;   // scale height of the air, metres
+          const float MIE_ZENITH = 1.25E3;       // aerosols sit much lower down
+          const vec3 TOTAL_RAYLEIGH = vec3(5.804542996261093E-6, 1.3562911419845635E-5, 3.0265902468824876E-5);
+          const vec3 MIE_CONST = vec3(1.8399918514433978E14, 2.7798023919660528E14, 4.0790479543861094E14);
+          const float CUTOFF_ANGLE = 1.6110731556870734;
+          const float STEEPNESS = 1.5;
+          const float SUN_E = 1000.0;
+          // cos of half a degree — the sun and the moon subtend almost exactly
+          // the same angle from here, which is the only reason eclipses work.
+          const float DISC_COS = 0.9999566769464484;
+          const float ONE_OVER_FOURPI = 0.07957747154594767;
+          // Judean summer: dry, dusty, a little more turbid than a maritime sky.
+          const float TURBIDITY = 3.4;
+          const float MIE_COEFF = 0.0055;
+          const float MIE_G = 0.80;
+
           float hash(vec3 p){ return fract(sin(dot(p, vec3(12.9898,78.233,45.164)))*43758.5453); }
+          float vnoise(vec3 p){
+            vec3 i = floor(p), f = fract(p);
+            f = f*f*(3.0-2.0*f);
+            float n000 = hash(i), n100 = hash(i+vec3(1,0,0));
+            float n010 = hash(i+vec3(0,1,0)), n110 = hash(i+vec3(1,1,0));
+            float n001 = hash(i+vec3(0,0,1)), n101 = hash(i+vec3(1,0,1));
+            float n011 = hash(i+vec3(0,1,1)), n111 = hash(i+vec3(1,1,1));
+            return mix(mix(mix(n000,n100,f.x), mix(n010,n110,f.x), f.y),
+                       mix(mix(n001,n101,f.x), mix(n011,n111,f.x), f.y), f.z);
+          }
+          float fbm(vec3 p){
+            float v = 0.0, a = 0.5;
+            for (int i = 0; i < 5; i++){ v += a*vnoise(p); p *= 2.03; a *= 0.5; }
+            return v;
+          }
+          float hgPhase(float c, float g){
+            return ONE_OVER_FOURPI * ((1.0 - g*g) / pow(max(1.0 - 2.0*g*c + g*g, 1e-4), 1.5));
+          }
+          // Optical mass: how many zenith-atmospheres this direction looks
+          // through. Kasten–Young, which stays finite at and just below the
+          // horizon where 1/cos does not.
+          float opticalMass(float cosZenith){
+            float za = acos(clamp(cosZenith, -1.0, 1.0));
+            return 1.0 / (cosZenith + 0.15 * pow(max(93.885 - za*180.0/PI, 0.1), -1.253));
+          }
+
           void main(){
             vec3 d = normalize(vDir);
-            float h = clamp(d.y, -0.06, 1.0);
-            // These were picked by eye when the renderer wrote whatever it was
-            // handed. Now the output is encoded to sRGB, so the same numbers
-            // come out roughly a stop and a half brighter — the horizon went to
-            // a white wash. Linearised (≈ x^2.2) they land where they were
-            // originally judged to look right.
-            vec3 dayZen = vec3(0.070,0.268,0.666), dayMid = vec3(0.325,0.552,0.792), dayHor = vec3(0.873,0.757,0.552);
-            vec3 day = mix(dayHor, mix(dayMid, dayZen, smoothstep(0.18,0.75,h)), smoothstep(0.0,0.22,h));
-            vec3 nZen = vec3(0.0008,0.0022,0.0035), nMid = vec3(0.0035,0.006,0.016), nHor = vec3(0.012,0.014,0.035);
-            vec3 nightC = mix(nHor, mix(nMid, nZen, smoothstep(0.15,0.7,h)), smoothstep(0.0,0.2,h));
-            vec3 col = mix(day, nightC, uNight);
-            float sdot = max(dot(d, uSunDir), 0.0);
-            col += (pow(sdot,1500.0)*3.2 + pow(sdot,60.0)*0.75 + pow(sdot,8.0)*0.16) * vec3(1.0,0.92,0.74) * (1.0-uNight);
-            float horizWarm = smoothstep(0.28,0.0,h) * pow(max(dot(normalize(vec3(d.x,0.0,d.z)), normalize(vec3(uSunDir.x,0.0,uSunDir.z))),0.0),3.0);
-            col += horizWarm * vec3(0.28,0.16,0.05) * (1.0-uNight);
-            float mdot = max(dot(d, uMoonDir), 0.0);
-            col += (pow(mdot,3800.0)*2.4 + pow(mdot,120.0)*0.5 + pow(mdot,14.0)*0.07) * vec3(0.82,0.87,1.0) * uNight;
-            vec3 sp = floor(d * 240.0);
-            float star = step(0.9986, hash(sp));
-            float tw = 0.55 + 0.45*sin(uTime*2.5 + hash(sp+1.7)*60.0);
-            col += star * tw * (0.35 + hash(sp+3.1)*0.8) * vec3(0.95,0.97,1.0) * uNight * smoothstep(0.02,0.28,h);
-            float band = exp(-pow((d.y-0.42+0.25*sin(atan(d.z,d.x))),2.0)*34.0);
-            col += band * 0.045 * vec3(0.7,0.75,0.95) * uNight;
-            col += (hash(d*1234.5)-0.5)*0.012;
-            gl_FragColor = vec4(col, 1.0);
+            vec3 sunDir = normalize(uSunDir);
+            float sunUp = dot(sunDir, UP);
+
+            // How much sun is left. Falls off across the horizon rather than at
+            // it, because the sun keeps lighting the air from below for a good
+            // while after it has gone.
+            float sunfade = 1.0 - clamp(1.0 - exp(sunUp), 0.0, 1.0);
+            float sunE = SUN_E * max(0.0, 1.0 - exp(-((CUTOFF_ANGLE - acos(clamp(sunUp, -1.0, 1.0))) / STEEPNESS)));
+            vec3 betaR = TOTAL_RAYLEIGH * (1.0 - (1.0 - sunfade));
+            vec3 betaM = 0.434 * ((0.2 * TURBIDITY) * 10E-18) * MIE_CONST * MIE_COEFF;
+
+            float mass = opticalMass(max(0.0, dot(UP, d)));
+            vec3 Fex = exp(-(betaR * RAYLEIGH_ZENITH * mass + betaM * MIE_ZENITH * mass));
+
+            float cosT = dot(d, sunDir);
+            vec3 betaRT = betaR * (3.0/(16.0*PI)) * (1.0 + pow(cosT*0.5 + 0.5, 2.0));
+            vec3 betaMT = betaM * hgPhase(cosT, MIE_G);
+            vec3 ratio = (betaRT + betaMT) / (betaR + betaM);
+            vec3 Lin = pow(sunE * ratio * (1.0 - Fex), vec3(1.5));
+            Lin *= mix(vec3(1.0), pow(sunE * ratio * Fex, vec3(0.5)),
+                       clamp(pow(1.0 - sunUp, 5.0), 0.0, 1.0));
+
+            // ── The disc ──
+            // Hidden below the true horizon so it cannot burn through the hill
+            // from underneath, and reddened on the way down by the same Fex the
+            // rest of the sky is using — which is what makes it go from white
+            // at noon to a red coin you can look at.
+            float disc = smoothstep(DISC_COS, DISC_COS + 0.00004, cosT)
+                       * smoothstep(-0.012, 0.006, sunDir.y);
+            // Limb darkening: the edge of a star's disc is dimmer than the
+            // middle because you see less deep into it. Small, and the reason a
+            // drawn sun looks like a sticker and a real one does not.
+            float limb = clamp((cosT - DISC_COS) / 0.000043, 0.0, 1.0);
+            disc *= 0.55 + 0.45 * sqrt(limb);
+            // The flat 0.1·Fex ambient is Preetham's stand-in for a night sky
+            // and it has to be gated on there being a sun, or it survives to
+            // midnight: with the sun nineteen degrees under, Fex is still ~0.9
+            // and that term alone was painting a dome at 0.067 — a brown-grey
+            // overcast with every star drowned behind it. Off by the time the
+            // sun is a quarter turn down, and the real night sky takes over.
+            float sunLeft = smoothstep(-0.26, 0.02, sunUp);
+            vec3 L0 = vec3(0.1) * Fex * sunLeft + (sunE * 19000.0 * Fex) * disc;
+
+            vec3 sky = (Lin + L0) * 0.042 + vec3(0.0, 0.00035, 0.0009);
+            sky = pow(sky, vec3(1.0 / (1.2 + 1.2 * sunfade)));
+
+            // ── Shafts ──
+            // Not a post-process — there is no composer here and adding one
+            // would cost the no-dependency rule. This is the cheap honest half
+            // of the effect: the Mie aureole broken up angularly, so when the
+            // sun is low the glow around it comes through the dust in bands
+            // rather than as an even wash. Only near the horizon, only near the
+            // sun, and gone by mid-morning.
+            float low = smoothstep(0.32, 0.02, sunDir.y) * smoothstep(-0.10, 0.02, sunDir.y);
+            if (low > 0.001) {
+              vec3 ax = normalize(cross(sunDir, UP));
+              float ang = atan(dot(d, ax), dot(d, normalize(cross(ax, sunDir))));
+              float shaft = fbm(vec3(ang * 2.6, uTime * 0.012, 4.0)) ;
+              shaft = smoothstep(0.42, 0.86, shaft);
+              float near = pow(max(cosT, 0.0), 7.0);
+              sky += shaft * near * low * vec3(0.26, 0.17, 0.085);
+            }
+
+            // ── Night ──
+            // Everything from here is nocturnal and rides on uNight, and every
+            // one of them is faded by how bright the sky already is: a star is
+            // not dim at dusk, it is outshone, and fading them against the sky's
+            // own luminance is what makes them come out in the right order
+            // instead of all at once.
+            float night = uNight;
+            if (night > 0.002) {
+              // A night sky is not black. Airglow — oxygen recombining at a
+              // hundred kilometres — sets a floor over the whole dome, and it
+              // is brightest a few degrees up where the line of sight through
+              // that layer is longest. This is that floor, and it is what the
+              // stars are drawn against.
+              sky += mix(vec3(0.016, 0.019, 0.045), vec3(0.0011, 0.0030, 0.0050),
+                         smoothstep(0.0, 0.55, d.y)) * night;
+              float horizonExt = smoothstep(-0.02, 0.22, d.y);   // thicker air, dimmer stars
+              float washout = 1.0 - smoothstep(0.006, 0.10, dot(sky, vec3(0.33)));
+
+              // ── Stars ──
+              // The old field put one star in the middle of every cell of a
+              // grid and gave it the whole cell, so at any size worth seeing
+              // they were squares. These are jittered inside their cell and
+              // fall off round, in two layers: a sparse bright one and a dense
+              // faint one, which is what actually makes a sky read as deep.
+              // Colour runs from the red end to the blue on the same hash, so
+              // Antares and Rigel are not the same white pinprick.
+              vec3 starC = vec3(0.0);
+              for (int L = 0; L < 2; L++) {
+                float scale = L == 0 ? 130.0 : 310.0;
+                float thresh = L == 0 ? 0.978 : 0.9945;
+                float size = L == 0 ? 0.20 : 0.13;
+                vec3 cell = floor(d * scale);
+                vec3 jit = vec3(hash(cell + 1.3), hash(cell + 2.7), hash(cell + 4.1));
+                float r = length(fract(d * scale) - jit);
+                float mag = hash(cell + 7.9);
+                // Magnitude. A flat hash makes every star the same and a high
+                // power makes almost all of them invisible; this keeps the
+                // spread wide and still leaves the faint ones on the plate,
+                // which is the difference between a sky and a scattering.
+                float lit = step(thresh, hash(cell)) * smoothstep(size, 0.0, r) * mix(0.22, 1.0, mag * mag);
+                float tw = 0.62 + 0.38 * sin(uTime * (1.4 + mag * 2.2) + mag * 62.0);
+                vec3 tint = mix(vec3(1.0, 0.78, 0.62), vec3(0.72, 0.82, 1.0), hash(cell + 11.7));
+                starC += lit * tw * tint * (L == 0 ? 1.5 : 0.62);
+              }
+              sky += starC * horizonExt * washout * night;
+
+              // ── The galaxy ──
+              // A band with structure in it: two octaves of cloud along the
+              // plane and a dark lane cut through the middle, which is the Rift
+              // and the thing that makes it recognisable rather than a smear.
+              float ph = atan(d.z, d.x);
+              float band = exp(-pow((d.y - 0.42 + 0.25 * sin(ph)) , 2.0) * 26.0);
+              float clouds = fbm(d * 5.5 + 11.0) * 0.7 + fbm(d * 15.0) * 0.4;
+              float rift = smoothstep(0.34, 0.62, fbm(d * 7.0 + 40.0));
+              sky += band * clouds * rift * 0.16 * vec3(0.74, 0.78, 0.98) * horizonExt * washout * night;
+
+              // ── The moon ──
+              // Given a disc, a terminator and a face. The phase runs off the
+              // angle between where the moon is and where the sun is, so the
+              // lit limb always points at the sun even when the sun is under
+              // the hill — the one detail that makes a painted moon wrong and
+              // is free to get right.
+              vec3 moonDir = normalize(uMoonDir);
+              float mCos = dot(d, moonDir);
+              float mDisc = smoothstep(DISC_COS - 0.00012, DISC_COS + 0.00006, mCos);
+              if (mDisc > 0.0) {
+                // Position on the visible face, in the moon's own frame.
+                vec3 mx = normalize(cross(moonDir, UP));
+                vec3 my = cross(moonDir, mx);
+                vec2 uv = vec2(dot(d, mx), dot(d, my)) / 0.0093;   // ≈ the disc radius
+                uv = clamp(uv, -1.0, 1.0);
+                float z = sqrt(max(0.0, 1.0 - dot(uv, uv)));
+                // Maria: darker basalt plains, and the reason the moon has a face.
+                float maria = smoothstep(0.42, 0.72, fbm(vec3(uv * 2.1, z * 1.4) + 3.0));
+                float face = mix(1.0, 0.62, maria) * (0.72 + 0.28 * z);
+                // Terminator. Which side is lit comes from where the sun is;
+                // *how much* is lit comes from the date. For an illuminated
+                // fraction k the phase angle is cos φ = 2k − 1, and the
+                // terminator is the ellipse whose semi-minor axis is |cos φ| —
+                // so at k = ½ it is a straight line down the middle and at
+                // k = 1 it has swung all the way to the limb. This is why a
+                // crescent's inner edge curves and its outer edge does not.
+                vec3 toSun = normalize(sunDir - moonDir * dot(sunDir, moonDir));
+                vec2 ax2 = normalize(vec2(dot(toSun, mx), dot(toSun, my)) + vec2(1e-5, 0.0));
+                vec2 pp2 = vec2(-ax2.y, ax2.x);
+                float su = dot(uv, ax2), sv = dot(uv, pp2);
+                float rad = sqrt(max(0.0, 1.0 - sv * sv));
+                float phase = smoothstep(-0.05, 0.05, su + (2.0 * uMoonK - 1.0) * rad);
+                // Earthshine: the dark limb is not black, it is lit by us.
+                sky += mDisc * face * (phase * 2.6 + 0.045) * vec3(0.96, 0.955, 0.92) * night;
+              }
+              // ── כּוֹכָב נוֹפֵל ──
+              // One every twenty-six seconds or so, on a great circle, from a
+              // hash of which twenty-six-second window it is — so it is always
+              // in a different place and it never repeats within a sitting. Two
+              // tenths of a second of it, which is about how long a real one
+              // lasts, and the visitor who happens to be looking the right way
+              // gets it and the one who is not never knows.
+              float mt = uTime / 26.0;
+              float ep = floor(mt), fr = fract(mt);
+              if (fr < 0.085) {
+                vec3 ra = normalize(vec3(hash(vec3(ep, 1.7, 3.1)) - 0.5,
+                                         hash(vec3(ep, 2.3, 5.9)) * 0.55 + 0.30,
+                                         hash(vec3(ep, 4.1, 7.3)) - 0.5));
+                vec3 rb = normalize(ra + vec3(hash(vec3(ep, 6.7, 1.3)) - 0.5, -0.40,
+                                              hash(vec3(ep, 8.9, 2.7)) - 0.5) * 0.62);
+                float u2 = fr / 0.085;
+                vec3 head = normalize(mix(ra, rb, u2));
+                vec3 tail = normalize(mix(ra, rb, max(0.0, u2 - 0.22)));
+                vec3 ab = head - tail;
+                float tt = clamp(dot(d - tail, ab) / max(dot(ab, ab), 1e-6), 0.0, 1.0);
+                float dm = length(d - (tail + ab * tt));
+                // Bright at the head, gone at the tail, and the whole thing
+                // fading as it burns out.
+                float streak = exp(-dm * dm * 46000.0) * (0.35 + 0.65 * tt) * (1.0 - u2 * u2);
+                sky += streak * vec3(1.0, 0.94, 0.80) * horizonExt * night * 2.6;
+              }
+
+              // Halo — ice in the high air, and a wide soft glow around it.
+              float mh = max(mCos, 0.0);
+              sky += (pow(mh, 2600.0) * 0.9 + pow(mh, 160.0) * 0.10 + pow(mh, 12.0) * 0.014)
+                     * vec3(0.80, 0.86, 1.0) * night;
+            }
+
+            // Dither. Eight bits across a gradient this shallow bands visibly,
+            // and a half-bit of noise is cheaper than a tenth bit of colour.
+            sky += (hash(d * 1234.5 + uTime * 0.0001) - 0.5) * 0.006;
+
+            gl_FragColor = vec4(max(sky, 0.0), 1.0);
             // A ShaderMaterial writes gl_FragColor raw — three only appends the
-            // output conversion to its own materials. Without this include the
-            // sky alone would stay in the old space and sit visibly darker than
-            // the House standing against it.
+            // output conversion to its own materials. The sun's disc leaves this
+            // in the thousands, so it needs the same ACES curve the stone gets
+            // or it clips to a white hole; and then the same sRGB encode, or the
+            // sky alone stays in the old space and sits visibly darker than the
+            // House standing against it.
+            #include <tonemapping_fragment>
             #include <encodings_fragment>
           }`,
       })
     );
     scene.add(sky);
 
-    const cMap = cloudTex();
+    // Eighteen cumulus in three decks and eighteen cirrus above them — the
+    // number rule, and also the smallest count at which a sky stops looking
+    // like a handful of clouds someone placed. The cirrus sit at three times
+    // the height and move at a third of the apparent speed, which is the only
+    // parallax cue a sky has.
+    const cMap = cloudTex(), ciMap = cirrusTex();
     const clouds = [];
     for (let layer = 0; layer < 3; layer++) {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         const m = new THREE.SpriteMaterial({ map: cMap, transparent: true, opacity: 0.85 - layer * 0.18, depthWrite: false, fog: false });
         const s = new THREE.Sprite(m);
         const sc = rnd(260, 480) - layer * 40;
-        s.scale.set(sc, sc * 0.42, 1);
+        s.scale.set(sc, sc * 0.46, 1);
         s.position.set(rnd(-1500, 1500), 330 + layer * 130 + rnd(-30, 30), rnd(-1500, 1500));
-        s.userData = { speed: 0.05 + layer * 0.05 + rnd(0, 0.05), mat: m, baseO: m.opacity };
+        s.userData = { speed: 3 + layer * 3 + rnd(0, 3), mat: m, baseO: m.opacity, cirrus: false };
         scene.add(s);
         clouds.push(s);
       }
+    }
+    for (let i = 0; i < 18; i++) {
+      const m = new THREE.SpriteMaterial({ map: ciMap, transparent: true, opacity: rnd(0.30, 0.55), depthWrite: false, fog: false });
+      const s = new THREE.Sprite(m);
+      const sc = rnd(700, 1250);
+      s.scale.set(sc, sc * 0.20, 1);
+      s.position.set(rnd(-1700, 1700), rnd(940, 1320), rnd(-1700, 1700));
+      s.userData = { speed: 1.4 + rnd(0, 1.6), mat: m, baseO: m.opacity, cirrus: true };
+      scene.add(s);
+      clouds.push(s);
     }
 
     // ── אָבָק — dust in the air ───────────────────────────────────────────
@@ -1114,6 +1790,64 @@ export default function Mikdash() {
     // flat cylinder into twenty-two real grooves — the one place where the
     // derived map is doing the whole job of geometry.
     const fluted = pbr(flutedTex(), { bump: 2.2, normalScale: 1.4, rough: [0.35, 0.68] });
+    // ── Beaten gold scatters along the hammer, not evenly ──
+    //
+    // The facade was the largest gold surface in the House and the least
+    // convincing thing in it: a flat orange slab. The reason is that
+    // MeshStandardMaterial's specular lobe is isotropic — the same width in
+    // every direction — and hammered plate is not. A planished surface carries
+    // thousands of shallow parallel dents from the working, and light coming
+    // off it is stretched across them into a band, which is why real gold
+    // leaf has a sheen that travels as you move and painted gold does not.
+    //
+    // `MeshPhysicalMaterial.anisotropy` does this in newer three; on r128 it
+    // does not exist, so this is the honest version of it — the GGX roughness
+    // is split into two, wide along the hammer direction and tight across it,
+    // and the specular lobe is evaluated once for each and mixed. Cheap: one
+    // extra distribution and one extra visibility term per light, on the four
+    // materials that are actually metal.
+    //
+    // The direction is taken from the surface's own UV tangent rather than a
+    // world axis, so the sheen follows the plate around a corner instead of
+    // sliding over it. Bent to the horizontal, because that is the way plate is
+    // beaten when it is lying on a bench.
+    const anisotropic = (mat, strength) => {
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.uAniso = { value: strength };
+        // Everything the lobe needs has to live inside BRDF_Specular_GGX
+        // itself: it is a function, declared long before main, and a variable
+        // set in main is not in scope there. So the tangent frame is rebuilt
+        // per call from the normal, which costs a cross product and a
+        // normalize and saves the whole business of threading a varying
+        // through a shader three assembled.
+        shader.fragmentShader = shader.fragmentShader
+          .replace("#include <common>", `#include <common>
+            uniform float uAniso;
+            float anisoGGX(vec3 h, vec3 n, vec3 t, vec3 b, float ax, float ay){
+              float ht = dot(h, t) / ax, hb = dot(h, b) / ay, hn = dot(h, n);
+              float d = ht*ht + hb*hb + hn*hn;
+              return RECIPROCAL_PI / (ax * ay * d * d);
+            }`)
+          .replace("float D = D_GGX( alpha, dotNH );", `float D = D_GGX( alpha, dotNH );
+            {
+              // The hammer runs horizontally across the plate, so the tangent
+              // is the horizontal direction lying in the surface. Degenerate
+              // on a floor, where the cross product vanishes and the epsilon
+              // picks an arbitrary but stable direction rather than a NaN.
+              vec3 aT = normalize(cross(vec3(0.0, 1.0, 0.0), normal) + vec3(1e-4, 0.0, 0.0));
+              vec3 aB = cross(normal, aT);
+              float ax = clamp(alpha * (1.0 + uAniso), 0.0016, 1.0);
+              float ay = clamp(alpha / (1.0 + uAniso), 0.0008, 1.0);
+              D = mix(D, anisoGGX(halfDir, normal, aT, aB, ax, ay), 0.8);
+            }`);
+      };
+      mat.customProgramCacheKey = () => "aniso" + strength;
+      return mat;
+    };
+    anisotropic(gold, 0.75);
+    anisotropic(goldPlate, 0.85);
+    anisotropic(bronze, 0.55);
+
     // only the metals take the environment — the stone is lit and tuned already
     const metals = [gold, goldPlate, bronze, silver, foundGold];
     metals.forEach((m) => { m.envMap = envMap; m.envMapIntensity = 1; });
@@ -1215,27 +1949,72 @@ export default function Mikdash() {
     // stay cheap. Cooler and darker than the near ground so the fog can lift
     // them off it — aerial perspective is most of what makes distance read.
     const hillMats = [hillMat(0xe4d3ad), hillMat(0xd6c6a2), hillMat(0xefdfba)];
+    // ── מַדְרֵגוֹת — the terraces ──
+    //
+    // The one thing the ring of hills was still saying was "heightfield". A
+    // displaced sphere with a broken silhouette is a landform; it is not a
+    // landform anyone lives on. The hills around Jerusalem have been cut into
+    // contour terraces for olives and vines for something like three thousand
+    // years, and the terraces are the single most recognisable thing about
+    // them — flat treads a few amot apart with a dry-stone riser between, held
+    // level right around the contour so the winter rain stays on the slope
+    // instead of taking the soil down into the wadi.
+    //
+    // Cheap to build, because a terrace is a quantisation. Snap each vertex's
+    // height to a fixed interval and the whole hill steps; smoothstep the last
+    // quarter of each interval and the riser gets a face instead of being a
+    // zero-thickness cliff the normals cannot resolve. The silhouette against
+    // the sky steps with it, which is the half that actually sells it — a
+    // terrace painted on a smooth hill reads as stripes.
+    //
+    // Snapping is in local y and the mesh is squashed afterwards, so the
+    // interval is divided by that squash: the treads have to come out level in
+    // the world, not level in the sphere.
+    const TERRACE = 11;                       // amot of rise per tread
     for (let i = 0; i < 15; i++) {
       const a = (i / 15) * Math.PI * 2 + rnd(-0.14, 0.14);
       const r = rnd(150, 300);
-      const geo = new THREE.SphereGeometry(r, 32, 18);
+      // Rows in phi, and this is the whole game. A quantisation cannot put a
+      // step where the mesh has no vertex to hold it: at the original 18 rows
+      // there was less than one row per tread, so snapping moved each row a
+      // little and the hill came out exactly as smooth as it started. It needs
+      // five or six rows to a tread — one for the tread, one for the riser,
+      // and slack — which at these radii means ninety-odd. Only the farmed
+      // hills pay for it; the rock ones stay cheap.
+      const farmed = i % 3 !== 2;
+      const geo = new THREE.SphereGeometry(r, farmed ? 32 : 28, farmed ? 96 : 20);
       const pos = geo.attributes.position;
       // One random phase set per hill, so no two share a ridge line.
       const p1 = rnd(0, 6.28), p2 = rnd(0, 6.28), p3 = rnd(0, 6.28);
+      // Not every hill is farmed. The steep ones are left as rock, which also
+      // keeps the ring from reading as one stamp repeated fifteen times.
+      const squash = rnd(0.2, 0.38);
+      const step = TERRACE / squash;
       const v = new THREE.Vector3();
       for (let k = 0; k < pos.count; k++) {
         v.fromBufferAttribute(pos, k);
         const th = Math.atan2(v.z, v.x), ph = Math.acos(Math.max(-1, Math.min(1, v.y / r)));
         const d =
-          Math.sin(th * 3 + p1) * Math.sin(ph * 2 + p1) * 0.13 +
-          Math.sin(th * 5 - p2) * Math.sin(ph * 3 + p2) * 0.07 +
-          Math.sin(th * 9 + p3) * Math.sin(ph * 5 - p3) * 0.035;
+          // Deeper than it was. The terraces are contour lines of this field,
+          // and a shallow field has near-circular contours — which came out as
+          // a stack of plates rather than a farmed slope. At this amplitude the
+          // lines wander round the hill the way a contour actually does.
+          Math.sin(th * 3 + p1) * Math.sin(ph * 2 + p1) * 0.22 +
+          Math.sin(th * 5 - p2) * Math.sin(ph * 3 + p2) * 0.11 +
+          Math.sin(th * 9 + p3) * Math.sin(ph * 5 - p3) * 0.045;
         v.multiplyScalar(1 + d);
+        if (farmed && v.y > 0) {
+          const lvl = Math.floor(v.y / step);
+          const f = v.y / step - lvl;
+          // Flat for the first three quarters of the tread, then the riser.
+          const u = Math.min(1, Math.max(0, (f - 0.70) / 0.30));
+          v.y = (lvl + u * u * (3 - 2 * u)) * step;
+        }
         pos.setXYZ(k, v.x, v.y, v.z);
       }
       geo.computeVertexNormals();
       const hill = new THREE.Mesh(geo, hillMats[i % hillMats.length]);
-      hill.scale.y = rnd(0.2, 0.38);
+      hill.scale.y = squash;
       hill.position.set(Math.cos(a) * rnd(1180, 1460), LAND_Y - 10, Math.sin(a) * rnd(1180, 1460));
       hill.receiveShadow = true;
       scene.add(hill);
@@ -1307,6 +2086,21 @@ export default function Mikdash() {
       palm:  new THREE.MeshStandardMaterial({ color: 0x4a3a24, roughness: 0.92 }),
       dark:  new THREE.MeshStandardMaterial({ color: 0x2b2318, roughness: 0.95 }),
     };
+    // ── What day it is, inside the scene ──
+    // The same arithmetic the לוּחַ panel runs, read once when the House is
+    // built. Three things in here are date-aware: the almond, the chanukiah at
+    // the gate, and the ox that walks in front of the bikkurim.
+    const todayRD = sceneDateRD();
+    const todayHeb = rdToHeb(todayRD);
+    const todayChag = chagOn(todayRD, false);
+    // The moon's age. Day 1 of a Hebrew month is the new moon and day 15 is
+    // full, which is a fact about the calendar and not a coincidence: the month
+    // is defined by the moon. Illuminated fraction from the age by the synodic
+    // period, 29.530594 days.
+    const moonAge = todayHeb.day - 1;
+    const moonK = (1 - Math.cos((2 * Math.PI * moonAge) / 29.530594)) / 2;
+    const almondInFlower = todayHeb.month === 11 || todayHeb.month === 12 || todayHeb.month === 13;
+
     const foliage = {
       olive:  new THREE.MeshStandardMaterial({ color: 0x2c3a1c, roughness: 0.95 }),
       cypress: new THREE.MeshStandardMaterial({ color: 0x11240f, roughness: 0.95 }),
@@ -1314,7 +2108,16 @@ export default function Mikdash() {
       rimon:  new THREE.MeshStandardMaterial({ color: 0x1b3a12, roughness: 0.9 }),
       fig:    new THREE.MeshStandardMaterial({ color: 0x21400f, roughness: 0.92 }),
       carob:  new THREE.MeshStandardMaterial({ color: 0x16290e, roughness: 0.95 }),
-      almond: new THREE.MeshStandardMaterial({ color: 0xd9b9c4, roughness: 0.9 }),
+      // ── The almond keeps the season ──
+      // It was in blossom all year, which is the one tree in this land where
+      // that is a real claim and not a licence: the shaked flowers in Shevat,
+      // before its own leaves and before anything else in the country, and it
+      // is named for being early — שָׁקֵד, from שׁוֹקֵד, to be awake and
+      // watching (Yirmiyahu 1:11–12, where the almond branch is the pun).
+      // So it flowers in Shevat and Adar and is green the rest of the year,
+      // which means a visitor in late January finds the grove different and
+      // nobody had to tell them why.
+      almond: new THREE.MeshStandardMaterial({ color: almondInFlower ? 0xe7cdd4 : 0x2c4a16, roughness: 0.9 }),
     };
     const fruit = {
       date:   new THREE.MeshStandardMaterial({ color: 0x6b2a08, roughness: 0.7 }),
@@ -1558,6 +2361,11 @@ export default function Mikdash() {
         merged.computeBoundingSphere();
         const m = new THREE.Mesh(merged, mat);
         m.castShadow = m.receiveShadow = true;
+        // Same gust in the depth pass as on the surface, or the shadow stands
+        // still while the tree bends.
+        if (sway && mat.userData.windAmp !== undefined) {
+          m.customDepthMaterial = windDepth(mat.userData.windAmp);
+        }
         out.add(m);
       }
       return out;
@@ -1577,9 +2385,6 @@ export default function Mikdash() {
     // everywhere at once. Amplitude is the baked aSway weight, so a trunk
     // stands still and a frond tip travels.
     //
-    // Known limit: the depth material used for shadow casting is not patched,
-    // so a tree's shadow stays put while the tree moves. Invisible from the
-    // orbit camera at this sun angle; it would show from directly beneath one.
     const windU = { value: 0 };
     // The same two sines the shader runs, evaluated in JS. The wind you hear
     // and the wind you watch were previously two unrelated clocks — the trees
@@ -1590,29 +2395,59 @@ export default function Mikdash() {
       const ph = x * 0.021 + z * 0.016;
       return Math.sin(tt * 0.85 + ph) * 0.62 + Math.sin(tt * 1.63 + ph * 2.3) * 0.38;
     };
+    // The displacement itself, lifted out of the surface material so the depth
+    // material can run the identical arithmetic. It has to be identical, not
+    // merely similar: a shadow drawn from a slightly different gust is worse
+    // than one that does not move at all, because the eye reads the mismatch
+    // as the tree floating off its own shadow.
+    const swayPatch = (shader, amp) => {
+      shader.uniforms.uWind = windU;
+      shader.uniforms.uAmp = { value: amp };
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", `#include <common>
+          attribute float aSway;
+          uniform float uWind;
+          uniform float uAmp;`)
+        .replace("#include <begin_vertex>", `#include <begin_vertex>
+          {
+            float ph = transformed.x * 0.021 + transformed.z * 0.016;
+            float gust = sin(uWind * 0.85 + ph) * 0.62
+                       + sin(uWind * 1.63 + ph * 2.3) * 0.38;
+            transformed.x += gust * aSway * uAmp;
+            transformed.z += gust * aSway * uAmp * 0.55;
+            transformed.y -= abs(gust) * aSway * uAmp * 0.12;
+          }`);
+    };
     const windward = (mat, amp) => {
-      mat.onBeforeCompile = (shader) => {
-        shader.uniforms.uWind = windU;
-        shader.uniforms.uAmp = { value: amp };
-        shader.vertexShader = shader.vertexShader
-          .replace("#include <common>", `#include <common>
-            attribute float aSway;
-            uniform float uWind;
-            uniform float uAmp;`)
-          .replace("#include <begin_vertex>", `#include <begin_vertex>
-            {
-              float ph = transformed.x * 0.021 + transformed.z * 0.016;
-              float gust = sin(uWind * 0.85 + ph) * 0.62
-                         + sin(uWind * 1.63 + ph * 2.3) * 0.38;
-              transformed.x += gust * aSway * uAmp;
-              transformed.z += gust * aSway * uAmp * 0.55;
-              transformed.y -= abs(gust) * aSway * uAmp * 0.12;
-            }`);
-      };
+      mat.onBeforeCompile = (shader) => swayPatch(shader, amp);
       // Distinct cache keys, or three reuses one compiled program for every
       // amplitude and the whole grove bends like a palm.
       mat.customProgramCacheKey = () => "wind" + amp;
+      // Carried on the material so the merge, which is the only place that
+      // knows which mesh ends up with which material, can hang the matching
+      // depth material off the mesh.
+      mat.userData.windAmp = amp;
       return mat;
+    };
+    // ── The shadows move too ──
+    //
+    // Shadow casting does not use the surface material. three swaps in a
+    // MeshDepthMaterial for the depth pass, and that one was unpatched — so
+    // every tree in the grove threw a shadow of where it would have been
+    // standing in still air. It read as fine from the orbit camera because the
+    // sun is high and the shadows are short; from underneath a palm at dusk,
+    // with the fronds travelling most of an amah, the tree and its shadow had
+    // visibly nothing to do with each other.
+    //
+    // A material assigned to `mesh.customDepthMaterial` is used in place of the
+    // swapped-in one, so this is the same displacement compiled into the depth
+    // program. RGBADepthPacking because that is what a directional light's
+    // shadow map wants.
+    const windDepth = (amp) => {
+      const d = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+      d.onBeforeCompile = (shader) => swayPatch(shader, amp);
+      d.customProgramCacheKey = () => "winddepth" + amp;
+      return d;
     };
     // A frond is a sail; a cypress barely gives. Amplitudes are in amot.
     windward(foliage.palm, 1.5);
@@ -1990,6 +2825,9 @@ export default function Mikdash() {
 
     // small torch flames reuse the sprite system
     const torchFires = [];
+    // Festival lights that only exist on their own day; flickered by the same
+    // loop the wall torches are.
+    const festivalFlames = [];
     const addTorch = (worldPos, parent = scene) => {
       const m = new THREE.SpriteMaterial({ map: fireTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
       const sp = new THREE.Sprite(m);
@@ -2381,7 +3219,43 @@ export default function Mikdash() {
     // there is far less sky for the river to hold.
     metals.push(waterMat);
     const streams = [];
-    streams.push(box(196, 0.5, 4, waterMat, -8, IC_H + 0.32, 30));
+    // The court's own reach of the river, written as its edges rather than as
+    // a width and a centre, because the kohanim have to know where it is: it
+    // runs from under the threshold of the House (x = −106, its eastern face)
+    // to past the eastern edge of the azarah, four amot across, south of the
+    // altar as Yechezkel 47:1 has it. Nothing else in the court divides it end
+    // to end, so anyone walking from the kiyor to the altar must cross here.
+    const AMAH_X0 = -106, AMAH_X1 = 90, AMAH_Z0 = 28, AMAH_Z1 = 32;
+    const inAmah = (x, z) => x > AMAH_X0 && x < AMAH_X1 && z > AMAH_Z0 && z < AMAH_Z1;
+    // A thrown droplet reads at eye height and disappears from above, which is
+    // where this House is mostly watched from — and the sprite pool is additive,
+    // which over sunlit stone adds nothing at all, the same trap the beacon fell
+    // into. So the water answers twice: droplets off the foot, and a ring
+    // opening on the surface where the foot went in. The ring is normally
+    // blended and pale against a mid-blue river, so it reads from any angle and
+    // at any hour.
+    const ripples = [];
+    for (let i = 0; i < 8; i++) {
+      const m = new THREE.Mesh(
+        new THREE.TorusGeometry(0.7, 0.18, 6, 22),
+        new THREE.MeshBasicMaterial({ color: 0xeaf8ff, transparent: true, opacity: 0, depthWrite: false })
+      );
+      m.rotation.x = Math.PI / 2;
+      m.visible = false;
+      m.userData.life = 0;
+      scene.add(m);
+      ripples.push(m);
+    }
+    let rippleNext = 0;
+    const ripple = (x, z) => {
+      const m = ripples[(rippleNext = (rippleNext + 1) % ripples.length)];
+      m.position.set(x, IC_H + 0.78, z);
+      m.scale.set(1, 1, 1);
+      m.userData.life = 1;
+      m.visible = true;
+    };
+    streams.push(box(AMAH_X1 - AMAH_X0, 0.5, AMAH_Z1 - AMAH_Z0, waterMat,
+                     (AMAH_X0 + AMAH_X1) / 2, IC_H + 0.32, (AMAH_Z0 + AMAH_Z1) / 2));
     streams.push(box(174, 0.5, 8, waterMat, 158, 0.5, 30));
     const s3 = box(360, 0.5, 18, waterMat, HALF + 210, LAND_Y + 0.6, 30);
     s3.rotation.y = -0.05;
@@ -2459,13 +3333,28 @@ export default function Mikdash() {
       return g;
     };
     // Kohanim: walking loops in the inner court (white with techelet sash)
+    // These waypoints are walked by lerp, with no collision resolution behind
+    // them — the kohanim are the one thing in the House that can pass through
+    // stone — so every leg has to be laid clear of the colliders by hand.
+    // Three of them were not:
+    //   · path 5 ran straight through the Temple platform, which stands six
+    //     amot proud of the azarah. Its two kohanim were buried inside the
+    //     marble for most of the loop and simply could not be seen.
+    //   · paths 2 and 6 each parked a waypoint in the middle of the amah, so a
+    //     kohen turned a corner standing in the water. Crossing it is right;
+    //     loitering in it is not, so both were moved to the southern bank.
+    //   · path 2's fifth leg clipped the southwestern corner of the altar.
+    //     Moving its waypoint off the water cleared that as well.
+    // Six of the twelve still cross the amah twice a loop, which is as it
+    // should be — the kiyor stands on the southern bank and the altar on the
+    // northern, so the walk to the service crosses the water by design.
     const KOHEN_PATHS = [
       [[30, -70], [55, -30], [30, 40], [-40, 60], [-70, 20], [-60, -50]],
-      [[-90, 40], [-60, 75], [0, 80], [40, 60], [10, 30], [-50, 10]],
+      [[-90, 40], [-60, 75], [0, 80], [40, 60], [12, 36], [-50, 10]],
       [[50, -80], [20, -95], [-30, -80], [-60, -40], [-30, -20], [20, -45]],
       [[-100, -30], [-80, -70], [-40, -90], [-10, -60], [-50, -35], [-85, -5]],
-      [[-120, 62], [-152, 30], [-124, -18], [-92, -52], [-126, -78], [-158, -40]],
-      [[58, -18], [40, 22], [0, 62], [-40, 88], [8, 70], [48, 30]],
+      [[-88, -52], [-142, -56], [-180, -78], [-158, -100], [-100, -96], [-72, -70]],
+      [[58, -18], [40, 22], [0, 62], [-40, 88], [8, 70], [50, 36]],
     ];
     KOHEN_PATHS.forEach((path, pi) => {
       for (let k = 0; k < 2; k++) {
@@ -2638,12 +3527,128 @@ export default function Mikdash() {
       { x: 178, z: HALF + 142, ry: -1.2, couched: false },
       { x: 216, z: HALF + 108, ry: -0.85, couched: false },
     ];
+    // The nearest camel, kept for the sound bed: a grunt should come from a
+    // particular animal at a particular place, not from the caravan in general.
+    const camelAt = new THREE.Vector3(CAMELS[0].x, LAND_Y + 6, CAMELS[0].z);
     for (const c of CAMELS) {
       const cm = makeCamel(c.couched);
       cm.position.set(c.x, LAND_Y, c.z);
       cm.rotation.y = c.ry;
       scene.add(cm);
     }
+
+    // The scene clock, stamped once a frame by the loop below. Declared up
+    // here because the flock is laid out at build time and wants to read it.
+    let nowT = 0;
+
+    // ═══════════ צֹאן — a flock on the approach ═══════════
+    //
+    // Most korbanot walked to Jerusalem. Devarim 14:24–25 makes the concession
+    // explicit — if the road is too long, sell it and carry the silver — which
+    // is worth reading the other way round: unless the road was too long, the
+    // animal came up on its own feet. So the last mile of the pilgrim road
+    // south of the stairs had sheep on it, and this one has had nothing on it
+    // at all, which is also the reason the middle distance has been reading as
+    // empty ground between two things worth looking at.
+    //
+    // Eighteen, which is the number rule, and two draw calls, which is the
+    // budget: the whole animal is merged down to one geometry of wool and one
+    // of face, and eighteen of each are drawn as instances. That is why they
+    // move as rigid bodies — a grazing sheep pitches its whole front end down
+    // here rather than lowering a head, which is close enough at two hundred
+    // amot and costs nothing per frame but a matrix.
+    const wool = new THREE.MeshStandardMaterial({ color: 0xd8d2c4, roughness: 0.96 });
+    const woolDark = new THREE.MeshStandardMaterial({ color: 0x4a4238, roughness: 0.9 });
+    const sheepProto = new THREE.Group();
+    {
+      // Fleece: three overlapping lobes, because a single ellipsoid reads as a
+      // pill and a fleece is lumpy — the same argument the trees settled.
+      for (const [lx, ly, lz, r] of [[0, 0, 0, 1.30], [0.62, 0.10, 0, 1.05], [-0.66, 0.04, 0, 1.02]]) {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 9, 7), wool);
+        b.scale.set(1.16, 0.92, 1.0);
+        b.position.set(lx, 2.05 + ly, lz);
+        b.castShadow = true; sheepProto.add(b);
+      }
+      // Legs: dark, thin, and short. They are four dots at distance and the
+      // thing that stops the fleece looking like a boulder.
+      for (let l = 0; l < 4; l++) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 1.5, 5), woolDark);
+        leg.position.set(l < 2 ? 0.78 : -0.72, 0.75, (l % 2 ? 1 : -1) * 0.52);
+        leg.castShadow = true; sheepProto.add(leg);
+      }
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.46, 0.9, 6), wool);
+      neck.position.set(1.55, 2.35, 0); neck.rotation.z = -0.55; sheepProto.add(neck);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 8, 6), woolDark);
+      head.scale.set(1.5, 0.92, 0.9);
+      head.position.set(2.12, 2.18, 0); head.castShadow = true; sheepProto.add(head);
+      for (const es of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.17, 5, 4), woolDark);
+        ear.scale.set(1.5, 0.5, 0.9);
+        ear.position.set(1.86, 2.30, es * 0.36); sheepProto.add(ear);
+      }
+      const tail = new THREE.Mesh(new THREE.SphereGeometry(0.30, 6, 5), wool);
+      tail.scale.set(0.8, 1.25, 0.8);
+      tail.position.set(-1.55, 2.10, 0); sheepProto.add(tail);
+    }
+    const SHEEP = 18;
+    const sheepInst = [];
+    for (const merged of mergeByMaterial(sheepProto).children) {
+      const im = new THREE.InstancedMesh(merged.geometry, merged.material, SHEEP);
+      im.castShadow = im.receiveShadow = true;
+      im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      scene.add(im);
+      sheepInst.push(im);
+    }
+    // Road and flock. The road runs south from the foot of the great stairs;
+    // the flock walks up it, and when the leaders reach the bottom step the
+    // whole flock is put back at the far end — a pilgrim road never runs out
+    // of them for long.
+    // Pulled in from the far plain. At five hundred amot out the flock was
+    // real and invisible — eighteen white specks two pixels across. This band
+    // sits them in the middle distance the entry shot actually frames.
+    const FLOCK_END = HALF + 66, FLOCK_START = HALF + 330;
+    const sheep = [];
+    for (let i = 0; i < SHEEP; i++) {
+      sheep.push({
+        // Clustered on the road with a long tail of stragglers, not spread
+        // evenly: a flock is a clump and three animals that fell behind.
+        lane: rnd(-70, 26) + (Math.random() < 0.22 ? rnd(-46, 46) : 0),
+        along: rnd(0, FLOCK_START - FLOCK_END),
+        sp: rnd(2.4, 3.6),
+        // Grazing. A sheep on a walk stops constantly; phase and rate per
+        // animal so the flock never dips its heads together.
+        gph: rnd(0, 6.28), grate: rnd(0.10, 0.22),
+        wob: rnd(0, 6.28),
+      });
+    }
+    const sheepM = new THREE.Matrix4(), sheepQ = new THREE.Quaternion();
+    const sheepE = new THREE.Euler(), sheepP = new THREE.Vector3(), sheepS = new THREE.Vector3(1, 1, 1);
+    const stepSheep = (dt2) => {
+      const span = FLOCK_START - FLOCK_END;
+      // Called once at build time, before the loop has stamped a clock.
+      const tt = nowT || 0;
+      for (let i = 0; i < SHEEP; i++) {
+        const sh = sheep[i];
+        // Grazing: nose down, and while the nose is down the feet stop. One
+        // number does both, which is also true of sheep.
+        const graze = Math.max(0, Math.sin(sh.gph + tt * sh.grate));
+        sh.along -= sh.sp * dt2 * (1 - graze * 0.92);
+        if (sh.along < 0) sh.along += span;
+        const z = FLOCK_END + sh.along;
+        // The road is not straight and neither is a flock on it.
+        const x = sh.lane + Math.sin(z * 0.012 + sh.wob) * 9;
+        sheepP.set(x, LAND_Y, z);
+        // Facing up the road, nose pitched into the grass, and the small
+        // side-to-side roll of a walking quadruped.
+        sheepE.set(0, -Math.PI / 2 + Math.cos(z * 0.012 + sh.wob) * 0.12,
+                   graze * 0.42 + Math.sin(tt * 3.1 + sh.wob) * 0.03 * (1 - graze));
+        sheepQ.setFromEuler(sheepE);
+        sheepM.compose(sheepP, sheepQ, sheepS);
+        for (const im of sheepInst) im.setMatrixAt(i, sheepM);
+      }
+      for (const im of sheepInst) im.instanceMatrix.needsUpdate = true;
+    };
+    stepSheep(0);
 
     // ═══════════ כִּנּוֹר — the harp of the Levites ═══════════
     //
@@ -3005,35 +4010,249 @@ export default function Mikdash() {
     mound.position.set(560, LAND_Y - 5, CWAY_Z);
     mound.receiveShadow = true;
     scene.add(mound);
-    const parah = new THREE.Group();
+    // ── שׁוֹר — an ox, built once and used twice ──
+    //
+    // What stood here was a sphere with a cone on it. Four things were wrong
+    // and all four are the same mistake — a cow is not a smooth solid:
+    //
+    //   · the horns were the colour of the hide. Horn is keratin over bone and
+    //     it is pale, which is the single strongest cue that the animal is an
+    //     animal and not a shape;
+    //   · the barrel was one ellipsoid, so it had no shoulder and no
+    //     hindquarter, and a bovine silhouette is almost entirely shoulder and
+    //     hindquarter with a dip between them;
+    //   · the legs were four straight columns from the body to the ground.
+    //     A leg has a knee in front and a hock behind, bending opposite ways,
+    //     and the hooves were missing entirely;
+    //   · nothing moved. She stood on the Mount for two versions perfectly
+    //     still, and stillness at that distance reads as a prop.
+    //
+    // Facing +X, feet at y = 0, about seven amot nose to tail before the group
+    // is scaled. `horn` lets the same animal be the red heifer of Bamidbar 19
+    // on Har HaMishcha and the ox that walks in front of the bikkurim with its
+    // horns overlaid with gold (Bikkurim 3:2–4).
+    const hornBone = new THREE.MeshStandardMaterial({ color: 0xd9cba4, roughness: 0.42 });
+    const hoofDark = new THREE.MeshStandardMaterial({ color: 0x2b2119, roughness: 0.65 });
+    const eyeDark = new THREE.MeshStandardMaterial({ color: 0x140f0a, roughness: 0.3 });
+    const makeOx = ({ hide, muzzle, horn = hornBone, wreath = false } = {}) => {
+      const g = new THREE.Group();
+      const parts = {};
+      const lobe = (r, sx, sy, sz, x, y, z, mat = hide) => {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(r, 11, 9), mat);
+        m.scale.set(sx, sy, sz); m.position.set(x, y, z); m.castShadow = true; g.add(m);
+        return m;
+      };
+      // Barrel: chest, belly, rump. The rump sits a touch lower than the
+      // withers, which is where a cow's topline actually goes.
+      parts.chest = lobe(1.55, 1.05, 1.02, 1.0, 1.5, 3.75, 0);
+      parts.belly = lobe(1.62, 1.25, 0.94, 1.02, -0.2, 3.55, 0);
+      lobe(1.48, 1.02, 0.98, 0.98, -1.9, 3.6, 0);
+      // Withers — the shoulder ridge an ox carries the yoke on.
+      lobe(0.85, 1.5, 0.62, 0.72, 1.4, 4.75, 0);
+      // Neck, thick at the shoulder and narrow at the poll.
+      const neck = cyl(0.72, 1.35, 2.9, 9, hide, 3.15, 4.55, 0, g);
+      neck.rotation.z = -0.62; neck.castShadow = true;
+      // Dewlap: the fold of loose skin down the throat. Small, and the reason
+      // the front of a cow does not read as a tube.
+      lobe(0.62, 1.5, 1.15, 0.5, 3.3, 3.35, 0);
+      // Head. Long and flat-sided, not round — a bovine skull is mostly muzzle.
+      parts.head = new THREE.Group();
+      parts.head.position.set(4.15, 5.05, 0);
+      // A cow's head is big. Scaled here rather than in every part below so the
+      // horns and the wreath come with it.
+      parts.head.scale.setScalar(1.18);
+      g.add(parts.head);
+      const skull = new THREE.Mesh(new THREE.SphereGeometry(0.86, 11, 9), hide);
+      skull.scale.set(1.25, 1.0, 0.88); skull.castShadow = true; parts.head.add(skull);
+      const snout = new THREE.Mesh(new THREE.SphereGeometry(0.58, 9, 7), muzzle);
+      snout.scale.set(1.45, 0.86, 0.86); snout.position.set(1.32, -0.34, 0);
+      snout.castShadow = true; parts.head.add(snout);
+      for (const sd of [-1, 1]) {
+        const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.11, 6, 5), eyeDark);
+        nostril.position.set(2.02, -0.30, sd * 0.24); parts.head.add(nostril);
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.15, 7, 6), eyeDark);
+        eye.position.set(0.62, 0.20, sd * 0.66); parts.head.add(eye);
+        // Ears, out sideways and a little back, and they flick.
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.30, 7, 6), hide);
+        ear.scale.set(1.5, 0.42, 0.85);
+        ear.position.set(-0.30, 0.36, sd * 0.92);
+        ear.rotation.z = sd * 0.25; ear.rotation.x = sd * 0.5;
+        parts.head.add(ear);
+        parts["ear" + (sd > 0 ? "R" : "L")] = ear;
+        // Horns: two tapered segments, the second turned up and in. A single
+        // straight cone is a party hat; the bend is the whole shape.
+        const h1 = cyl(0.15, 0.23, 0.78, 7, horn, 0, 0, 0);
+        const h2 = cyl(0.04, 0.15, 0.7, 7, horn, 0, 0.68, 0);
+        h2.rotation.z = sd * 0.0; h2.rotation.x = -sd * 0.75;
+        const hg = new THREE.Group();
+        hg.add(h1); hg.add(h2);
+        hg.position.set(-0.05, 0.62, sd * 0.5);
+        hg.rotation.x = sd * 0.85; hg.rotation.z = -0.18;
+        h1.castShadow = h2.castShadow = true;
+        parts.head.add(hg);
+      }
+      if (wreath) {
+        // עֲטָרָה שֶׁל זַיִת — the olive wreath of Bikkurim 3:3, worn between
+        // the horns.
+        const olive = new THREE.MeshStandardMaterial({ color: 0x5d7030, roughness: 0.85 });
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.13, 5, 12), olive);
+        ring.rotation.x = Math.PI / 2; ring.position.set(-0.05, 0.66, 0);
+        parts.head.add(ring);
+        for (let l = 0; l < 9; l++) {
+          const a = (l / 9) * Math.PI * 2;
+          const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.17, 5, 4), olive);
+          leaf.scale.set(1.6, 0.35, 0.7);
+          leaf.position.set(-0.05 + Math.cos(a) * 0.62, 0.74, Math.sin(a) * 0.62);
+          leaf.rotation.y = -a;
+          parts.head.add(leaf);
+        }
+      }
+      // Legs. Front knee bends back, hind hock bends forward — opposite ways,
+      // which is the thing everyone gets wrong and everyone can see.
+      parts.legs = [];
+      for (let l = 0; l < 4; l++) {
+        const fore = l < 2, sd = l % 2 ? 1 : -1;
+        const lx = fore ? 1.9 : -2.05, lz = sd * 0.95;
+        const leg = new THREE.Group();
+        leg.position.set(lx, 3.3, lz);
+        g.add(leg);
+        const upper = cyl(0.34, 0.52, 1.9, 7, hide, 0, -0.95, 0, leg);
+        upper.rotation.z = fore ? 0.10 : -0.16;
+        upper.castShadow = true;
+        const joint = new THREE.Mesh(new THREE.SphereGeometry(0.33, 7, 6), hide);
+        joint.position.set(fore ? -0.19 : 0.30, -1.85, 0); leg.add(joint);
+        const lower = cyl(0.20, 0.28, 1.55, 7, hide, fore ? -0.24 : 0.30, -2.62, 0, leg);
+        lower.rotation.z = fore ? -0.06 : 0.12;
+        lower.castShadow = true;
+        const hoof = cyl(0.27, 0.24, 0.42, 7, hoofDark, fore ? -0.28 : 0.22, -3.5, 0, leg);
+        hoof.castShadow = true;
+        parts.legs.push(leg);
+      }
+      // Tail with a switch on the end — the tuft is what you actually see move.
+      const tail = new THREE.Group();
+      tail.position.set(-3.25, 4.15, 0);
+      g.add(tail);
+      const tailRod = cyl(0.09, 0.16, 2.6, 6, hide, 0, -1.3, 0, tail);
+      tailRod.castShadow = true;
+      const switchTuft = new THREE.Mesh(new THREE.SphereGeometry(0.30, 7, 6), hoofDark);
+      switchTuft.scale.set(0.7, 1.5, 0.7); switchTuft.position.set(0, -2.75, 0);
+      tail.add(switchTuft);
+      parts.tail = tail;
+      return { group: g, parts };
+    };
+    // The one on the Mount. Bamidbar 19:2 — אֲדֻמָּה תְּמִימָה, entirely red
+    // and without blemish, and Parah 2:5 disqualifies her for two black hairs.
+    // Deeper than it reads on paper. Full sun through an ACES curve lifts a
+    // mid red most of a stop, and 0x9c3b22 — which is a red-brown in a swatch —
+    // came out of the renderer the colour of a peach.
+    const redHide = new THREE.MeshStandardMaterial({ color: 0x6d2410, roughness: 0.92 });
+    const redMuzzle = new THREE.MeshStandardMaterial({ color: 0x521a0b, roughness: 0.94 });
+    const parahOx = makeOx({ hide: redHide, muzzle: redMuzzle });
+    const parah = parahOx.group;
     parah.position.set(536, LAND_Y + 9, CWAY_Z);
-    const redHide = new THREE.MeshStandardMaterial({ color: 0x9c3b22, roughness: 0.9 });
-    const pBody = new THREE.Mesh(new THREE.SphereGeometry(3.2, 10, 8), redHide);
-    pBody.scale.set(1.75, 1, 1); pBody.position.y = 6.4; pBody.castShadow = true; parah.add(pBody);
-    const pNeck = cyl(1.5, 1.9, 3, 8, redHide, 4.9, 6.6, 0, parah);
-    pNeck.rotation.z = -0.5;
-    const pHead = new THREE.Mesh(new THREE.SphereGeometry(1.5, 9, 7), redHide);
-    pHead.scale.set(1.5, 1, 0.95); pHead.position.set(7.4, 6.2, 0); parah.add(pHead);
-    for (const s2 of [-1, 1]) {
-      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 5), redHide);
-      ear.scale.set(0.5, 0.6, 1.5);
-      ear.position.set(6.6, 7, s2 * 1.5);
-      parah.add(ear);
-      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.34, 2.2, 6), redHide);
-      horn.position.set(7, 7.9, s2 * 0.9);
-      horn.rotation.z = -s2 * 0.15;
-      horn.rotation.x = -s2 * 0.5;
-      parah.add(horn);
-    }
-    for (let l2 = 0; l2 < 4; l2++)
-      cyl(0.55, 0.6, 6.4, 6, redHide, -2.8 + (l2 % 2) * 5.4, 3.2, l2 < 2 ? -1.6 : 1.6, parah);
-    const pTail = cyl(0.3, 0.12, 4, 5, redHide, -5.9, 5.6, 0, parah);
-    pTail.rotation.z = 0.5;
     parah.rotation.y = -2.3;
     parah.scale.set(1.8, 1.8, 1.8);   // she has to read as a heifer from the Mount
     parah.userData = { id: 34 };
     scene.add(parah);
     clickables.push(parah);
+    // Alive, barely. Breath in the barrel, a tail that swings, an ear that
+    // flicks on its own clock, and the slow drop and lift of a head cropping
+    // grass. All of it small — she is four hundred amot away and the point is
+    // only that she is not a statue.
+    const livingOx = [];
+    const animateOx = (o, phase, scale = 1) => livingOx.push({ o, phase, scale });
+    animateOx(parahOx.parts, 0);
+
+    // ═══════════ מוֹעֲדִים — what stands here only on the chag ═══════════
+    //
+    // The House keeps the calendar. Two things are built only on the days they
+    // belong to, and on every other day of the year they are simply not here —
+    // which is the point: somebody who comes back in Kislev finds something
+    // that was not there in Av, and nothing told them to look.
+    //
+    // Both are outside the walls. A chanukiah is not a Temple vessel and has no
+    // business in the courts (the Menorah inside has seven branches and is lit
+    // by kohanim); its whole mitzvah is פִּרְסוּמֵי נִיסָא, publicising the
+    // miracle, which means a doorway and a street. And an ox has no business in
+    // the courts either, which is why the bikkurim procession stops at the foot
+    // of the stairs and the baskets go up on shoulders.
+    if (todayChag && todayChag.id === "chanukah") {
+      // Which night. Straight off the date rather than out of the sentence in
+      // the panel: 25 Kislev is the first, and Kislev is 29 days some years and
+      // 30 others, which is exactly the sort of thing that silently breaks a
+      // count once every few years and is invisible when you test it in August.
+      const kislevLen = hebMonthLen(todayHeb.year, 9);
+      const night = todayHeb.month === 9 ? todayHeb.day - 24 : todayHeb.day + (kislevLen - 24);
+      const lit = Math.max(1, Math.min(8, night));
+      const chanukiah = new THREE.Group();
+      // On the plaza clear of the southern gate, and scaled up until it reads
+      // from the opening view. A chanukiah is a hand's span of oil; this one is
+      // thirty amot across, which is not a claim about the object but about the
+      // one thing it is for — פִּרְסוּמֵי נִיסָא, publicising the miracle.
+      // Something nobody can see from the road is not publicising anything.
+      chanukiah.position.set(96, 0, HALF + 18);
+      chanukiah.scale.setScalar(2.3);
+      box(9, 1.1, 3.4, gold, 0, 0.55, 0, chanukiah);
+      cyl(0.5, 0.9, 4.2, 9, gold, 0, 2.7, 0, chanukiah);
+      box(13, 0.7, 0.8, gold, -0.9, 5.1, 0, chanukiah);
+      const flameTex2 = fireSpriteTex();
+      // Eight in a row and the שַׁמָּשׁ apart from them and higher, because it
+      // is the only one whose light may be used — the eight are for looking at
+      // and nothing else (Shabbat 21b–22a).
+      //
+      // Lamp 1 is at the right as you face it, and on night N lamps 1…N burn.
+      // The Talmud's argument about which end to start from is about the order
+      // of kindling, not the order of standing: the newest is lit first, and
+      // the row still fills from the far side inward.
+      for (let c = 0; c <= 8; c++) {
+        const isSham = c === 8;
+        const x = isSham ? -7.4 : (3.5 - c) * 1.4;
+        const cupY = isSham ? 6.7 : 5.6;
+        if (isSham) cyl(0.22, 0.22, 1.6, 7, gold, x, 5.8, 0, chanukiah);
+        const cup = cyl(0.44, 0.28, 0.62, 8, gold, x, cupY, 0, chanukiah);
+        cup.castShadow = true;
+        if (!isSham && c + 1 > lit) continue;          // not yet this night
+        const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex2, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.9 }));
+        fl.scale.set(0.9, 1.5, 1);
+        fl.position.set(x, cupY + 0.85, 0);
+        chanukiah.add(fl);
+        const li = new THREE.PointLight(0xffb347, 0.5, 34, 2);
+        li.position.set(x, cupY + 1.1, 0);
+        chanukiah.add(li);
+        festivalFlames.push({ fl, li, ph: rnd(0, 6.28) });
+      }
+      scene.add(chanukiah);
+    }
+
+    if (todayChag && todayChag.id === "shavuot") {
+      // Bikkurim 3:2–4. The ox goes in front with its horns overlaid with gold
+      // and an olive wreath on its head, and a flute plays the whole way up;
+      // the craftsmen of Jerusalem stand as they pass, which the Talmud says
+      // they do for nobody else — work stops for farmers carrying figs.
+      const oxHide = new THREE.MeshStandardMaterial({ color: 0x4a3320, roughness: 0.9 });
+      const oxMuzzle = new THREE.MeshStandardMaterial({ color: 0x33210f, roughness: 0.92 });
+      const bikkur = makeOx({ hide: oxHide, muzzle: oxMuzzle, horn: gold, wreath: true });
+      bikkur.group.position.set(-30, LAND_Y, HALF + 150);
+      bikkur.group.rotation.y = -Math.PI / 2;          // facing up the road
+      bikkur.group.scale.setScalar(1.55);
+      scene.add(bikkur.group);
+      animateOx(bikkur.parts, 2.1);
+      // The baskets. Bikkurim 3:8: the rich brought theirs in gold and silver,
+      // the poor in wicker of peeled willow — and the poor man's basket was
+      // given away with the fruit while the rich man's was handed back.
+      const wick = new THREE.MeshStandardMaterial({ color: 0xa8843e, roughness: 0.95 });
+      for (let b2 = 0; b2 < 6; b2++) {
+        const bx = -30 + rnd(-16, 16), bz = HALF + 168 + rnd(-14, 14);
+        const basket = cyl(1.5, 1.05, 2.1, 9, wick, bx, LAND_Y + 1.05, bz, scene);
+        basket.castShadow = true;
+        for (let f2 = 0; f2 < 5; f2++) {
+          const fig = new THREE.Mesh(new THREE.SphereGeometry(0.45, 7, 6), fruit.rimon);
+          fig.position.set(bx + rnd(-0.8, 0.8), LAND_Y + 2.2, bz + rnd(-0.8, 0.8));
+          scene.add(fig);
+        }
+      }
+    }
+
 
     // 35 · הכותל המערבי — the western retaining wall, whose courses are still
     // standing, with notes pressed into the joints (Shemot Rabbah 2:2).
@@ -3191,7 +4410,7 @@ export default function Mikdash() {
     const amb = {
       on: true, built: false, buf: null,
       master: null, wind: null, windF: null, fire: null, fireGain: null,
-      songBus: null, song: null, songAt: 0, crackAt: 0,
+      songBus: null, song: null, songAt: 0, crackAt: 0, camelAt: 0,
     };
     const playShofar = () => {
       if (!amb.on) return;
@@ -3405,15 +4624,24 @@ export default function Mikdash() {
     const playPitch = (midi, at, dur, dest, voices) => {
       const ctx = ensureAudio();
       const f = NOTE_HZ(midi);
+      // Release. Every note used to ring for a fixed half-second past its own
+      // length, which at a quaver of a third of a second meant three notes
+      // sounding at once for the whole of a fast run — the tunes came out
+      // slurred, and slurred reads as slow however fast the clock is set.
+      // Tie the tail to the note instead, capped so a held minim still decays
+      // like a struck string rather than stopping dead.
+      const tail = Math.min(0.42, dur * 0.6);
       [[1, "triangle", 0.19], [2, "sine", 0.06], [3, "sine", 0.022], [4, "sine", 0.008]]
         .forEach(([mul, type, peak]) => {
           const o = ctx.createOscillator(), g = ctx.createGain();
           o.type = type; o.frequency.value = f * mul;
           g.gain.setValueAtTime(0.0001, at);
-          g.gain.exponentialRampToValueAtTime(peak, at + 0.014);
-          g.gain.exponentialRampToValueAtTime(0.0001, at + dur + 0.5);
+          // Attack scaled to the note: 14ms is a pluck on a quaver and a thud
+          // on a semibreve, and the long notes are the ones that want a bow.
+          g.gain.exponentialRampToValueAtTime(peak, at + Math.min(0.03, 0.012 + dur * 0.02));
+          g.gain.exponentialRampToValueAtTime(0.0001, at + dur + tail);
           o.connect(g); g.connect(dest);
-          o.start(at); o.stop(at + dur + 0.6);
+          o.start(at); o.stop(at + dur + tail + 0.05);
           voices.push(o);
         });
     };
@@ -3441,9 +4669,14 @@ export default function Mikdash() {
       let cursor = 0;
       for (const [midi, beats] of mel.notes) {
         if (midi > 0) {
-          const dur = beats * spb * 0.92;
+          // A little more air between notes than the old 0.92. Articulation is
+          // most of what separates a melody from a drone.
+          const dur = beats * spb * 0.86;
           playPitch(midi, start + cursor, dur, bus, voices);
-          timeline.push({ at: start + cursor, midi });
+          // The beat position travels with the note so the panel can follow the
+          // words. Beats, not seconds: the lyric is attached to the music, and
+          // the music is the same shape at any tempo.
+          timeline.push({ at: start + cursor, midi, beat: cursor / spb });
         }
         cursor += beats * spb;
       }
@@ -3463,12 +4696,30 @@ export default function Mikdash() {
         voices.forEach((o) => { try { o.stop(now + fade); } catch { /* already done */ } });
         setTimeout(() => { try { bus.disconnect(); } catch { /* already gone */ } }, (fade + 0.3) * 1000);
       };
+      // ── Where the tune is coming from ──
+      //
+      // It is played by pressing a button, but it is sounding out of the
+      // fifteen steps, and it used to arrive at exactly the same volume from
+      // the far corner of the outer court as from the foot of the ascent. That
+      // is the one thing that told the ear it was a UI noise and not a place.
+      //
+      // It falls off over the precinct now — but to a floor, not to nothing.
+      // Someone who presses play from the outer wall has to hear that they
+      // pressed it, so distance takes two thirds of it and never the last
+      // third. Inverse-square in the tail, flat inside forty amot, which is
+      // roughly the width of the ascent itself.
+      const heard = () => {
+        const d = camera.position.distanceTo(STEPS_POS);
+        return 0.34 + 0.66 / (1 + Math.pow(Math.max(0, d - 40) / 190, 2));
+      };
+      bus.gain.value = heard();
       const tick = () => {
         if (!live) return;
+        bus.gain.value = heard();
         const now = ctx.currentTime;
         while (idx < timeline.length && now >= timeline[idx].at) {
-          const { midi } = timeline[idx];
-          onNote?.(midi);
+          const { midi, beat } = timeline[idx];
+          onNote?.(midi, beat);
           const st = nearestStep(midi);
           if (stepMeshes[st]) stepMeshes[st].material.emissiveIntensity = 0.85;
           idx++;
@@ -3613,6 +4864,42 @@ export default function Mikdash() {
         s.start(t0, Math.random() * 5, 0.12); s.stop(t0 + 0.13);
       }
 
+      // ── A camel, rarely ──
+      //
+      // Yeshayahu's caravan has been standing below the southern stairs in
+      // total silence since it arrived. A camel is not a quiet animal: it
+      // grumbles when it is loaded and it grumbles when it is not, and one low
+      // complaint from the dust is worth more to the place than another layer
+      // of wind.
+      //
+      // Built the way the fire crackle is — the shared brown-noise buffer,
+      // played slowly and pushed through a low resonant bandpass, with a
+      // little pitch fall over the length of it, which is what makes a growl
+      // sound like an animal exhaling rather than a filter sweeping. Only when
+      // the camera is close, and rarely enough that hearing one twice in a
+      // minute would be bad luck.
+      const camelAmt = clamp01(1 - (p.distanceTo(camelAt) - 30) / 150);
+      if (camelAmt > 0.05 && t > amb.camelAt) {
+        amb.camelAt = t + 14 + Math.random() * 30;
+        const t0 = ctx.currentTime;
+        const s2 = ctx.createBufferSource(), g2 = ctx.createGain(), f2 = ctx.createBiquadFilter();
+        const len = 0.5 + Math.random() * 0.45;
+        s2.buffer = amb.buf;
+        s2.playbackRate.value = 0.32 + Math.random() * 0.1;
+        f2.type = "bandpass";
+        f2.Q.value = 7.5;
+        // The fall. A camel's grumble drops as the breath runs out.
+        const f0 = 150 + Math.random() * 60;
+        f2.frequency.setValueAtTime(f0, t0);
+        f2.frequency.exponentialRampToValueAtTime(f0 * 0.62, t0 + len);
+        g2.gain.setValueAtTime(0.0001, t0);
+        g2.gain.exponentialRampToValueAtTime(0.5 * camelAmt, t0 + 0.09);
+        g2.gain.setValueAtTime(0.5 * camelAmt, t0 + len * 0.55);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t0 + len + 0.2);
+        s2.connect(f2); f2.connect(g2); g2.connect(amb.master);
+        s2.start(t0, Math.random() * 4, len + 0.3); s2.stop(t0 + len + 0.3);
+      }
+
       // Carried, not local: the ascent should reach the far side of the court
       // and the opening view from above, where the old 200-amah falloff put it
       // at exactly zero. 800 keeps the near mix as it was and lengthens the
@@ -3701,7 +4988,6 @@ export default function Mikdash() {
     beacon.frustumCulled = false;
     scene.add(beacon);
     const guide = { until: -1, active: false, t: 0, from: new THREE.Vector3(), to: new THREE.Vector3(), rFrom: 0, rTo: 0 };
-    let nowT = 0;
 
     // ═══════════ Camera control: orbit + first-person ═══════════
     // Where the House opens. HOME is declared here rather than beside
@@ -3727,6 +5013,201 @@ export default function Mikdash() {
     // On-screen navigation. Held buttons set a flag and the render loop moves
     // the camera per frame, so a long press glides instead of stepping.
     const nav = { l: 0, r: 0, u: 0, d: 0, in: 0, out: 0 };
+
+    // ═══════════ שִׂמְחָה — the ending ═══════════
+    //
+    // Thirty-six found. What used to happen was a line of text at the bottom of
+    // the screen, which is a receipt and not an ending.
+    //
+    // What happens now is the House doing what the House does when something is
+    // finished: the shofar of ingathering, a tekiah gedolah held until the
+    // breath runs out; the pillar of light standing up out of the Kodesh; every
+    // torch on the walls taking; and a burst of gold leaf and olive and
+    // pomegranate over the courts, which is the closest thing this place has to
+    // confetti and is not an anachronism — Tehillim 118:27 has them binding the
+    // festival offering with branches all the way up to the horns of the altar,
+    // and the Talmud (Sukkah 45a) has the children stripping and eating their
+    // lulavim on the seventh day. Things got thrown in this courtyard.
+    //
+    // Six hundred and forty-eight pieces of it: חי times thirty-six, which is
+    // the number of the thing being celebrated.
+    const CONFETTI = 648;
+    // Four amot to a piece, which is a leaf the size of a door and is not an
+    // attempt at scale. The opening view stands seven hundred amot out, where
+    // one amah is about one pixel: honest confetti would be invisible, and
+    // invisible confetti is not a celebration. Sized to read from where the
+    // House is actually watched from.
+    const confettiGeo = new THREE.PlaneGeometry(3.4, 2.3);
+    const confettiMat = new THREE.MeshStandardMaterial({
+      // Barely metallic. A high metalness with only a prefiltered sky to
+      // reflect turns a small facing-away triangle almost black, and a field of
+      // black specks over the courts reads as a bug and not as gold leaf.
+      //
+      // The emissive is warm and very low. It was white at a third, which is
+      // enough to lift every colour toward the paper it is printed on: the
+      // gold went cream, the pomegranate went pink and the techelet went baby
+      // blue. This only keeps the shaded side off the floor.
+      side: THREE.DoubleSide, roughness: 0.42, metalness: 0.12,
+      transparent: true, opacity: 0, emissive: 0x3a2a08, emissiveIntensity: 0.5,
+    });
+    const confetti = new THREE.InstancedMesh(confettiGeo, confettiMat, CONFETTI);
+    confetti.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    confetti.frustumCulled = false;
+    confetti.visible = false;
+    scene.add(confetti);
+    // Gold leaf, pomegranate, olive, the white of the linen, and the techelet of
+    // the thread — five colours already in this House, weighted so that gold
+    // wins. An even split of six read as party streamers; gold at two in five
+    // reads as gold leaf with things thrown in among it.
+    const CONF_COLS = [0xffc21f, 0xffd24a, 0xe8a413, 0x9c1620, 0xb3202a,
+                       0x5e7028, 0xfdf8ec, 0x1d4f9c];
+    {
+      const c = new THREE.Color();
+      for (let i = 0; i < CONFETTI; i++) {
+        c.setHex(CONF_COLS[i % CONF_COLS.length]);
+        confetti.setColorAt(i, c);
+      }
+      confetti.instanceColor.needsUpdate = true;
+    }
+    const confParts = [];
+    for (let i = 0; i < CONFETTI; i++) {
+      confParts.push({ p: new THREE.Vector3(), v: new THREE.Vector3(), spin: 0, ax: 0, az: 0, ph: 0, sz: 1 });
+    }
+    let confTime = -1;                       // < 0 means nothing is falling
+    const confM = new THREE.Matrix4(), confQ = new THREE.Quaternion();
+    const confE = new THREE.Euler(), confS = new THREE.Vector3();
+    // ── Where it is thrown ──
+    //
+    // The first version threw it over the Kodesh, which is the right place for
+    // it and the wrong place to see it from: from the opening view, seven
+    // hundred amot out and high, the whole burst went off in a patch of sky the
+    // size of a thumbnail. Confetti has to be in frame or it did not happen.
+    //
+    // So it is sown into the camera's own view instead — spread across the
+    // width of the frustum at every depth from just past the lens out to the
+    // House, with a sixth of it close enough to sweep past the eye. Wherever
+    // the visitor is standing and whichever way they are facing when the
+    // thirty-sixth falls, it comes down in front of them.
+    const cf = new THREE.Vector3(), cr = new THREE.Vector3(), cu = new THREE.Vector3();
+    const throwConfetti = () => {
+      camera.getWorldDirection(cf);
+      cr.set(cf.z, 0, -cf.x).normalize();          // horizontal right of the view
+      cu.crossVectors(cr, cf).normalize();
+      const halfW = Math.tan((camera.fov * Math.PI) / 360) * camera.aspect;
+      for (let i = 0; i < CONFETTI; i++) {
+        const q = confParts[i];
+        // A sixth of it right at the lens, the rest spread out to the House.
+        const depth = i % 6 === 0 ? rnd(14, 70) : rnd(70, 620);
+        const w = halfW * depth * 1.15;
+        q.p.copy(camera.position)
+          .addScaledVector(cf, depth)
+          .addScaledVector(cr, rnd(-w, w))
+          .addScaledVector(cu, rnd(0.05, 1.15) * w * 0.8 + depth * 0.10);
+        // Thrown, not dropped: it goes up first and outward from the middle of
+        // the frame, which is what a burst looks like.
+        q.v.set(rnd(-9, 9), rnd(8, 26), rnd(-9, 9));
+        q.spin = rnd(1.6, 6.5) * (Math.random() < 0.5 ? -1 : 1);
+        q.ax = rnd(0, 6.28); q.az = rnd(0, 6.28); q.ph = rnd(0, 6.28);
+        // Nearer pieces bigger, so the depth reads.
+        q.sz = rnd(0.7, 1.5) * (depth < 70 ? 0.45 : 1);
+      }
+      confTime = 0;
+      confetti.visible = true;
+      confettiMat.opacity = 1;
+    };
+    // Flat pieces do not fall, they flutter: air spills off one edge and then
+    // the other, and the leaf slides sideways each time it tips. Two sines out
+    // of phase with the tumble is enough to say it.
+    const stepConfetti = (dt2) => {
+      if (confTime < 0) return;
+      confTime += dt2;
+      if (confTime > 22) { confTime = -1; confetti.visible = false; return; }
+      confettiMat.opacity = confTime > 17 ? Math.max(0, 1 - (confTime - 17) / 5) : 1;
+      for (let i = 0; i < CONFETTI; i++) {
+        const q = confParts[i];
+        // Terminal velocity, reached fast, because a leaf has almost no mass
+        // and a great deal of drag.
+        q.v.y += (-11 - q.v.y * 0.9) * dt2;
+        q.v.x -= q.v.x * 0.55 * dt2;
+        q.v.z -= q.v.z * 0.55 * dt2;
+        const tip = Math.sin(confTime * 2.4 + q.ph);
+        q.p.x += (q.v.x + tip * 5.5) * dt2;
+        q.p.z += (q.v.z + Math.cos(confTime * 1.9 + q.ph) * 5.5) * dt2;
+        q.p.y += q.v.y * dt2;
+        // Rest where it lands rather than sinking through the paving.
+        const floor = groundHeight(q.p.x, q.p.z) + 0.25;
+        if (q.p.y <= floor) { q.p.y = floor; q.v.set(0, 0, 0); }
+        const settled = q.v.lengthSq() < 0.001;
+        confE.set(settled ? Math.PI / 2 : q.ax + confTime * q.spin,
+                  q.az + confTime * q.spin * 0.4,
+                  settled ? 0 : tip * 0.9);
+        confQ.setFromEuler(confE);
+        confS.set(q.sz, q.sz, q.sz);
+        confM.compose(q.p, confQ, confS);
+        confetti.setMatrixAt(i, confM);
+      }
+      confetti.instanceMatrix.needsUpdate = true;
+    };
+
+    // תְּקִיעָה גְדוֹלָה — one blast, held. Yeshayahu 27:13 is the great shofar
+    // of the ingathering, and the length of it is the whole point: a tekiah
+    // gedolah is held until the breath gives out, which is why it is the last
+    // sound of Yom Kippur and the right sound for this.
+    const tekiahGedolah = () => {
+      if (!amb.on) return;
+      const ctx = ensureAudio(); const t0 = ctx.currentTime + 0.15;
+      const LEN = 6.4;
+      const filt = ctx.createBiquadFilter(), gain = ctx.createGain();
+      filt.type = "lowpass"; filt.Q.value = 4;
+      filt.frequency.setValueAtTime(700, t0);
+      filt.frequency.linearRampToValueAtTime(1900, t0 + LEN * 0.72);
+      filt.frequency.linearRampToValueAtTime(1200, t0 + LEN);
+      const oscs = [];
+      // Two detuned voices, as in the short blast, and the octave above added
+      // late — a real horn cracks up into its next partial when it is pushed,
+      // and pushing it is what a gedolah is.
+      [[146, 1], [147.5, 1], [292, 0]].forEach(([f, on], k) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = k === 1 ? "square" : "sawtooth";
+        o.frequency.setValueAtTime(f, t0);
+        o.frequency.linearRampToValueAtTime(f * 1.08, t0 + 0.2);
+        o.frequency.setValueAtTime(f * 1.08, t0 + LEN * 0.66);
+        o.frequency.linearRampToValueAtTime(f * 1.58, t0 + LEN * 0.74);   // up to the fifth
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(on ? 0.26 : 0.0001, t0 + 0.12);
+        if (!on) {
+          g.gain.setValueAtTime(0.0001, t0 + LEN * 0.7);
+          g.gain.exponentialRampToValueAtTime(0.10, t0 + LEN * 0.78);
+        }
+        g.gain.setValueAtTime(on ? 0.26 : 0.10, t0 + LEN * 0.93);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + LEN + 0.5);
+        o.connect(g); g.connect(filt);
+        o.start(t0); o.stop(t0 + LEN + 0.6);
+        oscs.push(o);
+      });
+      // A little breath around the tone. Without it the blast is an oscillator.
+      const air = ctx.createBufferSource(), ag = ctx.createGain(), af = ctx.createBiquadFilter();
+      air.buffer = amb.buf; air.loop = true; air.playbackRate.value = 1.6;
+      af.type = "bandpass"; af.frequency.value = 1400; af.Q.value = 0.8;
+      ag.gain.setValueAtTime(0.0001, t0);
+      ag.gain.exponentialRampToValueAtTime(0.05, t0 + 0.2);
+      ag.gain.setValueAtTime(0.05, t0 + LEN * 0.9);
+      ag.gain.exponentialRampToValueAtTime(0.0001, t0 + LEN + 0.4);
+      air.connect(af); af.connect(ag); ag.connect(filt);
+      air.start(t0); air.stop(t0 + LEN + 0.5);
+      gain.gain.value = 1;
+      filt.connect(gain); gain.connect(amb.master || ctx.destination);
+    };
+
+    // Everything at once, and one flag the loop reads to make the light swell.
+    let finaleAt = -1;
+    apiRef.current.celebrate = () => {
+      throwConfetti();
+      tekiahGedolah();
+      finaleAt = nowT;
+      // Every torch on every wall takes at the same moment.
+      torchFires.forEach(({ flame }) => { flame.material.opacity = 1; });
+    };
     apiRef.current.nav = (k, on) => { if (k in nav) nav[k] = on ? 1 : 0; };
     apiRef.current.guideTo = (id) => {
       let obj = null;
@@ -4004,6 +5485,20 @@ export default function Mikdash() {
     const dayHemiSky = new THREE.Color(0xa0bdff), nightHemiSky = new THREE.Color(0x080d1d);
     const dayHemiGnd = new THREE.Color(0x8e7241), nightHemiGnd = new THREE.Color(0x020101);
     const daySunCol = new THREE.Color(0xffdea5), nightSunCol = new THREE.Color(0x5a74ba);
+    // ── Dusk ──
+    // The sky can now produce an evening; these are what let the ground join
+    // it. A low sun's light has been through thirty times the air a midday
+    // sun's has, and everything it touches goes with it: the direct light to
+    // orange, the haze to a dusty rose, the skylight that fills the shadows to
+    // the colour of the band opposite the sun. Linearised like every other
+    // colour here, because they are all consumed linearly.
+    const duskSunCol = new THREE.Color(0xff7a33);
+    const duskFog = new THREE.Color(0x8a4a2c);
+    const duskHemiSky = new THREE.Color(0xc98a86);
+    const sunColA = new THREE.Color(), fogA = new THREE.Color(), hemiA = new THREE.Color();
+    // Smoothstep — the same curve the sky shader uses, so a threshold set here
+    // and a threshold set there mean the same thing.
+    const sstep = (a, b, x) => { const u = clamp01((x - a) / (b - a)); return u * u * (3 - 2 * u); };
 
     const harpAt = harp.position.clone();
     let harpNext = 18;                        // the north wind is not waiting at the door
@@ -4032,17 +5527,48 @@ export default function Mikdash() {
       skyUniforms.uSunDir.value.copy(sunDir);
       const moonDir = new THREE.Vector3(lerp(-0.9, -0.5, e2), lerp(-0.2, 0.55, e2), lerp(0.2, 0.45, e2)).normalize();
       skyUniforms.uMoonDir.value.copy(moonDir);
-      sun.position.copy(e2 < 0.5 ? sunDir : moonDir).multiplyScalar(900);
-      sun.intensity = lerp(2.35, 0.26, e2);
-      sun.color.copy(daySunCol).lerp(nightSunCol, e2);
+      skyUniforms.uMoonK.value = moonK;
+      // ── The ground light follows the sun's height, not the clock ──
+      //
+      // All of this used to run linearly on e2, which is the eased position of
+      // a slider and not the position of anything in the sky. The result was
+      // that at the exact moment the sky behind the House had gone to dusk, the
+      // House itself was still lit at three-quarter strength and the colour of
+      // noon: a sunset painted on a backdrop with midday stone in front of it.
+      //
+      // Now every one of them is a function of sunDir.y, which is the same
+      // quantity the scattering in the sky shader is integrating. They cannot
+      // disagree any more, because there is only one number.
+      const sunY = sunDir.y;
+      // Direct sunlight, which ends at the geometric horizon and not a moment
+      // later. Everything after that is skylight, and skylight is the hemi.
+      const dayAmt = sstep(-0.02, 0.13, sunY);
+      // 0 overhead, 1 on the horizon. The reddening and the dimming both run
+      // on its square, because neither is linear in air mass.
+      const low = clamp01(1 - sunY / 0.42);
+      const moonAmt = sstep(-0.02, -0.17, sunY);
+      // The swap of the shadow-casting direction happens where both terms are
+      // zero, so there is nothing to see when it happens.
+      const useMoon = sunY <= -0.02;
+      sun.position.copy(useMoon ? moonDir : sunDir).multiplyScalar(900);
+      sun.intensity = useMoon ? 0.34 * moonAmt : 2.45 * dayAmt * (1 - 0.5 * low * low);
+      sunColA.copy(daySunCol).lerp(duskSunCol, low * low);
+      sun.color.copy(useMoon ? nightSunCol : sunColA);
       // Linearised hemisphere colours carry roughly a third less luminance, so
       // the fill comes back up — but not all the way. Some of that lost fill is
       // exactly the flatness this pass is trying to remove: a shadowed wall
       // should fall away, not sit at three-quarter brightness.
-      hemi.intensity = lerp(0.62, 0.26, e2);
-      hemi.color.copy(dayHemiSky).lerp(nightHemiSky, e2);
-      hemi.groundColor.copy(dayHemiGnd).lerp(nightHemiGnd, e2);
-      scene.fog.color.copy(dayFog).lerp(nightFog, e2);
+      //
+      // The skylight is what keeps a courtyard readable for the half hour
+      // after sunset, so it outlives the sun deliberately: it is still at a
+      // third of full when the direct light has been gone for ten degrees.
+      const skyAmt = sstep(-0.22, 0.14, sunY);
+      hemi.intensity = 0.25 + 0.40 * skyAmt;
+      hemiA.copy(dayHemiSky).lerp(duskHemiSky, low * low * dayAmt);
+      hemi.color.copy(hemiA).lerp(nightHemiSky, 1 - skyAmt);
+      hemi.groundColor.copy(dayHemiGnd).lerp(nightHemiGnd, 1 - skyAmt);
+      fogA.copy(dayFog).lerp(duskFog, low * low);
+      scene.fog.color.copy(fogA).lerp(nightFog, 1 - skyAmt);
       windowMat.emissiveIntensity = e2 * 1.6;
       doorGlow.intensity = e2 * 1.5;
       goldPlate.emissiveIntensity = e2 * 0.18;
@@ -4052,17 +5578,99 @@ export default function Mikdash() {
       shetiyaLight.intensity = lerp(0.9, 1.6, e2);
       fireLight.intensity = lerp(1.3, 2.4, e2) + Math.sin(t * 13) * 0.12 + (vnoiseJS(t * 7) - 0.5) * 0.3;
       fireBlueLight.intensity = lerp(0.85, 1.45, e2) + (vnoiseJS(t * 11 + 40) - 0.5) * 0.35;
+      // The festival lights burn steadily brighter than a wall torch and are
+      // not tied to nightfall: a chanukiah is lit at dusk and burns for half an
+      // hour past it, and these are the only flames in the House that do not
+      // go out when the sun comes up.
+      for (let fi = 0; fi < festivalFlames.length; fi++) {
+        const { fl, li, ph } = festivalFlames[fi];
+        const f = 0.86 + Math.sin(t * 8.3 + ph) * 0.09 + (vnoiseJS(t * 4.4 + ph) - 0.5) * 0.16;
+        fl.scale.set(0.9 * f, 1.5 * f, 1);
+        fl.material.opacity = 0.55 + e2 * 0.45;
+        li.intensity = (0.35 + e2 * 0.85) * f;
+      }
       torchFires.forEach(({ light, flame }, ti) => {
         light.intensity = e2 * 1.1 + Math.sin(t * 9 + ti * 2.4) * 0.1 * e2;
         const fs = 0.3 + e2 * 0.8 + Math.sin(t * 11 + ti * 3.1) * 0.12 + (vnoiseJS(t * 5 + ti) - 0.5) * 0.2;
         flame.scale.set(3 * fs, 4.4 * fs, 1);
         flame.material.opacity = 0.35 + e2 * 0.6;
       });
+      // ── Clouds ──
+      //
+      // Two fixes and one addition. The drift was `+= speed` once a frame,
+      // which the frame-rate audit missed: the weather ran two and a half times
+      // faster on a 144Hz laptop than on a 60Hz one. It is per-second now.
+      //
+      // The addition is the reason to stop and watch. Clouds are the last thing
+      // the sun touches — they are above the terminator and lit from
+      // underneath long after the courts have gone into shadow — and because
+      // the light arrives almost horizontally at that hour, the ones standing
+      // in the sun's direction take it and the ones behind the viewer do not.
+      // So the warmth is per-cloud, not a wash over all of them: gold on one
+      // side of the sky, blue-grey on the other, which is what a real evening
+      // looks like and what a single tint could never say.
+      const shx = sunDir.x, shz = sunDir.z;
+      const shl = Math.hypot(shx, shz) || 1;
+      const dusk = low * low * sstep(-0.16, 0.10, sunY);
+      stepSheep(dt);
+      stepConfetti(dt);
+      // ── The ox breathes ──
+      // Four small motions on four unrelated periods, so they never line up
+      // into a loop: the barrel fills and empties, the tail swings and
+      // occasionally snaps at a fly, one ear flicks, and the head goes down to
+      // the grass and comes up again. Nothing here is more than a few degrees.
+      for (let oi = 0; oi < livingOx.length; oi++) {
+        const { o, phase } = livingOx[oi];
+        const br = 1 + Math.sin(t * 0.9 + phase) * 0.022;
+        o.chest.scale.set(1.05 * br, 1.02 * br, 1.0 * br);
+        o.belly.scale.set(1.25, 0.94 * br, 1.02 * br);
+        // A tail hangs and swings; a fly makes it snap. The snap is the sharp
+        // term riding on the slow one, and it is what makes her look alive.
+        const fly = Math.max(0, Math.sin(t * 0.21 + phase * 2.1) - 0.93) * 14;
+        o.tail.rotation.x = Math.sin(t * 0.75 + phase) * 0.16 + fly * Math.sin(t * 9);
+        o.tail.rotation.z = Math.sin(t * 0.51 + phase * 1.7) * 0.11;
+        const flick = Math.max(0, Math.sin(t * 0.33 + phase * 3.3) - 0.9) * 9;
+        o.earR.rotation.x = 0.5 + flick;
+        o.earL.rotation.x = -0.5 - Math.max(0, Math.sin(t * 0.29 + phase) - 0.94) * 8;
+        // Grazing: down for a long while, up for a short one.
+        const graze = Math.max(0, Math.sin(t * 0.13 + phase * 1.3) * 1.5);
+        o.head.rotation.z = Math.min(1, graze) * 0.62;
+        o.head.position.y = 5.05 - Math.min(1, graze) * 1.5;
+        o.head.position.x = 4.15 + Math.min(1, graze) * 0.55;
+      }
+      // ── The swell ──
+      // For eight seconds after the thirty-sixth is found the House itself
+      // answers: the Shetiyah lights the room above it, the gold goes hot, and
+      // the exposure lifts most of a stop and comes back down. That last one is
+      // the whole trick — a flash of light in a tone-mapped scene is not a
+      // white sprite over the top, it is the camera opening.
+      if (finaleAt >= 0) {
+        const e = t - finaleAt;
+        if (e > 9) { finaleAt = -1; renderer.toneMappingExposure = 0.78; }
+        else {
+          // Fast up, slow down, with the shofar underneath it.
+          const swell = e < 0.55 ? e / 0.55 : Math.max(0, 1 - (e - 0.55) / 8.4);
+          const s2 = swell * swell * (3 - 2 * swell);
+          renderer.toneMappingExposure = 0.78 + 0.30 * s2;
+          shetiyaLight.intensity += 5.5 * s2;
+          goldPlate.emissiveIntensity += 0.55 * s2;
+          for (let mi = 0; mi < metals.length; mi++) metals[mi].envMapIntensity += 0.9 * s2;
+        }
+      }
       clouds.forEach((c2) => {
-        c2.position.x += c2.userData.speed;
-        if (c2.position.x > 1600) c2.position.x = -1600;
-        c2.userData.mat.opacity = c2.userData.baseO * lerp(1, 0.28, e2);
-        c2.userData.mat.color.setRGB(lerp(1, 0.35, e2), lerp(1, 0.4, e2), lerp(1, 0.55, e2));
+        const u = c2.userData;
+        c2.position.x += u.speed * dt;
+        if (c2.position.x > 1800) c2.position.x = -1800;
+        const cl = Math.hypot(c2.position.x, c2.position.z) || 1;
+        const facing = (c2.position.x * shx + c2.position.z * shz) / (cl * shl);
+        // Cirrus hold the light longest of anything in the sky — they are ice
+        // at three times the height, and they are still burning when the
+        // cumulus below them have gone grey.
+        const warm = clamp01(0.34 + 0.66 * facing) * dusk * (u.cirrus ? 1.25 : 1);
+        const night = 1 - skyAmt;
+        const r = lerp(1.0, 1.0, warm), g = lerp(1.0, 0.55, warm), b = lerp(1.0, 0.30, warm);
+        u.mat.color.setRGB(lerp(r, 0.30, night), lerp(g, 0.35, night), lerp(b, 0.52, night));
+        u.mat.opacity = u.baseO * lerp(1, 0.26, night) * (u.cirrus ? 0.55 + 0.75 * dusk : 1);
       });
       // Dust peaks when the sun is low and the light rakes through it. sunDir.y
       // runs about 0.6 at midday down through 0 at the horizon, so 1 - y is the
@@ -4285,6 +5893,16 @@ export default function Mikdash() {
       waterNormal.offset.x = (t * 0.045) % 1;
       waterNormal.offset.y = Math.sin(t * 0.19) * 0.03;
       streams.forEach((s, i) => { s.material.opacity = 0.6 + Math.sin(t * 2 + i) * 0.11; });
+      for (let i = 0; i < ripples.length; i++) {
+        const m = ripples[i];
+        if (!m.visible) continue;
+        const u = m.userData;
+        u.life -= dt * 1.5;
+        if (u.life <= 0) { m.visible = false; m.material.opacity = 0; continue; }
+        const sc = 1 + (1 - u.life) * 2.4;      // opens outward, staying inside the banks
+        m.scale.set(sc, sc, 1);
+        m.material.opacity = u.life * 0.7;
+      }
       sparks.material.opacity = 0.5 + Math.sin(t * 3) * 0.3;
       laverWater.position.y = IC_H + 5.5 + Math.sin(t * 2.2) * 0.06;
 
@@ -4372,18 +5990,45 @@ export default function Mikdash() {
       figures.forEach((f) => {
         if (f.userData.kind === "kohen") {
           const path = f.userData.path;
-          f.userData.t = (f.userData.t + f.userData.speed * dt) % 1;
+          // "וַיַּעֲבִרֵנִי בַמַּיִם מֵי אָפְסָיִם" — and he made me pass through the water,
+          // ankle-deep (Yechezkel 47:3). This water is for walking through, and
+          // here at the threshold it is still מים מפכים, a trickle — Yoma 77b has
+          // it issuing thin as a locust's antennae. Nobody bridges a rill.
+          // What it must not look like is clipping, which is what it was: full
+          // stride, no splash, feet hidden under a translucent blue skin. The
+          // amah now shortens the step, flattens the bob to a wade, quiets the
+          // arms, and answers at the feet.
+          const wet = f.userData.wet;
+          f.userData.t = (f.userData.t + f.userData.speed * dt * (wet ? 0.55 : 1)) % 1;
           const total = path.length;
           const ft = f.userData.t * total;
           const i0 = Math.floor(ft) % total, i1 = (i0 + 1) % total;
           const frac = ft - Math.floor(ft);
           const x = lerp(path[i0][0], path[i1][0], frac);
           const z = lerp(path[i0][1], path[i1][1], frac);
-          f.position.set(x, IC_H + Math.abs(Math.sin(t * 6 + f.userData.t * 40)) * 0.14, z);
+          const nowWet = inAmah(x, z);
+          const bob = Math.abs(Math.sin(t * 6 + f.userData.t * 40));
+          f.position.set(x, IC_H + bob * (nowWet ? 0.04 : 0.14), z);
           f.rotation.y = Math.atan2(-(path[i1][1] - path[i0][1]), path[i1][0] - path[i0][0]) + Math.PI / 2;
-          const swing = Math.sin(t * 6 + f.userData.t * 40) * 0.3;
+          const swing = Math.sin(t * 6 + f.userData.t * 40) * (nowWet ? 0.16 : 0.3);
           if (f.userData.armL) f.userData.armL.rotation.x = swing - 0.25;
           if (f.userData.armR) f.userData.armR.rotation.x = -swing + 0.25;
+          if (nowWet) {
+            // One splash as he steps in, then a smaller one under each footfall
+            // — `bob` at its lowest is the foot down. Counts are kept small on
+            // purpose: the 60 sprites here are the same pool the gold dust of a
+            // found wonder comes out of, and a wonder must never be upstaged by
+            // a man crossing a stream.
+            if (!wet) {
+              burst(f.position, { count: 12, speed: 6, size: 0.95, rise: 1.1, tint: 0xdff4ff });
+              ripple(x, z);
+            } else if (bob < 0.06 && t - (f.userData.dropAt || 0) > 0.45) {
+              f.userData.dropAt = t;
+              burst(f.position, { count: 4, speed: 4, size: 0.7, rise: 1, tint: 0xdff4ff });
+              ripple(x, z);
+            }
+          }
+          f.userData.wet = nowWet;
         } else {
           // Levites sway in song
           f.rotation.z = Math.sin(t * 1.4 + f.userData.ph) * 0.06;
@@ -4422,6 +6067,9 @@ export default function Mikdash() {
     applyCamera();
     animate();
     setLoaded(true);
+    // How long the white stone takes to rise, on the devices people actually
+    // have. Rounded to a tenth of a second — the exact millisecond is noise.
+    track("scene-ready", { ms: Math.round(performance.now() / 100) * 100 });
 
     return () => {
       cancelAnimationFrame(raf);
@@ -4437,6 +6085,18 @@ export default function Mikdash() {
   // wire imperative bridges after scene exists
   useEffect(() => {
     apiRef.current.openFact = (id) => {
+      // The heart of the measurement: which of the thirty-six are actually
+      // found, in what order, and how many people are still there by then.
+      const known = foundRef.current.includes(id);
+      const d = DISCOVERIES[id];
+      track(known ? "revisit" : "discovery", {
+        id,
+        kind: d.kind,
+        title: enTitle(d.title),
+        nth: known ? foundRef.current.length : foundRef.current.length + 1,
+        mode: questRef.current ? "quest" : "free",
+        walking: walkRef.current ? "yes" : "no",
+      });
       setFact(id);
       setFound((f) => (f.includes(id) ? f : [...f, id]));
     };
@@ -4490,7 +6150,170 @@ export default function Mikdash() {
     userSelect: "none", touchAction: "none", padding: 0,
   };
 
+  // ── What day it is, and what that means here ──
+  // Recomputed when the rite toggles, which is the only thing on this screen
+  // that can change the answer. The date itself is read once a mount; nobody
+  // leaves this open across midnight, and if they do the House is wrong about
+  // the date for exactly as long as a reload takes to fix.
+  const today = useMemo(() => {
+    const rd = sceneDateRD();
+    const n = new Date(Date.UTC(rdToGreg(rd).y, rdToGreg(rd).m - 1, rdToGreg(rd).d));
+    const h = rdToHeb(rd);
+    const p = parshahOnOrAfter(rd, israel);
+    return {
+      rd, h,
+      he: hebDateStr(h),
+      greg: n.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }),
+      chag: chagOn(rd, israel),
+      omer: omerDay(rd),
+      // The day of the Hebrew month is the age of the moon, so the panel can
+      // say what is actually up there — and the moon in the sky above the
+      // House is drawn from the same number.
+      moon: h.day - 1,
+      parshah: {
+        he: p.idx.map((i) => PARSHIYOT_HE[i]).join("־"),
+        en: p.idx.map((i) => PARSHIYOT[i]).join("–"),
+        book: PARSHAH_BOOK(p.idx[0]),
+      },
+    };
+  }, [israel]);
+
+  // A Hebrew birthday in a given year. Two things go wrong and both have
+  // answers: a 30th in a month that only has 29 days this year falls back to
+  // the 29th, and an Adar birthday in a leap year goes to Adar II, which is
+  // the Rema's ruling (Orach Chaim 55:10) and the near-universal practice.
+  const hebBirthdayIn = (hy, bm, bd) => {
+    let m = bm;
+    if (bm === 12 && hebLeap(hy)) m = 13;
+    else if (bm === 13 && !hebLeap(hy)) m = 12;
+    return hebToRD(hy, m, Math.min(bd, hebMonthLen(hy, m)));
+  };
+  const birth = useMemo(() => {
+    const mm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(bday);
+    if (!mm) return null;
+    const y = +mm[1], m = +mm[2], d = +mm[3];
+    if (y < 1500 || y > 2199 || m < 1 || m > 12 || d < 1 || d > gMonthLen(y, m)) return null;
+    const rd = gregToRD(y, m, d);
+    const h = rdToHeb(rd);
+    const named = (p) => ({
+      he: p.idx.map((i) => PARSHIYOT_HE[i]).join("־"),
+      en: p.idx.map((i) => PARSHIYOT[i]).join("–"),
+      book: PARSHAH_BOOK(p.idx[0]),
+    });
+    let hy = today.h.year;
+    if (hebBirthdayIn(hy, h.month, h.day) < today.rd) hy += 1;
+    const nextRd = hebBirthdayIn(hy, h.month, h.day);
+    const g = rdToGreg(nextRd);
+    const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Shabbat"];
+    return {
+      he: hebDateStr(h),
+      dow: DOW[((rd % 7) + 7) % 7],
+      chag: chagOn(rd, israel),
+      parshah: named(parshahOnOrAfter(rd, israel)),
+      thisYear: `${hebDateStr(rdToHeb(nextRd))} — ${g.d} ${["January","February","March","April","May","June","July","August","September","October","November","December"][g.m - 1]} ${g.y}`,
+      turning: hy - h.year,
+      bat: named(parshahOnOrAfter(hebBirthdayIn(h.year + 12, h.month, h.day), israel)),
+      bar: named(parshahOnOrAfter(hebBirthdayIn(h.year + 13, h.month, h.day), israel)),
+    };
+  }, [bday, israel, today]);
+
+  // ─── A chag announces itself ───
+  // Once, a few seconds after the doors open, and only if there is one. The
+  // House knows what day it is; it would be strange for it to say nothing on
+  // the day the whole place was built for.
+  useEffect(() => {
+    if (!opened || !loaded || !today.chag) return;
+    const t = setTimeout(() => showToast(`${today.chag.he} — ${today.chag.en}. Open לוּחַ.`), 4200);
+    return () => clearTimeout(t);
+  }, [opened, loaded, today.chag, showToast]);
+
   const allFound = found.length === DISCOVERIES.length;
+
+  // ── The ending fires once, and only for the person who earned it ──
+  // A visitor who comes back to a finished House should find it finished, not
+  // have the shofar blown at them again on every reload. So the celebration is
+  // hung on the *transition* to thirty-six, and the first value seen after the
+  // saved state loads is taken as the starting point rather than as an event.
+  const prevFound = useRef(-1);
+  useEffect(() => {
+    if (!storageReady) return;
+    const n = found.length, was = prevFound.current;
+    prevFound.current = n;
+    if (was < 0) return;
+    // Two moments worth naming on their own: the one that turns a visitor into
+    // a player, and the one almost nobody reaches.
+    if (was === 0 && n === 1) track("first-discovery");
+    if (n === DISCOVERIES.length && was < n) {
+      track("quest-complete");
+      setFinale(true);
+      apiRef.current.celebrate?.();
+    }
+  }, [found.length, storageReady]);
+  // ─── the shape of a whole visit ───
+  // Page views say how many came; this says how long they stayed and how deep
+  // they got. Sent on pagehide, which fires on a phone being locked or a tab
+  // being closed — the one lifecycle event mobile Safari can be relied on for.
+  // Guarded so that a visit is only ever counted once, however it ends.
+  const departed = useRef(false);
+  useEffect(() => {
+    const startedAt = performance.now();
+    const depart = (why) => {
+      if (departed.current) return;
+      departed.current = true;
+      track("visit-end", {
+        found: foundRef.current.length,
+        seconds: Math.round((performance.now() - startedAt) / 1000),
+        mode: questRef.current ? "quest" : "free",
+        walked: walkedRef.current ? "yes" : "no",
+        why,
+      });
+    };
+    const onVisibility = () => { if (document.visibilityState === "hidden") depart("hidden"); };
+    const onPageHide = () => depart("pagehide");
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+    };
+  }, []);
+
+  // ─── מֵחָדָשׁ — begin again ───
+  // Finding a wonder leaves marks all through the scene: materials swapped to
+  // gold, the menorah lit, the ketoret woken, Nicanor's doors open, the eighth
+  // rimon revealed. Unwinding each one by hand would be a list that goes stale
+  // the next time a wonder is added, so this rewrites the saved record and
+  // raises the House again from nothing — the one reset that cannot miss a
+  // piece. What a visitor chose is not progress, so night and sound survive,
+  // and someone who has just found all thirty-six is not shown the pesichah
+  // again on their way back in.
+  const startOver = useCallback(async () => {
+    track("start-over");
+    try {
+      await window.storage?.set(STORE_KEY, JSON.stringify({ found: [], night, sound, opened: true }));
+    } catch (err) { /* nothing saved means nothing to clear */ }
+    window.location.reload();
+  }, [night, sound]);
+  // Close the ending and the question goes with it — reopening the card should
+  // never land on a half-asked "are you sure".
+  useEffect(() => { if (!finale) setConfirmReset(false); }, [finale]);
+
+  // Escape closes the teaching card as well. It covers the House exactly the
+  // way the finale does, and it opens thirty-six times to the finale's once.
+  useEffect(() => {
+    if (fact === null) return;
+    const k = (e) => { if (e.key === "Escape") closeFact(); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [fact, closeFact]);
+
+  // Escape closes it, like everything else that covers the House.
+  useEffect(() => {
+    if (!finale) return;
+    const k = (e) => { if (e.key === "Escape") setFinale(false); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [finale]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden", background: "#0a1122", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
@@ -4508,19 +6331,29 @@ export default function Mikdash() {
         .navbtn:focus-visible { outline: 2px solid #ffd97a; outline-offset: 2px; }
         /* The hints list stops short of the screen bottom — and on a phone,
            short of the on-screen navigation pad it would otherwise hide under. */
-        .hints-panel { max-height: max(150px, min(48vh, calc(100vh - 324px))); }
+        .hints-panel { max-height: max(150px, min(48vh, calc(100vh - 448px))); }
         @media (max-width: 720px) {
-          .hints-panel { max-height: max(150px, min(48vh, calc(100vh - 570px))); }
+          .hints-panel { max-height: max(150px, min(48vh, calc(100vh - 600px))); }
         }
-        /* A phone held sideways has no room below the chips: stand the list
-           beside them instead, between the chip column and the navigation pad. */
-        @media (max-height: 560px) {
+        /* Beside the chips, not beneath them, wherever there is width for it —
+           a phone held sideways has no room below the column, and a desktop has
+           room to spare, so both get the taller list. Only a portrait phone,
+           which has neither, keeps the stacked layout above. */
+        @media (max-height: 560px), (min-width: 900px) {
           .hints-panel { top: 74px !important; bottom: 14px; right: 178px !important;
             width: min(285px, calc(100vw - 210px)) !important; max-height: none; }
         }
         @keyframes countPop { 0% { transform: scale(1); } 38% { transform: scale(1.32); color: #ffd97a; } 100% { transform: scale(1); } }
         @keyframes gleam { 0%,100% { box-shadow: 0 0 0 0 rgba(255,217,122,0); } 50% { box-shadow: 0 0 0 5px rgba(255,217,122,.18); } }
         @keyframes veilIn { from { opacity: 0; } to { opacity: 1; } }
+        /* The ending. The card comes up off the floor of the screen and the
+           seal turns once as it lands — one motion, not two, so it reads as
+           something being set down rather than as an animation being played. */
+        @keyframes finaleRise { from { opacity:0; transform: translateY(34px) scale(.94); } to { opacity:1; transform: none; } }
+        @keyframes sealTurn { from { opacity:0; transform: rotate(-160deg) scale(.3); } to { opacity:1; transform: none; } }
+        @keyframes sealGlow { 0%,100% { text-shadow: 0 0 14px rgba(255,217,122,.5); } 50% { text-shadow: 0 0 34px rgba(255,217,122,1), 0 0 60px rgba(212,164,55,.6); } }
+        .finale-card { animation: finaleRise .7s cubic-bezier(.16,.9,.28,1) both .1s; }
+        .finale-seal { color:#ffd97a; animation: sealTurn .8s cubic-bezier(.16,1,.3,1) both .28s, sealGlow 3.4s ease-in-out infinite 1.1s; }
         @keyframes scrollOpen { from { opacity:0; transform: translateY(22px) scale(.965); } to { opacity:1; transform: translateY(0) scale(1); } }
         @keyframes lineIn { from { opacity:0; transform: translateX(-8px); } to { opacity:1; transform: translateX(0); } }
         .gleam { animation: gleam 2.6s ease-in-out infinite; }
@@ -4645,8 +6478,12 @@ export default function Mikdash() {
           {DISCOVERIES[nextTarget].hint}
           <button
             onClick={() => {
-              if (!apiRef.current.guideTo?.(nextTarget)) return;
-              showToast(walkMode ? "Follow the pillar of light." : "There — where the light stands.");
+              // Asking for the pillar of light is the honest measure of how
+              // hard a given hint is: the ones with the highest counts are the
+              // ones whose wording needs work.
+              track("show-me", { from: "banner", id: nextTarget, nth: found.length + 1, title: enTitle(DISCOVERIES[nextTarget].title) });
+              if (apiRef.current.guideTo?.(nextTarget)) showToast(walkMode ? "Follow the pillar of light." : "There — where the light stands.");
+              else showToast("אֵין אוֹר — nothing to mark there yet. Walk the courts and look for it.");
             }}
             className={found.length === 0 ? "gleam" : undefined}
             style={{ pointerEvents: "auto", marginLeft: 12, fontFamily: "'Frank Ruhl Libre', serif", fontStyle: "normal", fontSize: 12, letterSpacing: ".08em", background: "rgba(212,164,55,.22)", color: "#ffd97a", border: "1px solid rgba(212,164,55,.55)", borderRadius: 999, padding: "4px 12px", cursor: "pointer" }}
@@ -4660,29 +6497,32 @@ export default function Mikdash() {
       <div style={{ position: "absolute", top: 18, right: 16, display: "flex", flexDirection: "column", gap: 9, alignItems: "flex-end", zIndex: 4 }}>
         <div style={{ background: "rgba(30,24,12,.85)", backdropFilter: "blur(6px)", borderRadius: 14, padding: "8px 15px", color: "#f0e6cd", border: "1px solid rgba(212,164,55,.5)", boxShadow: "0 6px 24px rgba(0,0,0,.3)", textAlign: "center" }}>
           <div style={{ fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: 0.7, fontFamily: "'Frank Ruhl Libre', serif" }}>נסתרות</div>
-          <div key={found.length} style={{ fontSize: 21, fontWeight: 700, fontFamily: "'Frank Ruhl Libre', serif", animation: "countPop .55s ease", ...(allFound ? { color: "#ffd24a", animation: "countPop .55s ease, glowPulse 2s infinite .55s" } : {}) }}>
+          <div key={found.length} onClick={allFound ? () => setFinale(true) : undefined} title={allFound ? "Read it again" : undefined} style={{ fontSize: 21, fontWeight: 700, fontFamily: "'Frank Ruhl Libre', serif", animation: "countPop .55s ease", ...(allFound ? { color: "#ffd24a", cursor: "pointer", animation: "countPop .55s ease, glowPulse 2s infinite .55s" } : {}) }}>
             {found.length} / {DISCOVERIES.length}
           </div>
         </div>
-        <button className="chip" onClick={() => setWalkMode((w) => !w)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: walkMode ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: walkMode ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.5)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("walk-mode", { to: walkMode ? "off" : "on", found: found.length }); setWalkMode((w) => !w); }} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: walkMode ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: walkMode ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.5)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {walkMode ? "⬆ Overview" : "⇊ Walk the Courts"}
         </button>
-        <button className="chip" onClick={() => setNight((n) => !n)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: night ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "linear-gradient(135deg,#1a2440,#2c3a63)", color: night ? "#4a3a18" : "#e8ecf7", border: "1px solid rgba(212,164,55,.55)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("night-mode", { to: night ? "off" : "on" }); setNight((n) => !n); }} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: night ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "linear-gradient(135deg,#1a2440,#2c3a63)", color: night ? "#4a3a18" : "#e8ecf7", border: "1px solid rgba(212,164,55,.55)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {night ? "☀ יום" : "☾ לילה"}
         </button>
-        <button className="chip" onClick={() => setSound((s) => !s)} title={sound ? "Silence the courts" : "Let the courts sound"} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: sound ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: sound ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("sound", { to: sound ? "off" : "on" }); setSound((s) => !s); }} title={sound ? "Silence the courts" : "Let the courts sound"} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: sound ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: sound ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {sound ? "♪ קול" : "⃠ דממה"}
         </button>
-        <button className="chip" onClick={() => setQuestMode((q) => !q)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("quest-mode", { to: questMode ? "free" : "quest", found: found.length }); setQuestMode((q) => !q); }} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {questMode ? "מסע · Quest ✓" : "Free explore"}
         </button>
-        <button className="chip" onClick={() => { setMusic((m) => !m); setPeace(false); }} title="Play the fifteen steps" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: music ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: music ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("panel", { which: "steps", to: music ? "close" : "open" }); setMusic((m) => !m); setPeace(false); setCal(false); setHints(false); }} title="Play the fifteen steps" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: music ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: music ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           ♪ נְגִינוֹת
         </button>
-        <button className="chip" onClick={() => { setPeace((p) => !p); setMusic(false); }} title="A house of prayer for all peoples" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: peace ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: peace ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("panel", { which: "calendar", to: cal ? "close" : "open" }); setCal((c) => !c); setMusic(false); setPeace(false); setHints(false); }} title="Today in the House, and the parshah of any birthday" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: cal ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: cal ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+          לוּחַ{today.chag ? " ✦" : ""}
+        </button>
+        <button className="chip" onClick={() => { track("panel", { which: "peace", to: peace ? "close" : "open" }); setPeace((p) => !p); setMusic(false); setCal(false); setHints(false); }} title="A house of prayer for all peoples" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: peace ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: peace ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           שָׁלוֹם
         </button>
-        <button className="chip" onClick={() => setHints((h) => !h)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+        <button className="chip" onClick={() => { track("panel", { which: "hints", to: hints ? "close" : "open" }); setHints((h) => !h); setMusic(false); setCal(false); setPeace(false); }} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {hints ? "Hide hints" : "רמזים"}
         </button>
       </div>
@@ -4710,7 +6550,7 @@ export default function Mikdash() {
       </div>
 
       {hints && (
-        <div className="panel hints-panel" style={{ position: "absolute", top: 296, right: 16, width: "min(285px, calc(100vw - 32px))", boxSizing: "border-box", overflowY: "auto", WebkitOverflowScrolling: "touch", background: "rgba(28,22,10,.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 16, padding: "16px 18px", color: "#e8dcba", boxShadow: "0 12px 40px rgba(0,0,0,.4)", zIndex: 3 }}>
+        <div className="panel hints-panel" style={{ position: "absolute", top: 432, right: 16, width: "min(285px, calc(100vw - 32px))", boxSizing: "border-box", overflowY: "auto", WebkitOverflowScrolling: "touch", background: "rgba(28,22,10,.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,164,55,.4)", borderRadius: 16, padding: "16px 18px", color: "#e8dcba", boxShadow: "0 12px 40px rgba(0,0,0,.4)", zIndex: 3 }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
             <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>שלושים ושש נסתרות</div>
             <button
@@ -4735,6 +6575,7 @@ export default function Mikdash() {
                 {!lockedAhead && !done && (
                   <button
                     onClick={() => {
+                      track("show-me", { from: "list", id: i, title: enTitle(d.title) });
                       if (apiRef.current.guideTo?.(i)) showToast(walkMode ? "Follow the pillar of light." : "There — where the light stands.");
                       else showToast("אֵין אוֹר — nothing to mark there yet. Walk the courts and look for it.");
                     }}
@@ -4758,7 +6599,7 @@ export default function Mikdash() {
           border: "1px solid rgba(150,120,50,.3)", boxShadow: "0 16px 44px rgba(0,0,0,.35)", maxHeight: "min(62vh, 560px)", overflowY: "auto", zIndex: 30 }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
             <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>נְגִינוֹת · Melodies</div>
-            <button onClick={() => { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); setMusic(false); }}
+            <button onClick={() => { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); setSongBeat(-1); setMusic(false); }}
               aria-label="Close" style={{ background: "none", border: "none", color: "#7a6634", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>×</button>
           </div>
           <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "#6d5c30", margin: "6px 0 12px" }}>
@@ -4769,9 +6610,9 @@ export default function Mikdash() {
               <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
                 <button
                   onClick={() => {
-                    if (nowPlaying === mel.id) { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); return; }
-                    const ok = apiRef.current.playMelody?.(mel, (m) => setActiveNote(m),
-                      () => { setNowPlaying(null); setActiveNote(null); });
+                    if (nowPlaying === mel.id) { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); setSongBeat(-1); return; }
+                    const ok = apiRef.current.playMelody?.(mel, (m, b) => { setActiveNote(m); setSongBeat(b); },
+                      () => { setNowPlaying(null); setActiveNote(null); setSongBeat(-1); });
                     if (ok) setNowPlaying(mel.id);
                     else showToast("קוֹל — turn the sound on first, and the steps will answer.");
                   }}
@@ -4793,11 +6634,51 @@ export default function Mikdash() {
                   ♪ Transcribed by ear — not yet checked against a score.
                 </div>
               )}
+              {/* ─── מִלִּים — the words ───
+                  Open per melody, and while that melody is playing the stanza
+                  being sung lights up. The span is in beats, so it follows the
+                  tune and not the clock: change the tempo and the words still
+                  land in the right place. */}
+              <button
+                onClick={() => setLyrics((v) => (v === mel.id ? null : mel.id))}
+                style={{ marginTop: 8, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 11, letterSpacing: ".08em",
+                  background: lyrics === mel.id ? "rgba(74,58,24,.14)" : "transparent", color: "#6d5c30",
+                  border: "1px solid rgba(150,120,50,.4)", borderRadius: 999, padding: "3px 11px", cursor: "pointer" }}>
+                {lyrics === mel.id ? "מִלִּים ▾" : "מִלִּים ▸ words"}
+              </button>
+              {lyrics === mel.id && (
+                <div style={{ marginTop: 9, padding: "11px 12px", borderRadius: 12, background: "rgba(255,252,244,.72)", border: "1px solid rgba(150,120,50,.26)" }}>
+                  {mel.lyrics.wordless && (
+                    <div style={{ fontSize: 12.5, lineHeight: 1.6, fontStyle: "italic", color: "#6d5c30" }}>{mel.lyrics.wordless}</div>
+                  )}
+                  {mel.lyrics.stanzas.map((st, si) => {
+                    const live = nowPlaying === mel.id && songBeat >= st.from && songBeat < st.to;
+                    return (
+                      <div key={si} style={{ marginBottom: 11, paddingLeft: 9,
+                        borderLeft: `2px solid ${live ? "#d4a437" : "rgba(150,120,50,.2)"}`,
+                        transition: "border-color .25s ease, opacity .25s ease",
+                        opacity: nowPlaying === mel.id && !live ? 0.42 : 1 }}>
+                        <div dir="rtl" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 16.5, lineHeight: 1.75, color: live ? "#4a3a18" : "#544729", whiteSpace: "pre-line", textAlign: "right" }}>{st.he}</div>
+                        <div style={{ fontSize: 11.5, fontStyle: "italic", color: "#8a7440", marginTop: 3, lineHeight: 1.5 }}>{st.tl}</div>
+                        <div style={{ fontSize: 12.5, color: "#544729", marginTop: 3, lineHeight: 1.55 }}>{st.en}</div>
+                      </div>
+                    );
+                  })}
+                  {mel.lyrics.more && (
+                    <div style={{ borderTop: "1px solid rgba(150,120,50,.22)", paddingTop: 8, marginTop: 2 }}>
+                      <div style={{ fontSize: 10.5, letterSpacing: ".09em", textTransform: "uppercase", color: "#8a7440", marginBottom: 5 }}>and the same tune again, three more times</div>
+                      {mel.lyrics.more.map((st, si) => (
+                        <div key={si} style={{ display: "flex", gap: 8, alignItems: "baseline", marginBottom: 3 }}>
+                          <span dir="rtl" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 14, color: "#544729" }}>{st.he}</span>
+                          <span style={{ fontSize: 11.5, color: "#8a7440", fontStyle: "italic" }}>{st.en}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
-          <div style={{ borderTop: "1px solid rgba(150,120,50,.22)", paddingTop: 10, fontSize: 10.5, lineHeight: 1.55, color: "#6d5c30" }}>
-            Only public-domain melodies are here. <i>Yerushalayim shel Zahav</i> (Naomi Shemer, 1967) and <i>Dance Me to the End of Love</i> (Leonard Cohen, 1984) are still in copyright, and encoding a melody reproduces the work even without its words.
-          </div>
         </div>
       )}
 
@@ -4835,6 +6716,95 @@ export default function Mikdash() {
             }
             return keys;
           })()}
+        </div>
+      )}
+
+      {/* ═══ לוּחַ — the calendar ═══
+          The House keeps its own date. Everything here is computed from the
+          molad in this file — no table, no network — so it is right in a
+          hundred years and right on an aeroplane. */}
+      {cal && (
+        <div className="panel" style={{ position: "absolute", top: 296, right: 16, width: "min(346px, calc(100vw - 32px))", boxSizing: "border-box",
+          background: "linear-gradient(160deg,#fdf8ec,#f2e7ce)", color: "#3a2f16", borderRadius: 16, padding: "16px 18px",
+          border: "1px solid rgba(150,120,50,.3)", boxShadow: "0 16px 44px rgba(0,0,0,.35)", maxHeight: "min(66vh, 620px)", overflowY: "auto", zIndex: 30 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>לוּחַ · Today in the House</div>
+            <button onClick={() => setCal(false)} aria-label="Close the calendar" style={{ flex: "0 0 auto", width: 28, height: 28, marginTop: -2, marginRight: -5, lineHeight: 1, fontSize: 15, background: "rgba(150,120,50,.12)", color: "#6d5c30", border: "1px solid rgba(150,120,50,.35)", borderRadius: 999, cursor: "pointer" }}>×</button>
+          </div>
+
+          <div style={{ textAlign: "center", margin: "12px 0 4px" }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 25, fontWeight: 700, color: "#4a3a18", lineHeight: 1.35 }}>{today.he}</div>
+            <div style={{ fontSize: 12.5, color: "#8a7440", fontStyle: "italic", marginTop: 2 }}>{today.greg}</div>
+          </div>
+
+          {today.chag && (
+            <div style={{ marginTop: 10, padding: "11px 13px", borderRadius: 12, background: "linear-gradient(135deg, rgba(212,164,55,.20), rgba(212,164,55,.09))", border: "1px solid rgba(150,120,50,.34)" }}>
+              <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 17, fontWeight: 700, color: "#4a3a18" }}>{today.chag.he}</div>
+              <div style={{ fontSize: 11.5, letterSpacing: ".08em", textTransform: "uppercase", color: "#8a7440", marginTop: 1 }}>{today.chag.en}</div>
+              <div style={{ fontSize: 13.5, lineHeight: 1.55, marginTop: 6, color: "#544729" }}>{today.chag.note}</div>
+            </div>
+          )}
+
+          {today.omer > 0 && (
+            <div style={{ marginTop: 10, fontSize: 13.5, lineHeight: 1.5, color: "#544729" }}>
+              <b style={{ fontFamily: "'Frank Ruhl Libre', serif" }}>סְפִירַת הָעֹמֶר</b> — day {today.omer} of forty-nine
+              {today.omer >= 7 && `, which is ${Math.floor(today.omer / 7)} week${Math.floor(today.omer / 7) > 1 ? "s" : ""}${today.omer % 7 ? ` and ${today.omer % 7} day${today.omer % 7 > 1 ? "s" : ""}` : ""}`}.
+              <div style={{ fontSize: 12, fontStyle: "italic", color: "#8a7440", marginTop: 3 }}>Counted from the sheaf that was waved in this court on the second day of Pesach (Vayikra 23:15).</div>
+            </div>
+          )}
+
+          <div style={{ marginTop: 11, fontSize: 12.5, lineHeight: 1.55, color: "#544729" }}>
+            <b style={{ fontFamily: "'Frank Ruhl Libre', serif" }}>הַלְּבָנָה</b> — the moon is {today.moon === 0 ? "new tonight" : `${today.moon} day${today.moon > 1 ? "s" : ""} old`}
+            {today.moon >= 13 && today.moon <= 16 ? ", and full" : ""}.
+            <div style={{ fontSize: 11.5, fontStyle: "italic", color: "#8a7440", marginTop: 2 }}>Turn on the night and look: it is drawn at that phase, because the Hebrew month is the moon and the day of it is the moon's age.</div>
+          </div>
+
+          <div style={{ marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(150,120,50,.24)" }}>
+            <div style={{ fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "#8a7440" }}>This Shabbat they read</div>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 20, fontWeight: 700, color: "#4a3a18", marginTop: 3 }}>{today.parshah.he}</div>
+            <div style={{ fontSize: 13, color: "#6d5c30" }}>{today.parshah.en} · {today.parshah.book}</div>
+          </div>
+
+          {/* ─── the birthday parshah ─── */}
+          <div style={{ marginTop: 13, paddingTop: 12, borderTop: "1px solid rgba(150,120,50,.24)" }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 14.5, color: "#4a3a18" }}>פָּרָשַׁת יוֹם הֻלֶּדֶת</div>
+            <div style={{ fontSize: 12.5, fontStyle: "italic", color: "#7a6634", lineHeight: 1.5, marginTop: 3 }}>
+              Your Hebrew birthday, and the parshah they read for it — the one a bar or bat mitzvah is called up to.
+            </div>
+            <input
+              type="date" value={bday} max="2199-12-31" min="1500-01-01"
+              onChange={(e) => setBday(e.target.value)}
+              aria-label="Your date of birth"
+              style={{ marginTop: 9, width: "100%", boxSizing: "border-box", fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 15, padding: "9px 11px", borderRadius: 10, border: "1px solid rgba(150,120,50,.45)", background: "rgba(255,252,244,.9)", color: "#3a2f16" }}
+            />
+            {birth && (
+              <div style={{ marginTop: 11, padding: "12px 13px", borderRadius: 12, background: "rgba(255,252,244,.75)", border: "1px solid rgba(150,120,50,.28)" }}>
+                <div style={{ fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "#8a7440" }}>You were born on</div>
+                <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 19, fontWeight: 700, color: "#4a3a18", marginTop: 2 }}>{birth.he}</div>
+                <div style={{ fontSize: 12.5, color: "#7a6634", fontStyle: "italic" }}>a {birth.dow}{birth.chag ? ` · ${birth.chag.en}` : ""}</div>
+                <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(150,120,50,.4), transparent)", margin: "10px 0" }} />
+                <div style={{ fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "#8a7440" }}>Your parshah</div>
+                <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21, fontWeight: 700, color: "#4a3a18", marginTop: 2 }}>{birth.parshah.he}</div>
+                <div style={{ fontSize: 13, color: "#6d5c30" }}>{birth.parshah.en} · {birth.parshah.book}</div>
+                <div style={{ fontSize: 12.5, lineHeight: 1.55, color: "#544729", marginTop: 8 }}>
+                  Your Hebrew birthday this year is <b>{birth.thisYear}</b>{birth.turning !== null ? <> — you turn <b>{birth.turning}</b></> : null}.
+                </div>
+                <div style={{ fontSize: 12.5, lineHeight: 1.6, color: "#544729", marginTop: 7 }}>
+                  <div>At twelve they read <b>{birth.bat.en}</b>.</div>
+                  <div>At thirteen, <b>{birth.bar.en}</b>.</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 13, paddingTop: 11, borderTop: "1px solid rgba(150,120,50,.24)", display: "flex", alignItems: "center", gap: 9 }}>
+            <button onClick={() => setIsrael((v) => !v)} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12, letterSpacing: ".05em", background: israel ? "linear-gradient(135deg,#f0e2b6,#e0cd97)" : "rgba(150,120,50,.12)", color: "#4a3a18", border: "1px solid rgba(150,120,50,.4)", borderRadius: 999, padding: "6px 13px", cursor: "pointer" }}>
+              {israel ? "אֶרֶץ יִשְׂרָאֵל" : "חוּץ לָאָרֶץ"}
+            </button>
+            <div style={{ fontSize: 11.5, fontStyle: "italic", color: "#8a7440", lineHeight: 1.4 }}>
+              One day of yom tov or two — it changes the parshah for a few weeks each year.
+            </div>
+          </div>
         </div>
       )}
 
@@ -4887,11 +6857,90 @@ export default function Mikdash() {
         </div>
       )}
 
-      {allFound && fact === null && (
-        <div className="panel" style={{ position: "absolute", bottom: 56, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, rgba(45,35,14,.95), rgba(76,58,20,.95))", border: "1px solid #d4a437", borderRadius: 16, padding: "18px 28px", color: "#ffe9ad", textAlign: "center", maxWidth: 500, boxShadow: "0 12px 44px rgba(0,0,0,.45)" }}>
-          <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21, fontWeight: 700 }}>כל הכבוד — all thirty-six found. חי, twice over.</div>
-          <div style={{ fontSize: 15.5, marginTop: 6, fontStyle: "italic", lineHeight: 1.5 }}>
-            “Out of Zion, the perfection of beauty, G-d shone forth” (Tehillim 50:2) · “Greater shall be the glory of this latter House than the former, and in this place I will grant peace” (Chaggai 2:9)
+      {/* ═══ The ending ═══
+          It used to be a line of text along the bottom of the screen, which is
+          a receipt. This is a card that covers the House, says the two verses
+          the whole place is built on, and can be shut — and once it is shut the
+          counter in the corner keeps it, so it is never lost, only put away. */}
+      {finale && (
+        <div className="panel" onClick={() => setFinale(false)}
+          style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "radial-gradient(circle at 50% 42%, rgba(60,44,12,.42), rgba(10,8,3,.72))",
+            backdropFilter: "blur(3px)", cursor: "pointer", zIndex: 40, padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} className="finale-card"
+            style={{ cursor: "default", maxWidth: 560, width: "100%", boxSizing: "border-box", position: "relative",
+              background: "linear-gradient(158deg, rgba(52,40,14,.97), rgba(86,66,22,.97) 55%, rgba(48,37,13,.97))",
+              border: "1px solid #d4a437", borderRadius: 22, padding: "34px 32px 28px",
+              color: "#ffe9ad", textAlign: "center", boxShadow: "0 30px 90px rgba(0,0,0,.62), 0 0 0 1px rgba(255,217,122,.16) inset" }}>
+            <button onClick={() => setFinale(false)} aria-label="Close" title="Close"
+              style={{ position: "absolute", top: 12, right: 14, width: 32, height: 32, lineHeight: 1, fontSize: 17,
+                background: "rgba(255,217,122,.12)", color: "#ffe9ad", border: "1px solid rgba(212,164,55,.5)",
+                borderRadius: 999, cursor: "pointer" }}>×</button>
+
+            <div className="finale-seal" style={{ fontSize: 40, lineHeight: 1 }}>✦</div>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 30, fontWeight: 900, color: "#ffd97a", marginTop: 12, letterSpacing: ".02em" }}>
+              כָּל הַכָּבוֹד
+            </div>
+            <div style={{ fontSize: 15, letterSpacing: ".14em", textTransform: "uppercase", color: "#d7bd82", marginTop: 7 }}>
+              all thirty-six found · חי, twice over
+            </div>
+            <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(212,164,55,.65), transparent)", margin: "18px auto", maxWidth: 340 }} />
+            <div style={{ fontSize: 17, fontStyle: "italic", lineHeight: 1.62 }}>
+              “Out of Zion, the perfection of beauty, G‑d shone forth.”
+              <div style={{ fontSize: 12.5, fontStyle: "normal", letterSpacing: ".08em", color: "#c9ad74", marginTop: 3 }}>תהילים נ׳:ב׳ · Tehillim 50:2</div>
+            </div>
+            <div style={{ fontSize: 17, fontStyle: "italic", lineHeight: 1.62, marginTop: 15 }}>
+              “Greater shall be the glory of this latter House than the former, and in this place I will grant peace.”
+              <div style={{ fontSize: 12.5, fontStyle: "normal", letterSpacing: ".08em", color: "#c9ad74", marginTop: 3 }}>חגי ב׳:ט׳ · Chaggai 2:9</div>
+            </div>
+            <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#e0c98f", marginTop: 18, fontStyle: "italic" }}>
+              Eighteen silver rimonim and eighteen living wonders, and nothing here that is not sourced to a pasuk, a daf, or a stone somebody measured. The House stays open. Nothing you found is taken back.
+            </div>
+            {confirmReset ? (
+              <div style={{ marginTop: 20, padding: "15px 16px", borderRadius: 15, background: "rgba(18,13,4,.5)", border: "1px solid rgba(212,164,55,.42)" }}>
+                <div style={{ fontSize: 14.5, fontStyle: "italic", lineHeight: 1.55, color: "#f2dfa9" }}>
+                  All thirty-six go back into hiding and the House is raised again from
+                  nothing. Night and sound stay as you set them.
+                </div>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 15 }}>
+                  <button onClick={startOver} autoFocus
+                    style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13, letterSpacing: ".13em", textTransform: "uppercase",
+                      background: "linear-gradient(135deg,#f3e6c0,#dcc48f)", color: "#4a3a18", border: "none", borderRadius: 999,
+                      padding: "12px 24px", cursor: "pointer" }}>
+                    Hide them again
+                  </button>
+                  <button onClick={() => setConfirmReset(false)}
+                    style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13, letterSpacing: ".13em", textTransform: "uppercase",
+                      background: "transparent", color: "#ffe9ad", border: "1px solid rgba(212,164,55,.55)", borderRadius: 999,
+                      padding: "12px 22px", cursor: "pointer" }}>
+                    Keep what I found
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 22 }}>
+                <button onClick={() => setFinale(false)}
+                  style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13, letterSpacing: ".13em", textTransform: "uppercase",
+                    background: "linear-gradient(135deg,#f3e6c0,#dcc48f)", color: "#4a3a18", border: "none", borderRadius: 999,
+                    padding: "12px 26px", cursor: "pointer" }}>
+                  Back to the House
+                </button>
+                <button onClick={() => apiRef.current.celebrate?.()} title="Blow it again"
+                  style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13, letterSpacing: ".13em", textTransform: "uppercase",
+                    background: "transparent", color: "#ffe9ad", border: "1px solid rgba(212,164,55,.55)", borderRadius: 999,
+                    padding: "12px 22px", cursor: "pointer" }}>
+                  📯 Again
+                </button>
+                {/* Quieter than the other two on purpose: it is the one button
+                    here that throws something away. */}
+                <button onClick={() => setConfirmReset(true)} title="Hide all thirty-six and walk in again"
+                  style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13, letterSpacing: ".13em", textTransform: "uppercase",
+                    background: "transparent", color: "#d0b478", border: "1px solid rgba(212,164,55,.3)", borderRadius: 999,
+                    padding: "12px 22px", cursor: "pointer" }}>
+                  ↻ מֵחָדָשׁ · Start over
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -4929,7 +6978,7 @@ export default function Mikdash() {
 
       {/* ─── פתיחה · the opening ─── The first step is the hardest, so it is
            given, not hidden: what the rings mean, and where the first one waits. */}
-      {false && loaded && !noWebGL && storageReady && !opened && (
+      {loaded && !noWebGL && storageReady && !opened && (
         <div className="pesichah-veil" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(ellipse at 50% 45%, rgba(20,15,6,.42), rgba(8,6,2,.78))", backdropFilter: "blur(3px)", zIndex: 7, padding: "36px 18px 22px" }}>
           <div className="pesichah" style={{ width: "min(560px, 92vw)", maxHeight: "88vh", overflowY: "auto", background: "linear-gradient(160deg, #fbf6e8, #efe3c4)", borderRadius: 22, border: "1px solid rgba(140,110,50,.5)", boxShadow: "0 30px 90px rgba(0,0,0,.55), 0 0 90px rgba(212,164,55,.22)", padding: "clamp(24px, 5vw, 34px) clamp(20px, 5vw, 34px) clamp(20px, 4vw, 26px)", textAlign: "center", position: "relative" }}>
 
@@ -4971,6 +7020,7 @@ export default function Mikdash() {
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", alignItems: "center", marginTop: "clamp(16px, 4vw, 22px)" }}>
               <button
                 onClick={() => {
+                  track("pesichah-closed", { via: "show-me" });
                   setOpened(true);
                   if (apiRef.current.guideTo?.(0)) showToast("There — where the light stands, inside the eastern gate.");
                 }}
@@ -4979,7 +7029,7 @@ export default function Mikdash() {
                 ⌖ הראה לי · Show me the first
               </button>
               <button
-                onClick={() => setOpened(true)}
+                onClick={() => { track("pesichah-closed", { via: "on-my-own" }); setOpened(true); }}
                 style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 13.5, letterSpacing: ".06em", background: "none", color: "#7a6634", border: "1px solid rgba(140,110,50,.35)", borderRadius: 999, padding: "12px 22px", cursor: "pointer" }}
               >
                 אֵלֵךְ לְבַדִּי · I'll look on my own

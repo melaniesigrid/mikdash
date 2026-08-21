@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
+import { initAnalytics } from "./analytics.js";
 
 // Outside Claude artifacts there is no window.storage — shim it with
 // localStorage so quest progress persists locally too. (Inside artifacts
@@ -22,6 +23,10 @@ if (typeof window !== "undefined" && !window.storage) {
     },
   };
 }
+
+// Loaded before the scene so that the earliest signals — a browser with no
+// WebGL, a visitor who leaves during the pesichah — are not lost.
+initAnalytics();
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

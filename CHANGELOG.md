@@ -1,5 +1,243 @@
 # Changelog
 
+## v3.18 — "The House Keeps the Calendar" (0.3.18)
+
+- **The ending is an ending.** Thirty-six found used to produce a line of text
+  along the bottom of the screen, which is a receipt. It is now the House doing
+  what the House does when something is finished: a tekiah gedolah held until
+  the breath gives out, the exposure lifting most of a stop and coming back
+  down — a flash in a tone-mapped scene is the camera opening, not a white
+  sprite laid over the top — every torch on the walls taking at once, and six
+  hundred and forty-eight pieces of gold leaf, pomegranate, olive, linen-white
+  and techelet coming down over the courts. חי times thirty-six, which is the
+  number of the thing being celebrated.
+  - **It can be closed**, which is what was asked and what was missing: an ×, a
+    button, the backdrop, or Escape. Once it is shut the counter in the corner
+    keeps it — 36/36 is clickable and brings it back, with a button to blow the
+    shofar again.
+  - The confetti is sown into the camera's own frustum rather than over the
+    Kodesh. The first version threw it in the right place and the wrong one: at
+    seven hundred amot the whole burst went off in a patch of sky the size of a
+    thumbnail. Confetti has to be in frame or it did not happen.
+
+- **לוּחַ — the House keeps its own calendar.** A Hebrew calendar in about a
+  hundred lines: the molad, the four dechiyot, and RD day numbers. No table, no
+  network, no dependency. It is right in a hundred years and right on an
+  aeroplane.
+  - **The parshah**, which is the hard half. The order never changes; what
+    changes is how many Shabbatot there are to put it in, because a Shabbat that
+    falls on a festival reads the festival. Which pairs double up is fixed for
+    each of the fourteen shapes a Hebrew year can take, separately for Israel,
+    which keeps one day of yom tov and therefore has one more Shabbat free. That
+    table was derived rather than remembered and then checked parshah by parshah
+    against sixty-five years of published luchot in both rites — **6,207
+    Shabbatot, no disagreements**, spanning 1939 to 2111.
+  - **A birthday parshah calculator.** Your Hebrew birthday, the day of the week
+    you were born, the chag if it was one, the parshah read that Shabbat, when
+    your Hebrew birthday falls this year and what you turn — and the parshah
+    they read at twelve and at thirteen. The two things that go wrong both have
+    answers: a 30th in a month that has 29 days this year falls back to the
+    29th, and an Adar birthday in a leap year goes to Adar II, which is the
+    Rema's ruling and the near-universal practice.
+  - Today's chag with what the place did on it, the count of the Omer — counted
+    from the sheaf that was waved *in this court* — and the age of the moon.
+  - `?date=2026-12-06` puts the House on any day you like, which is the only way
+    most people will ever see the chanukiah: eight nights a year is not many.
+
+- **The moon is the right shape tonight.** The Hebrew month *is* the moon — it
+  begins at the molad and the day of the month is very nearly the moon's age in
+  days — so the phase does not have to be invented. For an illuminated fraction
+  k the phase angle is cos φ = 2k − 1 and the terminator is the ellipse whose
+  semi-minor axis is |cos φ|, which is why a crescent's inner edge curves and
+  its outer edge does not. It is full on the fifteenth, which is why Pesach and
+  Sukkot are on the fifteenth.
+
+- **Things that are only here on their day.**
+  - **A chanukiah at the gate**, with tonight's count of lights and the shamash
+    apart from them and higher. Outside the walls, because its whole mitzvah is
+    פִּרְסוּמֵי נִיסָא and that means a doorway and a street — the Menorah
+    inside has seven branches and is a different object entirely.
+  - **The bikkurim ox on Shavuot**, horns overlaid with gold and an olive wreath
+    between them, with baskets of first fruit set down behind it. Bikkurim
+    3:2–4, which the kohen at the Chamber of the Bikkurim has been describing
+    for eleven versions with nothing to point at.
+  - **The almond keeps the season.** It was in blossom all year, which is the
+    one tree in this land where that is a real claim and not a licence: the
+    shaked flowers in Shevat, before its own leaves and before anything else in
+    the country, and it is named for being early — שָׁקֵד from שׁוֹקֵד, awake
+    and watching, which is Yirmiyahu's pun in 1:11–12. Now it flowers in Shevat
+    and Adar and is green the rest of the year.
+
+- **The words to the songs**, with the stanza being sung lit as it goes. The
+  spans are in beats and not seconds, so they follow the tune rather than the
+  clock and stay right at any tempo. All public domain: Imber 1878, the
+  thirteenth-century Ma'oz Tzur, and Tikkunei Shabbat (Prague, 1641). The nigun
+  has none, and says so.
+
+- **The ox.** What stood on Har HaMishcha was a sphere with a cone on it, and
+  the four things wrong with it were all the same mistake — a cow is not a
+  smooth solid. Horn is pale keratin over bone, not the colour of the hide, and
+  that is the strongest single cue that the animal is an animal. A bovine
+  silhouette is almost entirely shoulder and hindquarter with a dip between
+  them. A front knee bends back and a hind hock bends forward, opposite ways,
+  and there were no hooves at all. And nothing moved: she stood there perfectly
+  still for two versions, and stillness at that distance reads as a prop. She
+  now breathes, swings her tail, snaps it at a fly, flicks one ear on its own
+  clock and crops the grass. The model is built once and used twice — she is the
+  red heifer of Bamidbar 19, and with gold horns and a wreath she is the ox that
+  walks in front of the first fruits.
+  - Her hide is deeper. Full sun through an ACES curve lifts a mid red most of a
+    stop, and the old colour — a red-brown in a swatch — came out of the
+    renderer the colour of a peach.
+
+- **כּוֹכָב נוֹפֵל.** A meteor about every twenty-six seconds of night, on a
+  great circle, from a hash of which window it is, so it never repeats within a
+  sitting. Two tenths of a second of it. Whoever is looking the right way gets
+  it and whoever is not never knows it happened.
+
+- The public-domain notice is off the bottom of the music panel. The reasoning
+  that constrains what may be added is still in the source, where it belongs.
+
+## v3.17 — "An Evening Over the House" (0.3.17)
+
+- **The songs were all a fifth too slow, and one of them was the wrong song.**
+  Every tempo was set below the speed its tune is actually sung at, and four
+  melodies in a row at a funeral pace is what "the songs play too slow" meant.
+  They now run at the crotchet mark the score carries, or at the speed the thing
+  is sung where it carries none: the nigun 84 → 108, Hatikvah 72 → 94 (twenty
+  bars of 4/4, which is about a minute for the anthem and was taking sixty-six
+  seconds), Ma'oz Tzur 92 → 116, Shalom Aleichem 66 → 78.
+  - **Articulation, which was the other half of it.** Every note released over a
+    fixed half-second past its own length. At a quaver of a third of a second
+    that is three notes sounding at once for a whole run, and a slur reads as
+    slow however fast the clock is set. The tail is tied to the note now and
+    capped, the attack scales with it, and there is a little more air between
+    notes.
+  - **Shalom Aleichem is Goldfarb's again.** What stood here was written from
+    memory and was not his tune — a plausible shape in the right mode and the
+    wrong song. The engraving turned up: sixteen bars, D minor, ♩=66, and this
+    is it note for note, including the C♯ of the harmonic minor that the memory
+    version had quietly flattened away. Its written register runs G4–B♭5, above
+    every tread the fifteen steps are tuned to, so the line is moved down an
+    octave to land on them.
+  - **All four now carry `verified: true`.** Hatikvah and Ma'oz Tzur were
+    re-checked bar by bar against the LilyPond in their Wikipedia articles and
+    are exactly right as they stood. The by-ear warning stays in the panel for
+    whatever is added next.
+  - **The tune comes from the steps.** It used to arrive at the same volume from
+    the far corner of the outer court as from the foot of the ascent, which is
+    the one thing that told the ear it was a UI noise and not a place. Distance
+    now takes two thirds of it and never the last third.
+  - The public-domain notice is off the bottom of the music panel. The reasoning
+    that constrains what may be added is still in the source, where it belongs.
+
+- **The sky can have an evening.** What was there was three colours for day,
+  three for night and a cross-fade — and a sunset is not a dark blue day, so
+  mixing one toward the other never passed through gold. It is Preetham's
+  analytic scattering now, written out rather than imported: Rayleigh over the
+  whole dome, Mie for the aureole, both integrated along an optical mass that
+  grows without bound at the horizon. Dusk, the gold band, the deepening zenith
+  and the second blue after the sun is down all fall out of the sun's height on
+  their own.
+  - A sun disc with limb darkening, reddened on the way down by the same
+    extinction the rest of the sky is using, and hidden below the true horizon
+    so it cannot burn up through the hill.
+  - **A moon with a face.** Disc, maria, a terminator whose lit limb always
+    points at the sun — even when the sun is under the hill — earthshine on the
+    dark limb, and an ice halo.
+  - **Stars that are not squares.** The old field lit a whole cell of a grid;
+    these are jittered inside their cell and fall off round, in two layers, with
+    a magnitude spread and a colour temperature so Antares and Rigel are not the
+    same white pinprick. They are faded against the sky's own brightness, so
+    they come out in the right order at dusk instead of all at once.
+  - The galaxy has structure in it and a dark rift, and there is an airglow
+    floor under everything, because a night sky is not black.
+  - Shafts through the dust near a low sun — the honest cheap half of a
+    crepuscular ray, done in the aureole rather than in a composer this file is
+    not allowed to import.
+  - The sky is tone-mapped now, like everything else. It has a sun in it; it
+    needs the curve or it clips to a white hole.
+
+- **The light on the ground follows the sun, not the slider.** Every lamp, the
+  fog and the fill ran linearly on the eased day/night value, so at the moment
+  the sky behind the House had gone to dusk the House was still lit at
+  three-quarter strength and the colour of noon — a sunset painted on a backdrop
+  with midday stone in front of it. All of them are functions of the sun's
+  height now, which is the same number the scattering is integrating, so they
+  cannot disagree. Direct light ends at the geometric horizon; the skylight
+  outlives it by ten degrees, which is what keeps a courtyard readable for the
+  half hour after sunset.
+
+- **Weather.** Eighteen cumulus with the flat base a cloud gets at the
+  condensation level, and eighteen cirrus above them at three times the height.
+  They are lit from underneath at dusk and per-cloud, by whether they stand in
+  the sun's direction — gold on one side of the sky and blue-grey on the other,
+  which a single tint could never say.
+  - The cloud drift was `+= speed` once a frame, which the frame-rate audit
+    missed: the weather ran two and a half times faster on a 144Hz laptop.
+
+- **The hills are farmed.** They were a displaced sphere with a broken
+  silhouette, which is a landform but not one anyone lives on. The hills around
+  Jerusalem have been cut into contour terraces for three thousand years, and
+  the terraces are the most recognisable thing about them. Ten of the fifteen
+  are terraced now, in geometry rather than in paint, so the silhouette against
+  the sky steps too — which is the half that sells it.
+
+- **צֹאן — a flock on the approach.** Most korbanot walked to Jerusalem;
+  Devarim 14:24–25 makes the concession for a road too long, which is worth
+  reading the other way round. Eighteen sheep on the pilgrim road below the
+  great stairs, grazing and drifting up it, in two draw calls: the whole animal
+  is merged to one geometry of wool and one of face and instanced. Also the
+  reason the middle distance no longer reads as empty ground between two things
+  worth looking at.
+
+- **The shadows move with the wind.** Shadow casting does not use the surface
+  material — three swaps in a depth material for that pass, and it was
+  unpatched, so every tree in the grove threw the shadow of where it would have
+  been standing in still air. Same gust, same arithmetic, compiled into the
+  depth program.
+
+- **Gold scatters along the hammer.** The facade was the largest gold surface in
+  the House and the least convincing thing in it, because a standard material's
+  highlight is the same width in every direction and beaten plate's is not.
+  `MeshPhysicalMaterial.anisotropy` does this in newer three and does not exist
+  on r128, so the GGX lobe is split into two roughnesses — wide along the hammer
+  and tight across it — and mixed. Gold, gold plate and bronze.
+
+- **A camel, rarely.** Yeshayahu's caravan has been standing below the southern
+  stairs in total silence since it arrived. One low grumble from the dust when
+  the camera is near, with the pitch fall of an animal running out of breath.
+
+## v3.16 — "They Cross the Water" (0.3.16)
+
+- **Six of the twelve kohanim were walking through the river.** The amah runs
+  the full width of the azarah — from under the threshold of the House at
+  x = −106, four amot across, south of the altar where Yechezkel 47:1 puts it —
+  and nothing else divides the court end to end. The waypoint loops were never
+  checked against it, so half the kohanim forded it at full stride with dry
+  feet, and two of them turned corners standing mid-stream. They still cross,
+  because they must: the kiyor stands on the southern bank and the altar on the
+  northern, so the walk to the service crosses the water by design, and 47:3 has
+  the prophet himself walked through it ankle-deep. What was wrong was that it
+  read as clipping. The water now shortens the step to a wade, flattens the bob,
+  quiets the arms, throws droplets off the foot, and opens a ring on the surface
+  where the foot goes in. The two waypoints parked in the channel were moved to
+  the southern bank — crossing it is right, loitering in it is not.
+  - The channel's edges are named constants now (`AMAH_X0…AMAH_Z1`) and the
+    water box is built from them, so the river and the people walking it cannot
+    drift apart.
+  - The ring is normally blended and pale, not additive. A thrown droplet reads
+    at eye height and vanishes from above, which is where this House is mostly
+    watched from — and additive light over sunlit stone adds nothing at all,
+    which is the trap the pillar of light fell into two versions ago.
+- **Path 5's two kohanim were inside the Temple platform.** Three of its six
+  waypoints sat within the platform footprint, which stands six amot proud of
+  the azarah, so those two spent roughly 60% of every loop buried in marble and
+  simply could not be seen. Rerouted onto the open court north of the House.
+- **Path 2 clipped the corner of the altar.** Moving its mid-stream waypoint to
+  the bank cleared that as well. Every leg of all six paths is now verified
+  clear of every collider in the scene.
+
 ## v3.15 — "The Pillar of Light" (0.3.15)
 
 - **The fifteenth nistar could not be taken on a phone.** שערי ניקנור, the
