@@ -175,6 +175,27 @@ preferences.
 
 ## Found while doing the above
 
+- [x] **The Menorah had a shamash.** The middle lamp stood half a tefach above
+      the other six and the seven branches were vertical rods hung off a
+      crossbar — a chanukiah's silhouette on the Mikdash's Menorah. Rebuilt from
+      the sources: eighteen tefachim by Menachot 28b's own walk up the shaft, six
+      straight diagonal branches (Rashi on Shemot 25:32, בַּאֲלַכְסוֹן, and
+      Rambam's drawing in his own hand), all seven lamps in one row at one height
+      (Rambam, Beit HaBechirah 3:10), and twenty-two gevi'im, eleven kaftorim and
+      nine perachim distributed as the daf distributes them. The ornament count
+      is not decoration — it is the check that the shape is right.
+- [ ] **The Menorah's spread is a choice, not a source.** Nothing in the Gemara
+      or in Rambam gives the distance between the lamps. Three tefachim apart
+      was chosen because it makes the Menorah as wide as it is tall and the row
+      of seven even; parallel branches at a single angle would put the outer
+      three at two tefachim and leave a gap of five and a half beside the shaft.
+      If a source turns up, it outranks the choice.
+- [ ] **The lamps are cups, not נֵרוֹת.** Each lamp is a small goblet with a
+      flame over it. A real ner is a closed boat with a spout at one end, and
+      the spout is what carries Bamidbar 8:2 — the wick, and therefore the
+      flame, turned in toward the middle. The flames lean the right way now; the
+      vessels underneath them do not say why.
+
 - [ ] **The sky is barely in frame.** All of the work on it — the scattering,
       the terminator, the stars — is spent on a strip about a fifth of the
       height of the opening shot, because the camera sits high and looks down.
@@ -221,8 +242,12 @@ preferences.
       court. On the second day of Pesach it should be.
 - [ ] **Rosh Hashanah and Yom Kippur.** The one day the Kohen Gadol goes behind
       the parochet is already wonder-shaped and has no day attached to it.
-- [ ] **A Hebrew-date footer in the loading screen**, so the date is the first
-      thing the House says rather than something behind a chip.
+- [x] **A Hebrew-date footer in the loading screen**, so the date is the first
+      thing the House says rather than something behind a chip. It carries the
+      chag when there is one and the parshah of the coming Shabbat always, and
+      on every day that is not a chag the toast that used to stay silent says
+      the parshah instead — which is the question this House is asked more than
+      any other, and it was answerable only by opening a panel.
 
 ## Found while doing the calendar
 
@@ -243,31 +268,41 @@ Written down at the end of the session that built the calendar and the ending,
 while the reasoning was still in hand. Ordered by impact per hour, like
 everything else here.
 
-- [ ] **The chanukiah burns at noon.** It is lit the moment the House is built
-      and never goes out, which is wrong twice: the mitzvah is from
-      שְׁקִיעָה, and a flame in full sun reads as a sprite. It should come up
-      with the torches on the day/night ease and be out by mid-morning. Four
-      lines in the same loop that already flickers it.
-- [ ] **`?bday=1987-03-14`.** The birthday result is the one thing in here
-      somebody would want to send to somebody else, and there is no way to. The
-      date override already proves the pattern — read it the same way, seed the
-      input from it, and let the panel open itself when it is present.
+- [x] **The chanukiah burns at noon.** Fixed, and on the sun's own height
+      rather than on the day/night ease — Shabbat 21b puts the mitzvah at
+      משתשקע החמה, which is a fact about the sun and not about the position of
+      a slider. The flames are hidden outright in daylight rather than merely
+      dimmed, because an additive sprite at low opacity over a lit court is a
+      smudge on the gold.
+- [x] **`?bday=1987-03-14`.** Read the same way `?date=` is, and the לוּחַ
+      opens itself behind the teaching card when it is there. The address bar
+      keeps the date as it is typed, so the link in the bar is always the link
+      to the result on screen, and there is a button beside it that copies it.
 - [ ] **The parshah should say where it is.** The panel gives the name and the
       book; a bar mitzvah wants Devarim 21:10–25:19. Fifty-four verse ranges is
       an afternoon of typing against a chumash and no new machinery at all.
-- [ ] **A shofar you can actually blow.** `playShofar` is one blast and
-      `tekiahGedolah` is one long one. תְּקִיעָה · שְׁבָרִים · תְּרוּעָה ·
-      תְּקִיעָה גְדוֹלָה is the actual sequence, it is three more envelopes on
-      voices that already exist, and clicking wonder 10 in Elul or on Rosh
-      Hashanah is exactly when somebody would want it.
-- [ ] **Meteor showers keep dates.** The rate is a flat one every twenty-six
-      seconds. The Perseids peak in Av and the Leonids in Cheshvan, the calendar
-      is already in the file, and raising the rate for those few nights costs
-      one multiplier. Nobody would be told; the ones who noticed would be right.
-- [ ] **Let some confetti stay.** It settles on the paving correctly and then
-      fades out with the rest at twenty-two seconds. A dozen pieces left lying
-      where they fell until the next reload would be a better memory of having
-      finished than a card that can be reopened.
+- [x] **A shofar you can actually blow.** One blast is now a primitive with
+      three arguments — when, how long, and whether it breaks up to the fifth
+      at the end — and תשר״ת is built out of it: a tekiah, three shevarim, nine
+      teruot and the gedolah. In Elul and on Rosh Hashanah wonder 10 gives the
+      whole order; on Yom Kippur it gives one blast and it is the long one, the
+      tekiah gedolah at the close of Ne'ilah; every other day it is the single
+      tekiah it has always been.
+- [x] **Meteor showers keep dates** — Gregorian dates, which is the correction
+      this entry needed. A shower is the earth crossing a comet's dust and an
+      orbit is a solar fact: the Perseids are in the second week of August
+      whatever the Hebrew month happens to be doing, and keying them to Av would
+      have been a nicer sentence than it was a fact. Seven of them, with the
+      rate falling off either side of the peak, and the לוּחַ says which one is
+      running. The multipliers are deliberately not ZHRs — one meteor every
+      twenty-six seconds over a whole hemisphere is already generous, and a real
+      Geminid ratio on top of it would fill the sky.
+- [x] **Let some confetti stay.** One piece in every thirty-six, which is
+      eighteen of them. The clearing had to move from the material's opacity
+      into the instance scale — six hundred and forty-eight instances share one
+      material and a material cannot fade some of them and keep the rest — and
+      a leaf shrinking over five seconds at that distance reads as the wind
+      taking it, which is the truer thing for it to do anyway.
 - [ ] **Verify the finale from inside walk mode.** The burst is sown into the
       camera frustum, which should be right from a standing eye as well as from
       orbit — but it has only been watched from orbit, and the near sixth of it
@@ -276,20 +311,22 @@ everything else here.
 - [ ] **The sheep should notice you.** They graze and drift on a fixed path and
       walk through a visitor in walk mode. A flock parts around a person; that
       is most of what a flock does.
-- [ ] **A month is not a chag.** `chagOn` returns Elul for all twenty-nine days
-      of it, so the ✦ sits on the chip and the toast fires every day for a
-      month. Elul belongs in the panel and does not belong in the same band as
-      Yom Kippur — it wants a second, quieter tier.
+- [x] **A month is not a chag.** `chagOn` carries a tier now. A season keeps
+      no ✦, announces itself on the first of the month and then stops talking,
+      and sits in the panel in a plain frame instead of the gold one — because
+      standing Elul and Yom Kippur in the same card says they are the same kind
+      of day.
 - [ ] **Move the sedra derivation into `tools/`.** The fourteen-row merge table
       was derived from published luchot and checked across 6,207 Shabbatot, and
       the script that did it lives nowhere. Anybody who doubts a row — and one
       day somebody will — should be able to re-run the check rather than take
       the comment's word for it. Same directory the `harp-test.html` decision
       below has been waiting on.
-- [ ] **The lyric panel should follow the song.** The sung stanza lights, but on
-      a long melody it lights below the fold and the reader never sees it. A
-      `scrollIntoView` on the live stanza, guarded so it does not fight a
-      visitor who is scrolling themselves.
+- [x] **The lyric panel follows the song.** `scrollIntoView` with `block:
+      "nearest"`, so a stanza already in view is left exactly where it is, and a
+      hand on the wheel or a finger on the glass wins for four seconds — a panel
+      that scrolls itself back every two bars is worse than one that never
+      scrolled at all.
 
 ## Ideas worth considering, not yet decided
 

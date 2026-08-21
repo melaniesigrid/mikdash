@@ -1,5 +1,96 @@
 # Changelog
 
+## v3.20 — "Seven Lamps, All of Them Level" (0.3.20)
+
+- **The Menorah had a shamash, and now it does not.** What stood in the court
+  was a rake: seven vertical rods hung off a crossbar, with the middle rod
+  raised half a tefach above the other six. That is a chanukiah's silhouette,
+  and the Menorah has no shamash and never had one — Shemot 25:37 has the seven
+  lamps lit to give light across the face of it, and Rambam (Hilchot Beit
+  HaBechirah 3:10) says flatly that all seven sit in one row. It is rebuilt from
+  the sources rather than patched:
+  - **Eighteen tefachim**, by Menachot 28b's own walk up the shaft — three for
+    the base and its flower, two plain, one carrying a cup, a knob and a flower,
+    two plain, then a knob at the ninth, the eleventh and the thirteenth with a
+    pair of branches leaving each, and three at the top for the last three cups,
+    the knob and the flower. Three amot, which is what the daf adds to.
+  - **Six straight diagonal branches**, not curved. Rashi on Shemot 25:32 says
+    בַּאֲלַכְסוֹן and Rambam drew them that way in his own hand; the arch in Rome
+    is a Roman's memory of something he watched carried past him.
+  - **Twenty-two גְּבִיעִים, eleven כַּפְתּוֹרִים, nine פְּרָחִים** — three cups,
+    a knob and a flower on each of the six branches, and four, five and three on
+    the shaft. The count is not ornament. It is the check that the shape is
+    right, and the old one could not have passed it.
+  - **The wicks face in.** Bamidbar 8:2 — אֶל־מוּל פְּנֵי הַמְּנוֹרָה: the six
+    lean toward the middle lamp and the middle lamp leans west, to the Kodesh,
+    which is why Rambam reads it as the נֵר מַעֲרָבִי. The row runs north to
+    south, where the Rabbanan of Menachot 98b stood it. And it takes light from
+    the middle outward, a pair at a time.
+  - The one thing no source gives is the spread. The lamps are set three
+    tefachim apart, which makes the Menorah exactly as wide as it is tall.
+
+- **The chanukiah is lit at shkiah.** It was lit the moment the House was built
+  and never went out, which is wrong twice: Shabbat 21b puts the mitzvah at
+  משתשקע החמה, from when the sun sets, so a lamp burning at noon has not been
+  lit but merely left on — and an additive sprite over a courtyard in full sun
+  does not read as fire, it reads as a smudge on the gold. The oil catches on
+  the sun's own height now, which is the number the whole House already runs on.
+
+- **A shofar you can actually blow.** One blast is a primitive with three
+  arguments — when it starts, how long it is held, and whether it breaks up to
+  the fifth at the end, which a real horn does when it is pushed — because
+  length and articulation are the only things a bent horn with no finger holes
+  has. תשר״ת is built out of it: a tekiah, three shevarim, nine teruot, and the
+  gedolah held until the breath gives out. Rosh Hashanah 33b is the reason there
+  is an order at all — nobody could say any more whether the תְּרוּעָה the Torah
+  means is a moaning or a sobbing, so Rabbi Abbahu's takanah sounds both. In
+  Elul and on Rosh Hashanah the horn near the southern gate gives the whole
+  order; on Yom Kippur it gives one blast and it is the long one, the tekiah
+  gedolah at the close of Ne'ilah; every other day it is the single tekiah it
+  has always been.
+
+- **The House says what parshah it is.** It knew — it has known since v3.18 —
+  and it would only say so to somebody who opened a panel. The loading screen
+  now carries the Hebrew date, the chag if there is one, and the parshah of the
+  coming Shabbat, so the first thing the House says while the stone comes up is
+  what day it is; and on the three hundred and forty-odd days that are not a
+  chag, the toast that used to stay silent says the parshah instead. Never both.
+
+- **A month is not a chag.** `chagOn` carries a tier. Elul was in the same band
+  as Yom Kippur, which meant a ✦ on the chip and a toast across the courts on
+  every one of its twenty-nine days — and a mark that is on for a month is not a
+  mark. A season keeps no ✦, announces itself on the first of the month and then
+  lets it be, and sits in the panel in a plain frame rather than the gold one.
+
+- **The showers keep their own nights.** The sky threw one meteor every
+  twenty-six seconds, all year. Seven showers now raise that rate around their
+  peaks and fall off either side of them — and they are keyed to the Gregorian
+  date on purpose, which is the one place in this House where that is the honest
+  choice: a shower is the earth crossing the dust a comet left in its orbit, and
+  an orbit is a solar fact. The Perseids are in the second week of August
+  whatever the moon is doing. The לוּחַ says which one is running; nothing else
+  does, and the visitor who notices the sky is busy is right.
+
+- **A birthday is a link now.** `?bday=1987-03-14` is read exactly as `?date=`
+  is, the לוּחַ opens itself behind the teaching card, and the address bar keeps
+  the date as it is typed — so the link in the bar is always the link to the
+  result on the screen. There is a button beside it that copies it. This was the
+  one thing in here somebody would want to send to somebody else, and there was
+  no way to send it.
+
+- **Eighteen pieces of it stay where they fell.** The whole burst used to be
+  taken away at twenty-two seconds and the courts went back to looking exactly
+  as they had before the thirty-sixth was found. One piece in every thirty-six
+  now stays until the next reload. The clearing had to move out of the material
+  and into the instance scale — six hundred and forty-eight instances share one
+  material, and a material cannot fade some of them and keep the rest.
+
+- **The words follow the tune.** The sung stanza has lit up since the words
+  shipped, which is no use on a melody long enough to scroll: on Ma'oz Tzur it
+  lit below the fold and the one person who opened the words never saw it move.
+  The panel carries it up now — `block: "nearest"`, so a stanza already in view
+  is left where it is, and a hand on the wheel wins for four seconds.
+
 ## v3.19 — "Who Walks In, and Who Walks Out" (0.3.19)
 
 - **The pesichah comes back.** It has not been shown to anybody since v3.9. A

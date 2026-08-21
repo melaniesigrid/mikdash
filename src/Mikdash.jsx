@@ -473,6 +473,22 @@ function sceneDateRD() {
   return gregToRD(n.getFullYear(), n.getMonth() + 1, n.getDate());
 }
 
+// And ?bday=1987-03-14, which is the one thing in here somebody would want to
+// send to somebody else: open it and the לוּחַ opens itself, on their day, with
+// their parshah in it. Read exactly as ?date= is read, and as forgiving —
+// anything that is not a date is simply not there.
+function bdayFromQuery() {
+  try {
+    const q = new URLSearchParams(window.location.search).get("bday");
+    const m = q && /^(\d{4})-(\d{2})-(\d{2})$/.exec(q);
+    if (m) {
+      const y = +m[1], mo = +m[2], d = +m[3];
+      if (y >= 1500 && y <= 2199 && mo >= 1 && mo <= 12 && d >= 1 && d <= gMonthLen(y, mo)) return q;
+    }
+  } catch (err) { /* no window, or a query string that is not one */ }
+  return "";
+}
+
 // ── מוֹעֲדִים — what day it is in the House ──
 //
 // Only the ones this House would have noticed. Each carries what the place did
@@ -481,7 +497,9 @@ function chagOn(rd, israel = false) {
   const { year, month, day } = rdToHeb(rd);
   const L = hebLeap(year);
   const at = (m, d) => month === m && day === d;
-  const K = (id, he, en, note) => ({ id, he, en, note });
+  // tier "chag" is a day the House would have kept; tier "season" is a stretch
+  // of the year that colours it and is not the same kind of thing.
+  const K = (id, he, en, note, tier = "chag") => ({ id, he, en, note, tier });
   if (at(7, 1) || at(7, 2)) return K("rosh", "רֹאשׁ הַשָּׁנָה", "Rosh Hashanah", "The shofar is sounded a hundred times, and the world is judged. Here the great shofar waits on marble near the southern gate.");
   if (at(7, 10)) return K("yom", "יוֹם הַכִּפּוּרִים", "Yom Kippur", "The one day the Kohen Gadol went behind the parochet, into the room with nothing in it but the Even HaShetiyah. He said the Name aloud, and the court fell on their faces.");
   if (month === 7 && day >= 15 && day <= 21) return K("sukkot", "סֻכּוֹת", "Sukkot", `Day ${day - 14} of the festival. Water was poured on the altar and the Levites played all night on the fifteen steps — Sukkah 51b says whoever has not seen the Simchat Beit HaSho'evah has never seen rejoicing.`);
@@ -500,7 +518,14 @@ function chagOn(rd, israel = false) {
   if (at(4, 17)) return K("tammuz", "שִׁבְעָה עָשָׂר בְּתַמּוּז", "17 Tammuz", "The walls were breached. Three weeks from here to the ninth of Av.");
   if (at(5, 9)) return K("tisha", "תִּשְׁעָה בְּאָב", "Tisha B'Av", "Both Houses fell on this day. Makkot 24b: the sages wept at a fox in the ruin, and Rabbi Akiva laughed — because the prophecy of the ruin coming true is what makes the prophecy of the rebuilding true too.");
   if (at(5, 15)) return K("tuav", "ט״וּ בְּאָב", "Tu B'Av", "Ta'anit 30b calls it one of the two happiest days Israel ever had. The daughters of Jerusalem went out in borrowed white, so that nobody could tell who was rich.");
-  if (month === 6) return K("elul", "אֱלוּל", "Elul", "The month of return. The shofar is blown every morning, and the King is said to be in the field.");
+  // ── A month is not a chag ──
+  // Elul was in the same band as Yom Kippur, which meant a ✦ on the chip and a
+  // toast across the courts every single day for twenty-nine of them — and a
+  // mark that is on for a month is not a mark. It belongs in the year and it
+  // belongs in the panel; it does not belong in the same tier as the day the
+  // Kohen Gadol goes behind the parochet. Its own quieter tier, and the House
+  // says it once, on the first of the month, and then lets it be.
+  if (month === 6) return K("elul", "אֱלוּל", "Elul", "The month of return. The shofar is blown every morning, and the King is said to be in the field.", "season");
   return null;
 }
 // Sefirat HaOmer. Vayikra 23:15 counts from the day the Omer was brought, and
@@ -513,6 +538,43 @@ function omerDay(rd) {
     if (n >= 1 && n <= 49) return n;
   }
   return 0;
+}
+
+// ── כּוֹכָבִים נוֹפְלִים — the nights the sky is busy ──
+//
+// A meteor shower is the earth crossing the dust a comet left in its orbit,
+// and an orbit is a solar fact: the Perseids are in the second week of August
+// whatever the moon is doing, and the Hebrew date of them wanders a month
+// either way. So this is the one thing in the House that reads the Gregorian
+// date on purpose — a shower keyed to the Hebrew month would be right about a
+// third of the time and would be a nicer sentence than it is a fact.
+//
+// The multipliers are not ZHRs. The sky here already gives one meteor every
+// twenty-six seconds over the whole hemisphere, which is generous for a
+// sporadic night; multiplying that by a real Geminid ratio would fill the sky
+// with them. These are set so that a visitor who happens to be here on the
+// night notices the sky is busier than usual, which is what the shower is.
+const SHOWERS = [
+  { name: "the Quadrantids", peak: [1, 3], days: 1.5, mult: 3.0, note: "sharp — a few hours either side of the peak and no more" },
+  { name: "the Lyrids", peak: [4, 22], days: 2.5, mult: 1.8, note: "the oldest one on record: the Chinese noted them falling like rain in 687 BCE" },
+  { name: "the Eta Aquariids", peak: [5, 6], days: 5, mult: 2.4, note: "dust off Halley's comet, and best in the hour before dawn" },
+  { name: "the Perseids", peak: [8, 12], days: 4.5, mult: 4.0, note: "the reliable one, and warm enough to lie out under" },
+  { name: "the Orionids", peak: [10, 21], days: 4.5, mult: 2.0, note: "Halley's other crossing — the earth passes through the same trail twice a year" },
+  { name: "the Leonids", peak: [11, 17], days: 2.5, mult: 2.2, note: "quiet most years, and roughly every thirty-three a storm" },
+  { name: "the Geminids", peak: [12, 14], days: 3, mult: 4.5, note: "not a comet at all but 3200 Phaethon, which is a rock" },
+];
+// Strength 0…1, falling off linearly from the peak, and the year is tried
+// either side so that the last days of December can still see January's.
+function meteorShowerOn(rd) {
+  const { y } = rdToGreg(rd);
+  let best = null;
+  for (const sh of SHOWERS) {
+    for (const yy of [y - 1, y, y + 1]) {
+      const k = 1 - Math.abs(rd - gregToRD(yy, sh.peak[0], sh.peak[1])) / sh.days;
+      if (k > 0 && (!best || k * sh.mult > best.k * best.mult)) best = { ...sh, k };
+    }
+  }
+  return best;
 }
 
 const KOHEN_VOICES = [
@@ -1216,7 +1278,7 @@ export default function Mikdash() {
   const [peace, setPeace] = useState(false);
   const [cal, setCal] = useState(false);
   const [israel, setIsrael] = useState(false);
-  const [bday, setBday] = useState("");
+  const [bday, setBday] = useState(bdayFromQuery);
   const [lyrics, setLyrics] = useState(null);
   const [finale, setFinale] = useState(false);
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -1370,6 +1432,10 @@ export default function Mikdash() {
       // over this House is the moon that is actually up. It is full on the
       // fifteenth, which is why Pesach and Sukkot are on the fifteenth.
       uMoonK: { value: 0.5 },
+      // Seconds from one meteor to the next. Set from the date: the showers
+      // keep their own nights (see SHOWERS), and on every other night of the
+      // year this is the twenty-six seconds it has always been.
+      uMeteorPeriod: { value: 26 },
     };
     const sky = new THREE.Mesh(
       new THREE.SphereGeometry(2000, 32, 20),
@@ -1383,6 +1449,7 @@ export default function Mikdash() {
           varying vec3 vDir;
           uniform float uNight; uniform float uTime;
           uniform vec3 uSunDir; uniform vec3 uMoonDir; uniform float uMoonK;
+          uniform float uMeteorPeriod;
 
           // ── Why an atmosphere and not a gradient ──
           //
@@ -1611,21 +1678,22 @@ export default function Mikdash() {
                 sky += mDisc * face * (phase * 2.6 + 0.045) * vec3(0.96, 0.955, 0.92) * night;
               }
               // ── כּוֹכָב נוֹפֵל ──
-              // One every twenty-six seconds or so, on a great circle, from a
-              // hash of which twenty-six-second window it is — so it is always
-              // in a different place and it never repeats within a sitting. Two
-              // tenths of a second of it, which is about how long a real one
-              // lasts, and the visitor who happens to be looking the right way
-              // gets it and the one who is not never knows.
-              float mt = uTime / 26.0;
-              float ep = floor(mt), fr = fract(mt);
-              if (fr < 0.085) {
+              // One every uMeteorPeriod seconds, on a great circle, from a hash
+              // of which window it is — so it is always in a different place
+              // and it never repeats within a sitting. The window is the only
+              // thing the date moves; the streak keeps its own length in
+              // seconds, so a shower gives more of them and not longer ones.
+              // The visitor who happens to be looking the right way gets it and
+              // the one who is not never knows.
+              float mt = uTime / uMeteorPeriod;
+              float ep = floor(mt), fr = fract(mt) * uMeteorPeriod;
+              if (fr < 2.2) {
                 vec3 ra = normalize(vec3(hash(vec3(ep, 1.7, 3.1)) - 0.5,
                                          hash(vec3(ep, 2.3, 5.9)) * 0.55 + 0.30,
                                          hash(vec3(ep, 4.1, 7.3)) - 0.5));
                 vec3 rb = normalize(ra + vec3(hash(vec3(ep, 6.7, 1.3)) - 0.5, -0.40,
                                               hash(vec3(ep, 8.9, 2.7)) - 0.5) * 0.62);
-                float u2 = fr / 0.085;
+                float u2 = fr / 2.2;
                 vec3 head = normalize(mix(ra, rb, u2));
                 vec3 tail = normalize(mix(ra, rb, max(0.0, u2 - 0.22)));
                 vec3 ab = head - tail;
@@ -2100,6 +2168,11 @@ export default function Mikdash() {
     const moonAge = todayHeb.day - 1;
     const moonK = (1 - Math.cos((2 * Math.PI * moonAge) / 29.530594)) / 2;
     const almondInFlower = todayHeb.month === 11 || todayHeb.month === 12 || todayHeb.month === 13;
+    // And how busy the sky is tonight. Nobody is told; the ones who notice are
+    // right, and the ones who come back on the twelfth of August find something
+    // that was not here in June.
+    const shower = meteorShowerOn(todayRD);
+    skyUniforms.uMeteorPeriod.value = shower ? 26 / (1 + (shower.mult - 1) * shower.k) : 26;
 
     const foliage = {
       olive:  new THREE.MeshStandardMaterial({ color: 0x2c3a1c, roughness: 0.95 }),
@@ -3756,33 +3829,131 @@ export default function Mikdash() {
     shetiyaLight.position.set(shetiya.position.x, 6, 0);
     scene.add(shetiyaLight);
 
+    // ═══════════ מְנוֹרַת הַזָּהָב — seven lamps, and all of them level ═══════════
+    //
+    // What stood here was a rake: seven vertical rods off a bar, with the
+    // middle rod raised half a tefach above the other six. Both are wrong, and
+    // the raised middle one is wrong in the way that matters — a lamp standing
+    // higher than its neighbours is a chanukiah's שַׁמָּשׁ, and the Menorah has
+    // no shamash and never had one. Shemot 25:37 has the seven lamps lit to
+    // give light אֶל־עֵבֶר פָּנֶיהָ, across the face of it, and Rambam (Hilchot
+    // Beit HaBechirah 3:10) says flatly that all seven sit in one row. One
+    // height, no exceptions.
+    //
+    // The proportions are Menachot 28b's, which walks up the shaft a tefach at
+    // a time and comes to eighteen: three for the base and its flower, two
+    // plain, one carrying a cup, a knob and a flower, two plain, then a knob
+    // at the ninth, the eleventh and the thirteenth with a pair of branches
+    // leaving each, a plain tefach between them, two more plain, and three at
+    // the top for the last three cups, the knob and the flower. Eighteen
+    // tefachim is three amot.
+    //
+    // The ornament is the same daf and Rambam 3:2 — twenty-two גְּבִיעִים,
+    // eleven כַּפְתּוֹרִים, nine פְּרָחִים. Three cups, a knob and a flower on
+    // each of the six branches; four, five and three on the shaft itself. The
+    // count is not decoration: it is the check that the shape is right.
+    //
+    // Two things the sources leave open, and here is what was chosen. The
+    // branches are straight and diagonal rather than curved — Rashi on Shemot
+    // 25:32 says בַּאֲלַכְסוֹן and Rambam drew them that way in his own hand;
+    // the arch in Rome is a Roman's memory of something carried past him. And
+    // the spread, which nothing gives at all: the lamps are set three tefachim
+    // apart, which makes the Menorah exactly as wide as it is tall and the row
+    // of seven even.
     const men = new THREE.Group();
-    cyl(0.55, 0.8, 10, 8, gold, 0, 5, 0, men);
-    cyl(2.2, 2.6, 1, 10, gold, 0, 0.5, 0, men);
+    const menAxis = new THREE.Vector3(0, 1, 0);
+    // A member laid between two points and aimed down its own length, so that
+    // a branch is one straight run of gold from the knob it leaves to the lamp
+    // it carries — מִקְשָׁה אַחַת, all of a piece (Shemot 25:36).
+    const menLimb = (a, b, r) => {
+      const d = new THREE.Vector3().subVectors(b, a);
+      const m = cyl(r, r, d.length(), 9, gold, (a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2, men);
+      m.quaternion.setFromUnitVectors(menAxis, d.clone().normalize());
+      return m;
+    };
+    // The three ornaments, each placed at a point and aimed along whatever it
+    // grows out of. A gaviya is a goblet — Rambam 3:9 has them like the cups
+    // of Alexandria, wide at the mouth and narrow at the foot; a kaftor is a
+    // knob; a perach is a flower, flared open.
+    const ornGeo = {
+      gaviya: new THREE.CylinderGeometry(0.40, 0.19, 0.62, 9),
+      kaftor: new THREE.SphereGeometry(0.44, 10, 8),
+      perach: new THREE.CylinderGeometry(0.52, 0.15, 0.24, 10),
+    };
+    const orn = (kind, p, q) => {
+      const m = new THREE.Mesh(ornGeo[kind], gold);
+      m.position.copy(p);
+      if (q) m.quaternion.copy(q);
+      m.castShadow = true;
+      men.add(m);
+      return m;
+    };
+    const P = (y, z) => new THREE.Vector3(0, y, z);
+    // ── the shaft ──
+    // Everything from here to the scale at the bottom is in tefachim.
+    for (let f = 0; f < 3; f++) {                        // רַגְלֶיהָ — it stands on three feet
+      const fa = (f / 3) * Math.PI * 2 + 0.4;
+      cyl(0.26, 0.34, 1.1, 6, gold, Math.cos(fa) * 1.5, 0.55, Math.sin(fa) * 1.5, men);
+    }
+    cyl(1.1, 2.1, 1.0, 14, gold, 0, 1.4, 0, men);        // the base
+    cyl(0.34, 0.44, 16.2, 12, gold, 0, 9.9, 0, men);     // and the shaft, up to eighteen
+    orn("perach", P(2.6, 0));                            // three tefachim: the base and its flower
+    orn("gaviya", P(5.30, 0));                           // the sixth: a cup, a knob and a flower
+    orn("kaftor", P(5.72, 0));
+    orn("perach", P(6.02, 0));
+    orn("gaviya", P(15.35, 0));                          // and the last three tefachim: three cups,
+    orn("gaviya", P(15.95, 0));                          // a knob, and the flower at the top
+    orn("gaviya", P(16.55, 0));
+    orn("kaftor", P(17.10, 0));
+    orn("perach", P(17.55, 0));
+    // ── the six branches ──
+    // Shemot 25:35: וְכַפְתֹּר תַּחַת שְׁנֵי הַקָּנִים — a knob under each pair.
+    // The lowest knob carries the outermost pair, which is what lets six
+    // straight lines leave one shaft and cross nothing on the way up. Every
+    // one of them ends at eighteen tefachim; that is the whole of the shape.
     const flameTips = [];
-    [-4.8, -3.2, -1.6, 0, 1.6, 3.2, 4.8].forEach((bz) => {
-      if (bz !== 0) {
-        cyl(0.32, 0.36, 3.1, 6, gold, 0, 9.05, bz, men);
-        const knop = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 6), gold);
-        knop.position.set(0, 10, bz);
-        men.add(knop);
+    for (const [ky, out] of [[8.5, 9], [10.5, 6], [12.5, 3]]) {
+      orn("kaftor", P(ky, 0));
+      for (const sd of [-1, 1]) {
+        const a = P(ky, sd * 0.35), b = P(18, sd * out);
+        menLimb(a, b, 0.26);
+        const q = new THREE.Quaternion().setFromUnitVectors(menAxis, new THREE.Vector3().subVectors(b, a).normalize());
+        const at = (u) => new THREE.Vector3().lerpVectors(a, b, u);
+        orn("gaviya", at(0.22), q); orn("gaviya", at(0.40), q); orn("gaviya", at(0.58), q);
+        orn("kaftor", at(0.74), q);
+        orn("perach", at(0.88), q);
       }
-      cyl(0.55, 0.35, 0.9, 8, gold, 0, 10.6 + (bz === 0 ? 0.5 : 0), bz, men);
+    }
+    // ── the seven lamps ──
+    // In one row, at one height, three tefachim apart. Listed from the middle
+    // outward because that is the order they take light in when somebody finds
+    // this: the middle lamp first, and then a pair at a time.
+    for (const lz of [0, -3, 3, -6, 6, -9, 9]) {
+      cyl(0.50, 0.30, 0.52, 10, gold, 0, 18.26, lz, men);
       const m = new THREE.SpriteMaterial({ map: fireTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 });
       const fl = new THREE.Sprite(m);
-      fl.scale.set(1.4, 2.2, 1);
-      fl.position.set(0, 12.2 + (bz === 0 ? 0.5 : 0), bz);
+      fl.scale.set(1.9, 3.0, 1);
+      // Bamidbar 8:2 — אֶל־מוּל פְּנֵי הַמְּנוֹרָה. The six wicks are turned in
+      // toward the middle lamp; the middle one is turned west, to the Kodesh,
+      // which is why Rambam (Beit HaBechirah 3:8) reads it as the נֵר מַעֲרָבִי
+      // — the lamp that was found still burning. West is −x here, and this row
+      // runs north to south, which is where the Rabbanan of Menachot 98b stood
+      // the Menorah.
+      fl.position.set(lz === 0 ? -0.34 : 0, 19.3, lz - Math.sign(lz) * 0.3);
       men.add(fl);
       flameTips.push(fl);
-    });
-    box(0.5, 0.5, 10.2, gold, 0, 10, 0, men);
-    men.scale.set(1.8, 1.8, 1.8);
+    }
+    // Three amot is shoulder height, and shoulder height in a court two
+    // hundred amot across is a speck nobody could find, let alone click. The
+    // group is scaled up bodily: the size is a licence and not one proportion
+    // inside it is.
+    men.scale.setScalar(1.11);
     men.position.set(50, IC_H, 48);
     men.userData = { id: 12 };
     scene.add(men);
     clickables.push(men);
     const menLight = new THREE.PointLight(0xffc84d, 0, 60, 2);
-    menLight.position.set(50, IC_H + 24, 48);
+    menLight.position.set(50, IC_H + 21, 48);
     scene.add(menLight);
 
     const ketoret = new THREE.Group();
@@ -4400,10 +4571,62 @@ export default function Mikdash() {
     scene.add(swiftFlock);
 
     // ═══════════ Audio ═══════════
+    //
+    // A phone is stricter than a desktop in three ways that all end in silence,
+    // and each one is answered below.
+    //
+    // 1. A context opened outside a real gesture comes back suspended, and only
+    //    a resume() inside one starts it. The canvas already unlocked on touch,
+    //    but the canvas is not what a visitor touches first: on a phone the
+    //    first tap is as likely to be a chip, the quest button or a fact card,
+    //    and a gesture spent on one of those left the House silent until they
+    //    happened to touch stone. Any gesture anywhere counts now.
+    // 2. On iOS a page whose only sound is WebAudio is filed under the ambient
+    //    audio session, which the ring switch silences outright — the visitor
+    //    hears nothing and there is nothing on screen to tell them why. Holding
+    //    one genuinely-playing silent <audio> tag open moves the page into the
+    //    playback session, where the switch no longer applies.
+    // 3. A phone locked mid-visit comes back with the context interrupted, and
+    //    nothing else asks it to start again.
     let audioCtx = null;
+
+    // A quarter second of silence, looped. Written out by hand rather than
+    // fetched: 8-bit PCM silence is 128, not 0, and the whole file is 44 bytes
+    // of header and 2000 of it.
+    let silenceUrl = null;
+    const silentWav = () => {
+      if (silenceUrl) return silenceUrl;
+      const sr = 8000, n = sr / 4;
+      const buf = new ArrayBuffer(44 + n), view = new DataView(buf);
+      const ascii = (off, str) => { for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); };
+      ascii(0, "RIFF"); view.setUint32(4, 36 + n, true); ascii(8, "WAVEfmt ");
+      view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+      view.setUint32(24, sr, true); view.setUint32(28, sr, true);
+      view.setUint16(32, 1, true); view.setUint16(34, 8, true);
+      ascii(36, "data"); view.setUint32(40, n, true);
+      new Uint8Array(buf, 44).fill(128);
+      silenceUrl = URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+      return silenceUrl;
+    };
+    // Silence at full volume is still silence: the tag has to be really
+    // playing, not muted, for iOS to promote the session.
+    let silentTag = null;
+    const holdSession = () => {
+      if (!silentTag) {
+        silentTag = document.createElement("audio");
+        silentTag.src = silentWav();
+        silentTag.loop = true;
+        silentTag.volume = 1;
+        silentTag.setAttribute("playsinline", "");
+        silentTag.playsInline = true;
+      }
+      if (silentTag.paused) silentTag.play().catch(() => {});
+    };
+
     const ensureAudio = () => {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === "suspended") audioCtx.resume();
+      holdSession();
       return audioCtx;
     };
     // The ambient bed and every event sound answer to one switch.
@@ -4412,25 +4635,65 @@ export default function Mikdash() {
       master: null, wind: null, windF: null, fire: null, fireGain: null,
       songBus: null, song: null, songAt: 0, crackAt: 0, camelAt: 0,
     };
-    const playShofar = () => {
+
+    // Held on the window in the capture phase so nothing on the page can eat
+    // the gesture first, and held until a context is actually running: resume()
+    // is a promise, and the first one does not always take.
+    const UNLOCK_EVENTS = ["pointerdown", "touchend", "mousedown", "keydown"];
+    const dropUnlock = () => UNLOCK_EVENTS.forEach((n) => window.removeEventListener(n, unlock, true));
+    function unlock() {
       if (!amb.on) return;
-      const ctx = ensureAudio(); const t0 = ctx.currentTime;
+      buildAmbience();
+      if (audioCtx && audioCtx.state === "running") dropUnlock();
+    }
+    UNLOCK_EVENTS.forEach((n) => window.addEventListener(n, unlock, true));
+    const onAudioVisible = () => {
+      if (document.visibilityState === "visible" && amb.on && amb.built) ensureAudio();
+    };
+    document.addEventListener("visibilitychange", onAudioVisible);
+    // ── One blast, and everything is made out of it ──
+    //
+    // A shofar is a bent horn with no finger holes and one note in it. Every
+    // difference between a tekiah, a shever and a teruah is length and
+    // articulation — the ba'al tokea has nothing else to work with — so this
+    // is one voice with three arguments: when it starts, how long it is held,
+    // and whether it breaks up to its next partial at the end, which a real
+    // horn does when it is pushed and a short note never gets far enough to do.
+    //
+    // Returns how long it occupies, release included, so a caller can lay the
+    // next one against the end of it without counting.
+    const hornBlast = (ctx, t0, len, climb = false, peak = 0.28) => {
       const osc = ctx.createOscillator(), osc2 = ctx.createOscillator();
       const gain = ctx.createGain(), filt = ctx.createBiquadFilter();
       filt.type = "lowpass"; filt.frequency.value = 900; filt.Q.value = 4;
       osc.type = "sawtooth"; osc2.type = "square";
+      // The little scoop up at the start is the horn speaking: the column of
+      // air takes a moment to settle onto the note, and without it the blast
+      // begins as an oscillator being switched on.
       [[osc, 146, 158, 230], [osc2, 147.5, 159, 232]].forEach(([o, f1, f2, f3]) => {
         o.frequency.setValueAtTime(f1, t0);
-        o.frequency.linearRampToValueAtTime(f2, t0 + 0.15);
-        o.frequency.setValueAtTime(f2, t0 + 1.15);
-        o.frequency.linearRampToValueAtTime(f3, t0 + 1.28);
+        o.frequency.linearRampToValueAtTime(f2, t0 + Math.min(0.15, len * 0.45));
+        if (climb && len > 0.7) {
+          o.frequency.setValueAtTime(f2, t0 + len - 0.45);
+          o.frequency.linearRampToValueAtTime(f3, t0 + len - 0.32);
+        }
       });
+      const atk = Math.min(0.09, len * 0.3);
+      const rel = Math.min(0.5, 0.06 + len * 0.22);
       gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(0.28, t0 + 0.09);
-      gain.gain.setValueAtTime(0.28, t0 + 1.6);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.1);
-      osc.connect(filt); osc2.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
-      osc.start(t0); osc2.start(t0); osc.stop(t0 + 2.2); osc2.stop(t0 + 2.2);
+      gain.gain.exponentialRampToValueAtTime(peak, t0 + atk);
+      gain.gain.setValueAtTime(peak, t0 + len);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + len + rel);
+      osc.connect(filt); osc2.connect(filt); filt.connect(gain);
+      gain.connect(amb.master || ctx.destination);
+      osc.start(t0); osc2.start(t0);
+      osc.stop(t0 + len + rel + 0.05); osc2.stop(t0 + len + rel + 0.05);
+      return len + rel;
+    };
+    const playShofar = () => {
+      if (!amb.on) return;
+      const ctx = ensureAudio();
+      hornBlast(ctx, ctx.currentTime, 1.6, true);
     };
     // ── The kinnor: a plucked string, not an oscillator ──
     //
@@ -5121,8 +5384,22 @@ export default function Mikdash() {
     const stepConfetti = (dt2) => {
       if (confTime < 0) return;
       confTime += dt2;
-      if (confTime > 22) { confTime = -1; confetti.visible = false; return; }
-      confettiMat.opacity = confTime > 17 ? Math.max(0, 1 - (confTime - 17) / 5) : 1;
+      // ── Eighteen of them stay where they fell ──
+      //
+      // The whole burst used to be taken away at twenty-two seconds and the
+      // courts went back to looking exactly as they had before the
+      // thirty-sixth was found. A few pieces left lying on the paving is a
+      // better memory of having finished than a card that can be reopened, so
+      // one piece in every thirty-six stays — which is eighteen, and this
+      // House counts in eighteens.
+      //
+      // The clearing has to happen in the scale and not in the opacity: six
+      // hundred and forty-eight instances share one material, and a material
+      // cannot fade some of them and keep the rest. A leaf four amot across,
+      // shrinking over five seconds at that distance, reads as the wind taking
+      // it — which is the truer thing for it to do anyway.
+      const clearing = confTime > 17 ? Math.max(0, 1 - (confTime - 17) / 5) : 1;
+      const last = confTime > 22;
       for (let i = 0; i < CONFETTI; i++) {
         const q = confParts[i];
         // Terminal velocity, reached fast, because a leaf has almost no mass
@@ -5142,20 +5419,25 @@ export default function Mikdash() {
                   q.az + confTime * q.spin * 0.4,
                   settled ? 0 : tip * 0.9);
         confQ.setFromEuler(confE);
-        confS.set(q.sz, q.sz, q.sz);
+        const sz = q.sz * (i % 36 === 0 ? 1 : clearing);
+        confS.set(sz, sz, sz);
         confM.compose(q.p, confQ, confS);
         confetti.setMatrixAt(i, confM);
       }
       confetti.instanceMatrix.needsUpdate = true;
+      // The survivors keep the matrix they were written this frame, and
+      // nothing touches them again until the next burst or the next reload.
+      if (last) confTime = -1;
     };
 
     // תְּקִיעָה גְדוֹלָה — one blast, held. Yeshayahu 27:13 is the great shofar
     // of the ingathering, and the length of it is the whole point: a tekiah
     // gedolah is held until the breath gives out, which is why it is the last
     // sound of Yom Kippur and the right sound for this.
-    const tekiahGedolah = () => {
+    const tekiahGedolah = (startAt) => {
       if (!amb.on) return;
-      const ctx = ensureAudio(); const t0 = ctx.currentTime + 0.15;
+      const ctx = ensureAudio();
+      const t0 = typeof startAt === "number" ? Math.max(startAt, ctx.currentTime) : ctx.currentTime + 0.15;
       const LEN = 6.4;
       const filt = ctx.createBiquadFilter(), gain = ctx.createGain();
       filt.type = "lowpass"; filt.Q.value = 4;
@@ -5197,6 +5479,44 @@ export default function Mikdash() {
       air.start(t0); air.stop(t0 + LEN + 0.5);
       gain.gain.value = 1;
       filt.connect(gain); gain.connect(amb.master || ctx.destination);
+    };
+
+    // ── תשר״ת — the order a shofar is actually blown in ──
+    //
+    // Rosh Hashanah 33b–34a. The Torah says תְּרוּעָה and does not say what one
+    // is; by the time anybody asked, nobody could say for certain whether the
+    // sound meant is a moaning or a sobbing, so Rabbi Abbahu's takanah sounds
+    // both — שְׁבָרִים, three broken notes the length of a sigh, and תְּרוּעָה,
+    // nine short ones the length of a sob — each wrapped in the plain
+    // תְּקִיעָה the pasuk puts before and after it. Then the gedolah, held
+    // until the breath gives out, which is the sound this House's own shofar
+    // is for: Yeshayahu 27:13, the great shofar of the ingathering.
+    //
+    // Everything here is length. There is no second instrument and no second
+    // note; that is the whole nature of the thing being played.
+    const shofarSequence = () => {
+      if (!amb.on) return;
+      const ctx = ensureAudio();
+      let at = ctx.currentTime + 0.12;
+      at += hornBlast(ctx, at, 1.5, true) + 0.34;                       // תְּקִיעָה
+      for (let i = 0; i < 3; i++) at += hornBlast(ctx, at, 0.4) + 0.1;  // שְׁבָרִים
+      at += 0.26;
+      for (let i = 0; i < 9; i++) at += hornBlast(ctx, at, 0.09, false, 0.25) + 0.045;  // תְּרוּעָה
+      at += 0.3;
+      tekiahGedolah(at);                                                // תְּקִיעָה גְדוֹלָה
+    };
+    // What the horn near the southern gate does depends on the day it is
+    // asked. In Elul it is blown every morning and on Rosh Hashanah a hundred
+    // times, so on those days it gives the whole order rather than one note.
+    // On Yom Kippur it gives one blast only, and it is the long one: the
+    // tekiah gedolah at the close of Ne'ilah, when the gates shut. Every other
+    // day of the year it is what it has always been — a single tekiah, and
+    // then the courts are quiet again.
+    const soundTheShofar = () => {
+      const id = todayChag && todayChag.id;
+      if (id === "elul" || id === "rosh") shofarSequence();
+      else if (id === "yom") tekiahGedolah();
+      else playShofar();
     };
 
     // Everything at once, and one flag the loop reads to make the light swell.
@@ -5419,7 +5739,7 @@ export default function Mikdash() {
         if (rimonById[id].userData.ring) rimonById[id].userData.ring.material.color.set(0xffd24a);
       }
       if (id === 9) { revealEighth(); playHarp(); }
-      if (id === 10) playShofar();
+      if (id === 10) soundTheShofar();
       if (id === 12) { flameTips.forEach((f, i) => setTimeout(() => { f.material.opacity = 0.95; }, i * 180)); menLight.intensity = 1.1; }
       if (id === 13) { ketoretState.active = true; playChime(); }
       if (id === 14) nicanor.userData.target = 1;
@@ -5578,16 +5898,28 @@ export default function Mikdash() {
       shetiyaLight.intensity = lerp(0.9, 1.6, e2);
       fireLight.intensity = lerp(1.3, 2.4, e2) + Math.sin(t * 13) * 0.12 + (vnoiseJS(t * 7) - 0.5) * 0.3;
       fireBlueLight.intensity = lerp(0.85, 1.45, e2) + (vnoiseJS(t * 11 + 40) - 0.5) * 0.35;
-      // The festival lights burn steadily brighter than a wall torch and are
-      // not tied to nightfall: a chanukiah is lit at dusk and burns for half an
-      // hour past it, and these are the only flames in the House that do not
-      // go out when the sun comes up.
+      // ── The chanukiah is lit at shkiah, and not before ──
+      //
+      // It used to be lit the moment the House was built and never go out,
+      // which is wrong twice. The mitzvah begins at sunset — Shabbat 21b puts
+      // it משתשקע החמה, from when the sun sets — so a lamp burning at noon has
+      // not been lit, it has merely been left on. And an additive sprite over
+      // a courtyard in full sun does not read as fire at all; it reads as a
+      // smudge on the gold.
+      //
+      // So the oil catches on the same number the rest of the House runs on:
+      // the sun's own height. Not the day/night ease, which is the position of
+      // a slider — shkiah is a fact about the sun, and these are the only
+      // flames here whose halachic hour is a real one.
+      const lampAmt = sstep(0.10, -0.04, sunY);
       for (let fi = 0; fi < festivalFlames.length; fi++) {
         const { fl, li, ph } = festivalFlames[fi];
+        fl.visible = lampAmt > 0.012;
+        if (!fl.visible) { li.intensity = 0; continue; }
         const f = 0.86 + Math.sin(t * 8.3 + ph) * 0.09 + (vnoiseJS(t * 4.4 + ph) - 0.5) * 0.16;
         fl.scale.set(0.9 * f, 1.5 * f, 1);
-        fl.material.opacity = 0.55 + e2 * 0.45;
-        li.intensity = (0.35 + e2 * 0.85) * f;
+        fl.material.opacity = lampAmt * 0.95;
+        li.intensity = lampAmt * 1.15 * f;
       }
       torchFires.forEach(({ light, flame }, ti) => {
         light.intensity = e2 * 1.1 + Math.sin(t * 9 + ti * 2.4) * 0.1 * e2;
@@ -5963,7 +6295,7 @@ export default function Mikdash() {
       flameTips.forEach((f, i) => {
         if (f.material.opacity > 0) {
           const fs = 1 + Math.sin(t * 10 + i * 2) * 0.22;
-          f.scale.set(1.4 * fs, 2.2 * fs, 1);
+          f.scale.set(1.9 * fs, 3.0 * fs, 1);
         }
       });
       shetiya.material.emissiveIntensity = lerp(0.6, 1.05, e2) + Math.sin(t * 1.4) * 0.22;
@@ -6078,6 +6410,10 @@ export default function Mikdash() {
       window.removeEventListener("keyup", ku);
       el.remove();
       renderer.dispose();
+      dropUnlock();
+      document.removeEventListener("visibilitychange", onAudioVisible);
+      if (silentTag) { silentTag.pause(); silentTag.removeAttribute("src"); }
+      if (silenceUrl) URL.revokeObjectURL(silenceUrl);
       audioCtx?.close();
     };
   }, []);
@@ -6166,6 +6502,7 @@ export default function Mikdash() {
       greg: n.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }),
       chag: chagOn(rd, israel),
       omer: omerDay(rd),
+      shower: meteorShowerOn(rd),
       // The day of the Hebrew month is the age of the moon, so the panel can
       // say what is actually up there — and the moon in the sky above the
       // House is drawn from the same number.
@@ -6178,15 +6515,31 @@ export default function Mikdash() {
     };
   }, [israel]);
 
-  // A Hebrew birthday in a given year. Two things go wrong and both have
-  // answers: a 30th in a month that only has 29 days this year falls back to
-  // the 29th, and an Adar birthday in a leap year goes to Adar II, which is
-  // the Rema's ruling (Orach Chaim 55:10) and the near-universal practice.
-  const hebBirthdayIn = (hy, bm, bd) => {
-    let m = bm;
-    if (bm === 12 && hebLeap(hy)) m = 13;
-    else if (bm === 13 && !hebLeap(hy)) m = 12;
-    return hebToRD(hy, m, Math.min(bd, hebMonthLen(hy, m)));
+  // A Hebrew birthday in a given year. Three things go wrong and each has an
+  // answer, and all three of them need to know whether the year of birth was
+  // itself a leap year — which is why this takes the whole Hebrew date and
+  // not a month and a day.
+  //
+  // Born in Adar of a plain year, or in Adar II, the birthday follows the
+  // last month of the year: Adar II in a leap year, plain Adar otherwise.
+  // That is the Rema (Orach Chaim 55:10) and the near-universal practice.
+  // Born in Adar I, though, the birthday stays in Adar I when the year has
+  // one, and falls in plain Adar when it has not (Magen Avraham there) — a
+  // month earlier than the rule above, and a different parshah.
+  //
+  // And a 30th in a month that has only 29 days this year is postponed to the
+  // first of the next month, not pulled back to the 29th: the 30th of
+  // Cheshvan, Kislev or Adar I is the first day of the next Rosh Chodesh, and
+  // the first of the month is the other day of it. (A yahrzeit moves the
+  // other way; a birthday does not.)
+  const hebBirthdayIn = (hy, b) => {
+    const bornLeap = hebLeap(b.year);
+    let m = b.month, d = b.day;
+    if ((m === 12 && !bornLeap) || m === 13) m = monthsInHebYear(hy);
+    else if (m === 8 && d === 30 && hebMonthLen(hy, 8) === 29) { m = 9; d = 1; }
+    else if (m === 9 && d === 30 && hebMonthLen(hy, 9) === 29) { m = 10; d = 1; }
+    else if (m === 12 && d === 30 && !hebLeap(hy)) { m = 1; d = 1; }
+    return hebToRD(hy, m, d);
   };
   const birth = useMemo(() => {
     const mm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(bday);
@@ -6201,8 +6554,8 @@ export default function Mikdash() {
       book: PARSHAH_BOOK(p.idx[0]),
     });
     let hy = today.h.year;
-    if (hebBirthdayIn(hy, h.month, h.day) < today.rd) hy += 1;
-    const nextRd = hebBirthdayIn(hy, h.month, h.day);
+    if (hebBirthdayIn(hy, h) < today.rd) hy += 1;
+    const nextRd = hebBirthdayIn(hy, h);
     const g = rdToGreg(nextRd);
     const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Shabbat"];
     return {
@@ -6212,20 +6565,85 @@ export default function Mikdash() {
       parshah: named(parshahOnOrAfter(rd, israel)),
       thisYear: `${hebDateStr(rdToHeb(nextRd))} — ${g.d} ${["January","February","March","April","May","June","July","August","September","October","November","December"][g.m - 1]} ${g.y}`,
       turning: hy - h.year,
-      bat: named(parshahOnOrAfter(hebBirthdayIn(h.year + 12, h.month, h.day), israel)),
-      bar: named(parshahOnOrAfter(hebBirthdayIn(h.year + 13, h.month, h.day), israel)),
+      bat: named(parshahOnOrAfter(hebBirthdayIn(h.year + 12, h), israel)),
+      bar: named(parshahOnOrAfter(hebBirthdayIn(h.year + 13, h), israel)),
     };
   }, [bday, israel, today]);
+
+  // ── The address bar is the share link ──
+  //
+  // A birthday that has been typed in is worth sending to the person whose
+  // birthday it is, and there was no way to: the panel held the one thing in
+  // here somebody would want to pass on and the URL said nothing. Now the date
+  // goes into the query string as it is entered, so the link in the bar is
+  // always the link to this result — nothing to press, and nothing to explain.
+  // Wrapped, because a page inside a sandboxed frame is not allowed to touch
+  // its own history and that must not be the thing that breaks the panel.
+  useEffect(() => {
+    try {
+      const u = new URL(window.location.href);
+      if (birth) u.searchParams.set("bday", bday);
+      else u.searchParams.delete("bday");
+      window.history.replaceState(null, "", u.toString());
+    } catch (err) { /* sandboxed, or no history to speak of */ }
+  }, [bday, birth]);
+
+  // A link that was opened for a birthday should land on it. The card is read
+  // first — it is the only place the House explains itself — and the panel
+  // opens behind it, so the visitor closes one thing and finds the other.
+  const bdayLink = useRef(bdayFromQuery());
+  useEffect(() => {
+    if (!loaded || !bdayLink.current) return;
+    bdayLink.current = "";
+    setCal(true); setMusic(false); setPeace(false); setHints(false);
+  }, [loaded]);
+
+  // ── The words follow the tune ──
+  //
+  // The stanza being sung lights up, which is no use on a melody long enough
+  // to scroll: on Ma'oz Tzur the live stanza lights below the fold and the one
+  // person who opened the words never sees it move. So the panel carries it
+  // up — but only if the visitor is not reading somewhere else. A hand on the
+  // wheel wins for four seconds, because a panel that scrolls itself back
+  // every two bars is worse than one that never scrolled at all.
+  const liveStanzaRef = useRef(null);
+  const handScrolledAt = useRef(0);
+  const liveStanza = useMemo(() => {
+    if (!nowPlaying || lyrics !== nowPlaying) return null;
+    const mel = MELODIES.find((m) => m.id === nowPlaying);
+    if (!mel) return null;
+    const i = mel.lyrics.stanzas.findIndex((st) => songBeat >= st.from && songBeat < st.to);
+    return i < 0 ? null : `${nowPlaying}:${i}`;
+  }, [nowPlaying, lyrics, songBeat]);
+  useEffect(() => {
+    if (!liveStanza) return;
+    const el = liveStanzaRef.current;
+    if (!el || performance.now() - handScrolledAt.current < 4000) return;
+    // `nearest` so a stanza already in view is left exactly where it is.
+    try { el.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+    catch (err) { el.scrollIntoView(false); }
+  }, [liveStanza]);
 
   // ─── A chag announces itself ───
   // Once, a few seconds after the doors open, and only if there is one. The
   // House knows what day it is; it would be strange for it to say nothing on
   // the day the whole place was built for.
   useEffect(() => {
-    if (!opened || !loaded || !today.chag) return;
-    const t = setTimeout(() => showToast(`${today.chag.he} — ${today.chag.en}. Open לוּחַ.`), 4200);
+    if (!opened || !loaded) return;
+    // A season announces itself on the day it begins and then stops talking.
+    // Elul ran this toast on every one of its twenty-nine days, which is how a
+    // thing that is meant to feel like an arrival comes to feel like a notice.
+    const quietSeason = today.chag && today.chag.tier === "season" && today.h.day !== 1;
+    // And on the three hundred and forty-odd days that are not a chag, it says
+    // the parshah instead — the one thing about today that is true every week
+    // of the year, and the answer to the question this House gets asked more
+    // than any other. Never both: the chag outranks it on the day it falls.
+    const line = today.chag && !quietSeason
+      ? `${today.chag.he} — ${today.chag.en}. Open לוּחַ.`
+      : `פָּרָשַׁת ${today.parshah.he} — read this Shabbat. Open לוּחַ.`;
+    const t = setTimeout(() => showToast(line), 4200);
     return () => clearTimeout(t);
-  }, [opened, loaded, today.chag, showToast]);
+  }, [opened, loaded, today.chag, today.h.day, today.parshah.he, showToast]);
 
   const allFound = found.length === DISCOVERIES.length;
 
@@ -6517,7 +6935,7 @@ export default function Mikdash() {
           ♪ נְגִינוֹת
         </button>
         <button className="chip" onClick={() => { track("panel", { which: "calendar", to: cal ? "close" : "open" }); setCal((c) => !c); setMusic(false); setPeace(false); setHints(false); }} title="Today in the House, and the parshah of any birthday" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: cal ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: cal ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
-          לוּחַ{today.chag ? " ✦" : ""}
+          לוּחַ{today.chag && today.chag.tier !== "season" ? " ✦" : ""}
         </button>
         <button className="chip" onClick={() => { track("panel", { which: "peace", to: peace ? "close" : "open" }); setPeace((p) => !p); setMusic(false); setCal(false); setHints(false); }} title="A house of prayer for all peoples" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: peace ? "linear-gradient(135deg,#f3e6c0,#e0cd97)" : "rgba(30,24,12,.85)", color: peace ? "#4a3a18" : "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           שָׁלוֹם
@@ -6596,7 +7014,9 @@ export default function Mikdash() {
       {music && (
         <div className="panel" style={{ position: "absolute", top: 296, right: 16, width: "min(330px, calc(100vw - 32px))", boxSizing: "border-box",
           background: "linear-gradient(160deg,#fdf8ec,#f2e7ce)", color: "#3a2f16", borderRadius: 16, padding: "16px 18px",
-          border: "1px solid rgba(150,120,50,.3)", boxShadow: "0 16px 44px rgba(0,0,0,.35)", maxHeight: "min(62vh, 560px)", overflowY: "auto", zIndex: 30 }}>
+          border: "1px solid rgba(150,120,50,.3)", boxShadow: "0 16px 44px rgba(0,0,0,.35)", maxHeight: "min(62vh, 560px)", overflowY: "auto", zIndex: 30 }}
+          onWheel={() => { handScrolledAt.current = performance.now(); }}
+          onTouchMove={() => { handScrolledAt.current = performance.now(); }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
             <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 15 }}>נְגִינוֹת · Melodies</div>
             <button onClick={() => { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); setSongBeat(-1); setMusic(false); }}
@@ -6654,7 +7074,7 @@ export default function Mikdash() {
                   {mel.lyrics.stanzas.map((st, si) => {
                     const live = nowPlaying === mel.id && songBeat >= st.from && songBeat < st.to;
                     return (
-                      <div key={si} style={{ marginBottom: 11, paddingLeft: 9,
+                      <div key={si} ref={live ? liveStanzaRef : null} style={{ marginBottom: 11, paddingLeft: 9,
                         borderLeft: `2px solid ${live ? "#d4a437" : "rgba(150,120,50,.2)"}`,
                         transition: "border-color .25s ease, opacity .25s ease",
                         opacity: nowPlaying === mel.id && !live ? 0.42 : 1 }}>
@@ -6737,10 +7157,18 @@ export default function Mikdash() {
             <div style={{ fontSize: 12.5, color: "#8a7440", fontStyle: "italic", marginTop: 2 }}>{today.greg}</div>
           </div>
 
+          {/* A chag is gold and a season is not. The gold card is for the day
+              itself; a month that colours the year gets the same words in a
+              quieter frame, because standing them side by side in the same one
+              says they are the same kind of day, and they are not. */}
           {today.chag && (
-            <div style={{ marginTop: 10, padding: "11px 13px", borderRadius: 12, background: "linear-gradient(135deg, rgba(212,164,55,.20), rgba(212,164,55,.09))", border: "1px solid rgba(150,120,50,.34)" }}>
-              <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 17, fontWeight: 700, color: "#4a3a18" }}>{today.chag.he}</div>
-              <div style={{ fontSize: 11.5, letterSpacing: ".08em", textTransform: "uppercase", color: "#8a7440", marginTop: 1 }}>{today.chag.en}</div>
+            <div style={{ marginTop: 10, padding: "11px 13px", borderRadius: 12,
+              background: today.chag.tier === "season" ? "rgba(255,252,244,.62)" : "linear-gradient(135deg, rgba(212,164,55,.20), rgba(212,164,55,.09))",
+              border: today.chag.tier === "season" ? "1px solid rgba(150,120,50,.22)" : "1px solid rgba(150,120,50,.34)" }}>
+              <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: today.chag.tier === "season" ? 15.5 : 17, fontWeight: 700, color: "#4a3a18" }}>{today.chag.he}</div>
+              <div style={{ fontSize: 11.5, letterSpacing: ".08em", textTransform: "uppercase", color: "#8a7440", marginTop: 1 }}>
+                {today.chag.en}{today.chag.tier === "season" ? " · the month we are in" : ""}
+              </div>
               <div style={{ fontSize: 13.5, lineHeight: 1.55, marginTop: 6, color: "#544729" }}>{today.chag.note}</div>
             </div>
           )}
@@ -6758,6 +7186,15 @@ export default function Mikdash() {
             {today.moon >= 13 && today.moon <= 16 ? ", and full" : ""}.
             <div style={{ fontSize: 11.5, fontStyle: "italic", color: "#8a7440", marginTop: 2 }}>Turn on the night and look: it is drawn at that phase, because the Hebrew month is the moon and the day of it is the moon's age.</div>
           </div>
+
+          {today.shower && (
+            <div style={{ marginTop: 10, fontSize: 12.5, lineHeight: 1.55, color: "#544729" }}>
+              <b style={{ fontFamily: "'Frank Ruhl Libre', serif" }}>כּוֹכָבִים נוֹפְלִים</b> — {today.shower.name} are running{today.shower.k > 0.66 ? ", at their peak" : ""}.
+              <div style={{ fontSize: 11.5, fontStyle: "italic", color: "#8a7440", marginTop: 2 }}>
+                {today.shower.note}. Turn on the night and watch one patch of sky — the House throws more of them on these nights than on any other.
+              </div>
+            </div>
+          )}
 
           <div style={{ marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(150,120,50,.24)" }}>
             <div style={{ fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "#8a7440" }}>This Shabbat they read</div>
@@ -6793,6 +7230,26 @@ export default function Mikdash() {
                   <div>At twelve they read <b>{birth.bat.en}</b>.</div>
                   <div>At thirteen, <b>{birth.bar.en}</b>.</div>
                 </div>
+                {/* The result is meant to be sent to the person it is about.
+                    The address bar already carries it; this is the two seconds
+                    of friction between knowing that and doing it. */}
+                <button
+                  onClick={() => {
+                    track("share", { what: "birthday" });
+                    const link = window.location.href;
+                    try {
+                      navigator.clipboard.writeText(link).then(
+                        () => showToast("הַקִּישׁוּר הוּעְתַּק — the link is copied, and it opens on this day."),
+                        () => showToast("The link is in the address bar, and it carries this date."));
+                    } catch (err) {
+                      showToast("The link is in the address bar, and it carries this date.");
+                    }
+                  }}
+                  style={{ marginTop: 10, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 11.5, letterSpacing: ".07em",
+                    background: "rgba(74,58,24,.10)", color: "#6d5c30", border: "1px solid rgba(150,120,50,.4)",
+                    borderRadius: 999, padding: "5px 13px", cursor: "pointer" }}>
+                  שְׁלַח — copy the link to this birthday
+                </button>
               </div>
             )}
           </div>
@@ -7043,9 +7500,26 @@ export default function Mikdash() {
         </div>
       )}
 
+      {/* ── The first thing the House says is what day it is ──
+          The stone takes a few seconds to come up, and a line of italic
+          apology is a waste of them. The calendar is already computed by the
+          time this paints — it costs no network and no wait — so the loading
+          screen carries the Hebrew date, the chag if there is one, and the
+          parshah being read this Shabbat. A visitor who never opens a single
+          panel has still been told what day it is in the House. */}
       {!loaded && !noWebGL && (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#c9bd98", fontStyle: "italic", fontSize: 18 }}>
-          Raising the white stone mountain…
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          color: "#c9bd98", textAlign: "center", padding: "0 24px", boxSizing: "border-box" }}>
+          <div style={{ fontStyle: "italic", fontSize: 18 }}>Raising the white stone mountain…</div>
+          <div style={{ marginTop: 26, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 18, color: "#e2d5ab" }}>{today.he}</div>
+          {today.chag && (
+            <div style={{ marginTop: 3, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 15, color: "#d4a437" }}>
+              {today.chag.he} · {today.chag.en}
+            </div>
+          )}
+          <div style={{ marginTop: 16, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase", color: "#8a7440" }}>This Shabbat they read</div>
+          <div style={{ marginTop: 2, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 21, color: "#efe0b4" }}>{today.parshah.he}</div>
+          <div style={{ marginTop: 1, fontSize: 12.5, color: "#a2926a" }}>{today.parshah.en} · {today.parshah.book}</div>
         </div>
       )}
     </div>
