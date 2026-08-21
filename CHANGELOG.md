@@ -1,5 +1,58 @@
 # Changelog
 
+## v3.19 — "Who Walks In, and Who Walks Out" (0.3.19)
+
+- **The pesichah comes back.** It has not been shown to anybody since v3.9. A
+  `false &&` was put in front of it while the fifteen steps were being turned
+  right way up — a way to get past the card on every reload while working on
+  something else — and it was never taken out. Every visitor since has landed
+  in a five-hundred-amah plaza with nothing to tell them that the rings of gold
+  light are the thing to click. The card is the only place the House explains
+  itself, and it is on again.
+
+- **The House can be told what is happening to it.** Umami, which sets no
+  cookie and therefore needs no banner across the courts, and which is not
+  loaded at all unless a website id is present in the build. What is counted is
+  what a teacher would want to know: which of the thirty-six are actually
+  found and in what order, how many visitors get past the first one, which
+  hints send people to press "show me", how many browsers cannot open a WebGL
+  context at all, and how far a visit gets before it ends. Every call is
+  wrapped so that a blocked script, a dead network or an ad-blocker cannot be
+  the reason a wonder fails to open. Do Not Track is honoured.
+
+- **מֵחָדָשׁ — the House can be walked again.** Thirty-six found and the ending
+  read, and there was nothing to do afterwards but keep a finished House. The
+  ending card now offers to hide them all again: it asks first, because
+  thirty-six discoveries is a real thing to throw away, and the question goes
+  away with the card rather than waiting inside it. Finding a wonder leaves
+  marks all through the scene — gold in place of silver, the menorah lit, the
+  ketoret woken, Nicanor's doors standing open — so beginning again rewrites
+  the record and raises the House from nothing rather than trying to unwind
+  each mark by hand and missing one. Night and sound are settings, not
+  progress, and they survive it.
+
+- **The hints list stops hiding behind the chips.** It was placed below the chip
+  column when the column ended above it; three chips have been added since
+  (נגינות, לוח, שלום) and it had been painting over the list's title, its
+  subtitle, and the first hint — the one line that says where the next wonder
+  waits. Wherever there is width for it the list now stands beside the column
+  instead of beneath it, which is the same answer a phone held sideways was
+  already getting, and it is taller for it. A portrait phone, which has the
+  width for neither, keeps the stacked layout and now clears the chips.
+
+- **One panel at a time.** נגינות, לוח and שלום already closed one another —
+  they share the right-hand column and cannot be read two at a time. רמזים
+  opens into the same column and had never been let into that arrangement, so
+  the list and the melodies could both be open, on top of each other, both
+  unreadable.
+
+- **Escape closes the teaching card.** The ending has closed on Escape since it
+  shipped. The card that opens thirty-six times a visit did not.
+
+- **"Show me" in the banner stops swallowing the press.** When there was no
+  beacon to raise it returned in silence, which reads as a broken button. The
+  same button in the hints list has always said so out loud; now both do.
+
 ## v3.18 — "The House Keeps the Calendar" (0.3.18)
 
 - **The ending is an ending.** Thirty-six found used to produce a line of text
