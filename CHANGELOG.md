@@ -1,5 +1,60 @@
 # Changelog
 
+## v3.22 — "Where a Visitor Stops" (0.3.22)
+
+- **הַסּוֹרֵג.** Middot 2:3 puts a lattice ten tefachim high round the sacred
+  ground, and this House drew every gate, every chamber and every stack of
+  firewood and left out the one line whose entire job is to say where a visitor
+  halts. It is built: a stone lattice round the court, with the חֵיל — the
+  ten-amah terrace — between it and the platform on the north, the west and the
+  south. On the east it stands further out, past the foot of the fifteen steps,
+  because the עֶזְרַת נָשִׁים that would fill that ground is not built yet.
+  - **The thirteen are not holes in it.** וּשְׁלֹשׁ עֶשְׂרֵה פְּרָצוֹת הָיוּ שָׁם
+    שֶׁפְּרָצוּם מַלְכֵי יָוָן — thirteen breaches, broken through by the Greek
+    kings; חָזְרוּ וּגְדָרוּם, they went back and fenced them up, וְגָזְרוּ כְּנֶגְדָּם
+    שְׁלֹשׁ עֶשְׂרֵה הִשְׁתַּחֲוָיוֹת. So they are thirteen panels of plainer, later
+    stone set into a run of lattice, each with a place laid in the pavement in
+    front of it to bow at. A repair left visible is the whole of the story.
+  - Three ways through, because a fence nobody can pass is a wall: the eastern
+    stair and the two gate axes.
+
+- **The altar was fourteen and a half amot tall and not one of its eight
+  numbers was anybody's.** Rebuilt on Middot 3:1, which walks up it a course at
+  a time: thirty-two by thirty-two on the ground; up one and in one, and that
+  ledge is the יְסוֹד; up five and in one, and that is the סוֹבֵב; up three more.
+  Nine amot to the hearth. The horns take an amah at each corner and the
+  kohanim's walkway another, which leaves the twenty-four by twenty-four the
+  mishnah ends on. The willows lean on a narrower face now — and on a nine-amah
+  altar, eleven-amah branches finally do what Sukkah 45a says they did: their
+  heads bend over the top.
+
+- **A ramp, and not steps.** The wonder standing at the foot of the ascent is
+  called הכבש — A Ramp, and Not Steps, and quotes וְלֹא־תַעֲלֶה בְמַעֲלֹת עַל
+  מִזְבְּחִי at whoever reads it. The ramp under it was built out of ten visible
+  steps. It is one unbroken incline now, thirty-two amot long and sixteen wide,
+  which is Middot 3:3 exactly — lying to the east rather than the south,
+  because this is Yechezkel's House and his altar is climbed from the east
+  (43:17). The wonder's own text now says so, so that a reader holding Middot
+  sees a decision rather than a mistake. Walk mode was still standing people on
+  the old staircase; it walks the incline now.
+  - Everything hung off the old altar height — the six flame cones, the fire's
+    two lights, the sparks, the smoke — is measured from the hearth instead, so
+    the fire sits on the wood exactly as it did on an altar that is now the
+    height the mishnah gives.
+
+- **Twelve spouts on the kiyor.** Yoma 37a says it in the same breath as the
+  wheel: Ben Katin also made the laver twelve spouts, one for each kohen of the
+  daily offering, so that nobody stands at dawn with his hands out waiting for
+  a turn. The wonder beside it is about the man; the thing he is remembered for
+  was not on the laver.
+
+- **The Menorah's lamps have spouts.** They were seven open cups with a flame
+  over each, which is a candle-holder. A נֵר is a closed boat with the wick
+  lying in a spout at one end — and the spout is the only reason Bamidbar 8:2
+  can say anything about which way the light goes. The six turn theirs in
+  toward the middle lamp; the middle one turns west, to the Kodesh. The flames
+  already leaned the right way. Now the vessels under them say why.
+
 ## v3.21 — "What Belongs Inside, Goes Inside" (0.3.21)
 
 - **הַכְנָסַת הַכֵּלִים — the kohanim carry the vessels in.** The Menorah, the

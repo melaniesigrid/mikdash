@@ -209,16 +209,49 @@ not against a memory of a picture.
       of the first House. Yechezkel's porch has none, and the Second Temple had
       none. They are sourced, and they are in the wrong House — the choice
       should either be defended in the plaque or the pillars should come down.
-- [ ] **The kiyor has no spouts.** Yoma 37a: twelve of them, one for each kohen
-      of the daily offering, which is the detail the wonder beside it is about.
-- [ ] **No soreg.** Middot 2:3: a lattice ten tefachim high ran round the
-      precinct, with thirteen breaches the Greek kings made in it and thirteen
-      places to bow opposite them. It is missing entirely, and it is the one
-      piece of this precinct that says where a visitor may and may not walk.
-- [ ] **The altar is climbed from the east** (Yechezkel 43:17) rather than by
-      Middot's southern ramp — a deliberate choice of the vision this House is
-      built on, and it should be said out loud somewhere a visitor can read it,
-      because to anybody holding Middot it looks like an error.
+- [x] **The kiyor has no spouts.** Twelve now, one for each kohen of the daily
+      offering (Yoma 37a) — the thing Ben Katin is actually remembered for was
+      missing from the laver his wonder stands beside.
+- [x] **No soreg.** Built: a lattice ten tefachim high round the court, with
+      the חֵיל of ten amot between it and the platform on three sides (Middot
+      2:3). The thirteen are not holes in it — מַלְכֵי יָוָן broke through and
+      חָזְרוּ וּגְדָרוּם, they fenced them up again, so they are thirteen panels of
+      plainer, later stone, each with a place laid in the pavement in front of
+      it for one of the thirteen bowings. Three ways through: the eastern
+      stair and the two gate axes.
+- [ ] **The soreg does not stop anybody.** It is the one line in this precinct
+      whose whole job is to say where a visitor halts, and you can walk through
+      it. Colliders are axis-aligned boxes and the ring is four runs with three
+      openings, so it is four calls and some arithmetic — but it would also be
+      the first thing in this House that refuses a visitor, which is a decision
+      and not a detail.
+- [ ] **The soreg has no inscription.** The stone found in 1871 — ΜΗΘΕΝΑ
+      ΑΛΛΟΓΕΝΗ ΕΙΣΠΟΡΕΥΕΣΘΑΙ — is the one object from this precinct anybody can
+      still go and look at, and this House already says its wonders come from
+      "Tanach, Talmud, or the spade of the archaeologist". A candidate for the
+      54th tier if it ever comes.
+- [x] **The altar is climbed from the east** (Yechezkel 43:17) rather than by
+      Middot's southern ramp. Said out loud now, in the הכבש wonder that stands
+      at the foot of it, so that a reader holding Middot sees a decision rather
+      than a mistake.
+- [x] **The altar was fourteen and a half amot tall and none of its numbers was
+      anybody's.** Rebuilt on Middot 3:1: thirty-two square on the ground, up
+      one and in one to the יְסוֹד, up five and in one to the סוֹבֵב, up three
+      more — nine amot to the hearth, horns an amah at each corner, twenty-four
+      by twenty-four of hearth inside them. The ramp is Middot 3:3's thirty-two
+      by sixteen, and it is one unbroken incline: the wonder standing at its
+      foot is called *A Ramp, and Not Steps* and quotes Shemot 20:23, and the
+      ramp under it had been built out of ten visible steps. The fire, its two
+      lights and its sparks were all hung off the old height and now hang off
+      the hearth.
+- [x] **The lamps are cups, not נֵרוֹת.** Each has a spout now, and the spout is
+      what carries Bamidbar 8:2 — six turned in toward the middle lamp and the
+      middle one turned west to the Kodesh.
+- [ ] **The altar's flame is theatrical.** Twenty amot of fire over a nine-amah
+      altar. It is the signature image of the House and it is not a measurement;
+      if anything ever makes it read as a claim, it should come down to the four
+      or five amot a woodpile actually throws.
+
 
 ## Found while doing the above
 
@@ -245,11 +278,6 @@ not against a memory of a picture.
       mouth of the bikkurim procession, 84 with the swifts on the walls, 134
       from the men who stand here at night, and the spices of Shir HaShirim 4
       from the man who can smell the ketoret from Jericho.
-- [ ] **The lamps are cups, not נֵרוֹת.** Each lamp is a small goblet with a
-      flame over it. A real ner is a closed boat with a spout at one end, and
-      the spout is what carries Bamidbar 8:2 — the wick, and therefore the
-      flame, turned in toward the middle. The flames lean the right way now; the
-      vessels underneath them do not say why.
 
 - [ ] **The sky is barely in frame.** All of the work on it — the scattering,
       the terminator, the stars — is spent on a strip about a fifth of the

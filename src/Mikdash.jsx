@@ -54,7 +54,7 @@ const DISCOVERIES = [
   { kind: "rimon", emoji: "🤫", title: "לשכת חשאים — The Chamber of the Discreet", text: "Shekalim 5:6: in it the discreet would place their gifts in secret, and the poor of good family would take from it in secret. The Rambam ranks this second only to a loan that prevents poverty: the giver does not know who receives, and the receiver does not know who gave (Hilchot Matnot Aniyim 10:8). A whole room built so that no one would ever have to say thank you.", hint: "In the far northeastern kitchen court, a gift that no one signed." },
   { kind: "rimon", emoji: "🔎", title: "אבן הטוען — The Claimant's Stone", text: "Bava Metzia 28b: there was a stone in Jerusalem — whoever had lost something went there, and whoever had found something went there. The finder stood and announced, the loser stood and gave the identifying signs, and took back what was his. An entire city's honesty, organized around one rock in the open air.", hint: "On the eastern pavement, a plain stone that gives back what was lost." },
   { kind: "rimon", emoji: "⚖️", title: "לשכת הגזית — The Chamber of Hewn Stone", text: "Middot 5:4: the Great Sanhedrin sat in the Chamber of Hewn Stone — seventy-one elders in a half-circle, so that each one could see the faces of all the others. From here Torah went out to all Israel (Sanhedrin 88b). And when murderers grew many, the Sanhedrin rose and left the chamber, so that capital cases could no longer be tried (Avodah Zarah 8b): they would rather leave the room than kill in it.", hint: "Along the southern edge of the inner court, where seventy-one sat in a half circle." },
-  { kind: "rimon", emoji: "📐", title: "הכבש — A Ramp, and Not Steps", text: "“Do not ascend My altar by steps, so that your nakedness not be uncovered upon it” (Shemot 20:23) — so the altar is climbed by a ramp of thirty-two amot (Middot 3:3). Rashi asks what nakedness a robed kohen could uncover, and answers: the stones have no feelings, and still the Torah asks that they not be treated dismissively. How much more so a human being, who is in the image of his Maker.", hint: "At the foot of the long incline that climbs the burning mountain." },
+  { kind: "rimon", emoji: "📐", title: "הכבש — A Ramp, and Not Steps", text: "“Do not ascend My altar by steps, so that your nakedness not be uncovered upon it” (Shemot 20:23) — so the altar is climbed by a ramp of thirty-two amot, sixteen wide (Middot 3:3) — and here it lies to the east rather than to the south, because this is Yechezkel's House and his altar is ascended from the east (43:17). Rashi asks what nakedness a robed kohen could uncover, and answers: the stones have no feelings, and still the Torah asks that they not be treated dismissively. How much more so a human being, who is in the image of his Maker.", hint: "At the foot of the long incline that climbs the burning mountain." },
   { kind: "rimon", emoji: "🍷", title: "השיתין — The Drains Beneath the Altar", text: "Sukkah 49a: the shitin — the shafts beneath the altar's southwestern corner into which the libations poured — were created during the six days of Creation, and they descend to the deep. Nearby, a kohen once noticed one paving stone that sat differently from its fellows; before he could finish telling his friend, his soul left him, and they knew for certain that the Ark had been hidden underneath (Yoma 54a; Shekalim 6:2).", hint: "At the altar's southwestern corner, where the wine goes down and does not come back." },
   { kind: "rimon", emoji: "🏺", title: "שער המים — The Water Gate", text: "Middot 2:6 names the gates of the azarah, and through this one they carried up the golden flask drawn from the Shiloach for the water libation of Sukkot (Sukkah 48b). Its name, says the Talmud, is also a promise: from beneath this threshold the future water will come out (Yechezkel 47:1). What was carried in each dawn will one day flow out on its own.", hint: "South of the inner court, where the flask was carried up each dawn of Sukkot." },
   { kind: "rimon", emoji: "🏔️", title: "הר המוריה — Mount Moriah", text: "“And Shlomo began to build the House of Hashem in Jerusalem on Mount Moriah, where He appeared to David his father” (Divrei HaYamim II 3:1). Here Avraham bound Yitzchak and named the place “Hashem will see”; here Yaakov slept and saw the ladder; here, say Chazal, the dust of Adam was taken from the very ground of his atonement (Bereishit Rabbah 14:8). The mountain was chosen long before the first stone was cut.", hint: "From the eastern stairs, turn and look back at the mountain itself." },
@@ -2900,6 +2900,15 @@ export default function Mikdash() {
     const AX = -8;
     const IC = 210, IC_H = 10;
     const TOP = IC_H;
+    // ── How tall the altar is, and why everything above it is measured from
+    // this one number ──
+    // Middot 3:1 walks up it: thirty-two by thirty-two on the ground; up one
+    // and in one, and that ledge is the יְסוֹד; up five and in one, and that is
+    // the סוֹבֵב; up three more. Nine amot to the hearth, and the horns stand on
+    // top of that. The altar here was fourteen and a half amot tall and none of
+    // its four tiers was a number anybody gives, so the fire, its lights and
+    // its sparks were all hung off a height that did not exist.
+    const ALT_H = 9;
     // renderOrder is explicit: three cones share a centre, and distance
     // sorting alone would let them swap places as the camera turns.
     // Six cones. Each is a shell, so stacking them is how the fire gets its
@@ -2915,15 +2924,19 @@ export default function Mikdash() {
       flames.push({ uniforms: f.uniforms, mesh: f.mesh, ts, rot });
       return f;
     };
-    addFlame(4.9, 14.5, { solid: true, blue: 0.2 }, { y: 21.4, order: 1, ts: 1.1, rot: 0.72 });
-    addFlame(4.6, 16.0, { blue: 0.55 }, { y: 22.6, order: 2, ts: 1.25, rot: -0.55, intensity: 1.5 });
-    addFlame(6.3, 18.5, { solid: true, orange: true, alphaScale: 0.52 }, { y: 23.5, order: 2, ts: 0.85, rot: 0.31, intensity: 1.15 });
-    addFlame(7.3, 20.0, { solid: true, orange: true, alphaScale: 0.36 }, { y: 24.2, order: 2, ts: 1.45, rot: -0.23, intensity: 0.95 });
-    addFlame(8.2, 21.5, { blue: 0.16 }, { y: 24.8, order: 3, ts: 1.0, rot: 0.4 });
+    // Every one of these was a constant tied to the old fourteen-and-a-half
+    // amah altar. They are the same numbers relative to the hearth, so the fire
+    // sits on the wood exactly as it did — on an altar that is now the height
+    // the mishnah gives.
+    addFlame(4.9, 14.5, { solid: true, blue: 0.2 }, { y: ALT_H + 6.95, order: 1, ts: 1.1, rot: 0.72 });
+    addFlame(4.6, 16.0, { blue: 0.55 }, { y: ALT_H + 8.15, order: 2, ts: 1.25, rot: -0.55, intensity: 1.5 });
+    addFlame(6.3, 18.5, { solid: true, orange: true, alphaScale: 0.52 }, { y: ALT_H + 9.05, order: 2, ts: 0.85, rot: 0.31, intensity: 1.15 });
+    addFlame(7.3, 20.0, { solid: true, orange: true, alphaScale: 0.36 }, { y: ALT_H + 9.75, order: 2, ts: 1.45, rot: -0.23, intensity: 0.95 });
+    addFlame(8.2, 21.5, { blue: 0.16 }, { y: ALT_H + 10.35, order: 3, ts: 1.0, rot: 0.4 });
     // drawn last: additive tongues painted over the heart would add white to
     // it and the blue would be gone by night
     addFlame(2.1, 16.5, { segments: 16, solid: true, blue: 1, heartOnly: true, alphaScale: 0.88 },
-             { y: 23.0, order: 5, ts: 1.6, rot: -0.95, intensity: 1.3 });
+             { y: ALT_H + 8.55, order: 5, ts: 1.6, rot: -0.95, intensity: 1.3 });
 
     const fireParticles = [];
     for (let i = 0; i < 54; i++) {
@@ -2978,11 +2991,11 @@ export default function Mikdash() {
 
     // warm light: physical decay so it doesn't wash the gold facade into a "sun"
     const fireLight = new THREE.PointLight(0xff8c33, 1.0, 130, 2);
-    fireLight.position.set(AX, TOP + 25, 0);
+    fireLight.position.set(AX, TOP + ALT_H + 10.55, 0);
     scene.add(fireLight);
     // the heart throws its own colour onto the hearth stones
     const fireBlueLight = new THREE.PointLight(0x3f7dff, 0.7, 62, 2);
-    fireBlueLight.position.set(AX, TOP + 16.8, 0);
+    fireBlueLight.position.set(AX, TOP + ALT_H + 2.35, 0);
     scene.add(fireBlueLight);
 
     // small torch flames reuse the sprite system
@@ -3205,6 +3218,86 @@ export default function Mikdash() {
     addCollider(IC_E - 2, IC_E + 2, -IC / 2, -20);
     addCollider(IC_E - 2, IC_E + 2, 20, IC / 2);
 
+    // ═══════════ הַסּוֹרֵג — the lattice that says how far in ═══════════
+    //
+    // Middot 2:3: לִפְנִים מִמֶּנּוּ סוֹרֵג גָּבוֹהַּ עֲשָׂרָה טְפָחִים — a lattice ten
+    // tefachim high, standing inside the wall of the Temple Mount. It is the
+    // one thing in this precinct whose entire job is to say where a visitor
+    // stops, and it was missing altogether: the House drew every gate and
+    // every chamber and left out the line.
+    //
+    // וּשְׁלֹשׁ עֶשְׂרֵה פְּרָצוֹת הָיוּ שָׁם שֶׁפְּרָצוּם מַלְכֵי יָוָן — thirteen breaches,
+    // broken through it by the Greek kings; חָזְרוּ וּגְדָרוּם, they went back and
+    // fenced them up, וְגָזְרוּ כְּנֶגְדָּם שְׁלֹשׁ עֶשְׂרֵה הִשְׁתַּחֲוָיוֹת, and enacted
+    // thirteen bowings opposite them. So the thirteen are not holes: they are
+    // thirteen panels of plainer, later stone set into a run of lattice, with a
+    // place laid in the pavement in front of each one to bow at. A repair left
+    // visible is the whole of the story.
+    //
+    // Between the lattice and the court is the חֵיל, ten amot of terrace — ten
+    // on the north, the west and the south. On the east it stands further out,
+    // past the foot of the fifteen steps, because the עֶזְרַת נָשִׁים that would
+    // fill that ground is not built yet.
+    const SOREG_H = 10 / 6;                       // ten tefachim, in amot
+    const SG_X0 = -200, SG_X1 = 122, SG_Z = 115;
+    const soregGrp = new THREE.Group();
+    const soregBays = [];
+    // Three ways through, because a fence nobody can pass is a wall: the
+    // eastern stair, and the axes of the northern and southern gates.
+    const soregGaps = [[SG_X1, 0, 27], [0, -SG_Z, 27], [0, SG_Z, 27]];
+    const soregRun = (ax, az, bx, bz) => {
+      const dx = bx - ax, dz = bz - az;
+      const n = Math.max(1, Math.round(Math.hypot(dx, dz) / 2.6));
+      const ux = dx / n, uz = dz / n;
+      for (let i = 0; i < n; i++) {
+        const cx = ax + ux * (i + 0.5), cz = az + uz * (i + 0.5);
+        if (soregGaps.some(([gx, gz, r]) => Math.hypot(cx - gx, cz - gz) < r)) continue;
+        soregBays.push({ cx, cz, len: Math.hypot(ux, uz), rot: Math.abs(dx) > Math.abs(dz) ? 0 : Math.PI / 2,
+                         out: Math.abs(dx) > Math.abs(dz) ? [0, Math.sign(cz)] : [Math.sign(cx - (SG_X0 + SG_X1) / 2), 0] });
+      }
+    };
+    soregRun(SG_X0, -SG_Z, SG_X1, -SG_Z);
+    soregRun(SG_X1, -SG_Z, SG_X1, SG_Z);
+    soregRun(SG_X1, SG_Z, SG_X0, SG_Z);
+    soregRun(SG_X0, SG_Z, SG_X0, -SG_Z);
+    // Thirteen, spread evenly round the whole run.
+    const soregFixed = new Set();
+    for (let k = 0; k < 13; k++) soregFixed.add(Math.round((k * soregBays.length) / 13));
+    soregBays.forEach((b, i) => {
+      const g = new THREE.Group();
+      g.position.set(b.cx, 0, b.cz);
+      g.rotation.y = b.rot;
+      const L = b.len;
+      if (soregFixed.has(i)) {
+        // fenced up again: one plain slab where the lattice was broken through
+        box(L, SOREG_H - 0.12, 0.42, stoneDarkM, 0, (SOREG_H - 0.12) / 2, 0, g);
+        box(L, 0.2, 0.56, marble, 0, SOREG_H - 0.1, 0, g);
+      } else {
+        box(L, 0.24, 0.4, marble, 0, 0.12, 0, g);                  // sill
+        box(L, 0.26, 0.5, marble, 0, SOREG_H - 0.13, 0, g);        // cap
+        box(0.3, SOREG_H, 0.4, marble, -L / 2 + 0.15, SOREG_H / 2, 0, g);
+        // the lattice itself: two slats crossing in every bay
+        const span = SOREG_H - 0.5, ang = Math.atan2(span, L);
+        for (const sgn of [-1, 1]) {
+          const slat = box(Math.hypot(L, span), 0.15, 0.24, marble, 0, SOREG_H / 2, 0, g);
+          slat.rotation.z = sgn * ang;
+        }
+      }
+      soregGrp.add(g);
+      if (soregFixed.has(i)) {
+        // and the place opposite it where one bows
+        const [ox, oz] = b.out;
+        const mark = new THREE.Group();
+        mark.position.set(b.cx + ox * 3.4, 0, b.cz + oz * 3.4);
+        box(2.6, 0.14, 2.6, bronze, 0, 0.07, 0, mark);
+        box(2.0, 0.16, 2.0, stoneDarkM, 0, 0.08, 0, mark);
+        soregGrp.add(mark);
+      }
+    });
+    // One merged mesh per material: a lattice of this many small members is
+    // exactly the case the merge was written for.
+    scene.add(mergeByMaterial(soregGrp));
+
     // Nicanor gate + operable doors
     const NIC_X = IC_E;
     box(4, 24, 5, marble, NIC_X, IC_H + 12, -20);
@@ -3253,21 +3346,62 @@ export default function Mikdash() {
     const KIYOR_X = -60, KIYOR_Z = 36;
     cyl(5, 3.4, 2.4, 14, bronze, KIYOR_X, IC_H + 4.4, KIYOR_Z);
     cyl(1.6, 2.4, 3.4, 10, bronze, KIYOR_X, IC_H + 1.7, KIYOR_Z);
+    // ── שְׁנֵים עָשָׂר דַּד — and the twelve spouts ──
+    // Yoma 37a, in the same breath as the wheel: Ben Katin also made the kiyor
+    // twelve spouts, one for each of the kohanim of the daily offering, so that
+    // none of them stands at dawn with his hands out waiting for a turn. The
+    // wonder beside this laver is about the man; the thing the man is
+    // remembered for was not on it.
+    const spoutAxis = new THREE.Vector3(0, 1, 0);
+    for (let sp = 0; sp < 12; sp++) {
+      const sa = (sp / 12) * Math.PI * 2;
+      const m = cyl(0.2, 0.34, 1.6, 6, bronze,
+                    KIYOR_X + Math.cos(sa) * 4.3, IC_H + 3.9, KIYOR_Z + Math.sin(sa) * 4.3);
+      m.quaternion.setFromUnitVectors(spoutAxis,
+        new THREE.Vector3(Math.cos(sa) * 0.5, -0.87, Math.sin(sa) * 0.5).normalize());
+    }
     const laverWaterMat = new THREE.MeshStandardMaterial({ color: 0x22809f, metalness: 0.4, roughness: 0.08, envMap, envMapIntensity: 1 });
     metals.push(laverWaterMat);
     const laverWater = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 0.3, 14), laverWaterMat);
     laverWater.position.set(KIYOR_X, IC_H + 5.5, KIYOR_Z);
     scene.add(laverWater);
 
-    // ═══════════ Altar body ═══════════
-    box(34, 2, 34, stoneDarkM, AX, TOP + 1, 0);
-    box(29, 4, 29, white, AX, TOP + 4, 0);
-    box(25, 4, 25, white, AX, TOP + 8, 0);
-    box(21, 4.5, 21, stoneDarkM, AX, TOP + 12.2, 0);
-    addCollider(AX - 18, AX + 18, -18, 18);
-    for (const hx of [-1, 1]) for (const hz of [-1, 1]) box(2.6, 3.2, 2.6, stoneDarkM, AX + hx * 9.4, TOP + 16, hz * 9.4);
-    for (let i = 0; i < 5; i++) box(9 - i, 0.9, 1.4, cedar, AX, TOP + 14.8 + i * 0.5, -3 + i * 1.4);
-    for (let s = 0; s < 10; s++) box(3, 1.25, 13, white, AX + 17 + s * 2.7, TOP + 13.4 - s * 1.34, 0);
+    // ═══════════ הַמִּזְבֵּחַ — the altar, on the mishnah's own numbers ═══════════
+    //
+    // Middot 3:1, in order: המזבח היה שלשים ושתים על שלשים ושתים — thirty-two
+    // square on the ground. עלה אמה וכנס אמה, up one and in one on every side:
+    // thirty by thirty, and that ledge is the יְסוֹד. עלה חמש וכנס אמה, up five
+    // and in one: twenty-eight by twenty-eight, and that is the סוֹבֵב, the
+    // ledge a kohen walks round on. עלה שלש, up three more. The horns take an
+    // amah at each side and the kohanim's walkway another, which leaves
+    // twenty-four by twenty-four of hearth to burn on.
+    //
+    // What stood here was thirty-four, twenty-nine, twenty-five and twenty-one
+    // at heights of two, four, four and four and a half — fourteen and a half
+    // amot of altar, and not one of those eight numbers is in any source.
+    const tier = (w, h, y, mat) => box(w, h, w, mat, AX, TOP + y, 0);
+    tier(32, 1, 0.5, stoneDarkM);        // the ground course
+    tier(30, 5, 3.5, white);             // above the yesod
+    tier(28, 3, 7.5, white);             // above the sovev; the top face is at nine
+    addCollider(AX - 16, AX + 16, -16, 16);
+    // מְקוֹם הַקְּרָנוֹת אַמָּה מִזֶּה וְאַמָּה מִזֶּה — an amah of the top surface at
+    // each corner is the horn's place, so the horns stand at ±13½ and the
+    // hearth inside them is the twenty-four the mishnah ends on.
+    for (const hx of [-1, 1]) for (const hz of [-1, 1])
+      box(1, 1.2, 1, stoneDarkM, AX + hx * 13.5, TOP + ALT_H + 0.6, hz * 13.5);
+    // the מַעֲרָכָה, laid on the hearth
+    for (let i = 0; i < 5; i++) box(9 - i, 0.9, 1.4, cedar, AX, TOP + ALT_H + 0.35 + i * 0.5, -3 + i * 1.4);
+    // ── וְלֹא תַעֲלֶה בְמַעֲלֹת עַל מִזְבְּחִי ──
+    //
+    // The wonder standing at the foot of this thing is called הכבש — A Ramp,
+    // and Not Steps, and quotes Shemot 20:23 at anybody who reads it. The ramp
+    // it stands at the foot of was built out of ten visible steps. It is one
+    // unbroken incline now, thirty-two amot long and sixteen wide, which is
+    // Middot 3:3's ramp exactly — carried on the east rather than the south,
+    // because this House is Yechezkel's and his altar is climbed from the east
+    // (Yechezkel 43:17).
+    const kevesh = box(Math.hypot(32, ALT_H) + 1.2, 1.6, 16, white, AX + 32, TOP + ALT_H / 2 - 0.2, 0);
+    kevesh.rotation.z = -Math.atan2(ALT_H, 32);
 
     // ═══════════ THE HOUSE ═══════════
     const T = new THREE.Group();
@@ -4049,6 +4183,19 @@ export default function Mikdash() {
     // this: the middle lamp first, and then a pair at a time.
     for (const lz of [0, -3, 3, -6, 6, -9, 9]) {
       cyl(0.50, 0.30, 0.52, 10, gold, 0, 18.26, lz, men);
+      // ── A נֵר has a spout ──
+      // The lamps were seven open cups with a flame over each, which is a
+      // candle-holder. An oil lamp is a closed boat with the wick lying in a
+      // spout at one end, and the spout is the whole reason Bamidbar 8:2 can
+      // say anything at all about which way the light goes: the six turn their
+      // spouts in toward the middle lamp, and the middle lamp turns its own
+      // west, toward the Kodesh. The flames leaned the right way already; now
+      // the vessels under them say why.
+      const dz = lz === 0 ? 0 : (lz > 0 ? -1 : 1);
+      const dx = lz === 0 ? -1 : 0;
+      const spout = cyl(0.13, 0.25, 0.5, 7, gold, dx * 0.42, 18.3, lz + dz * 0.42, men);
+      spout.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0),
+        new THREE.Vector3(dx, 0.34, dz).normalize());
       const m = new THREE.SpriteMaterial({ map: fireTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 });
       const fl = new THREE.Sprite(m);
       fl.scale.set(1.9, 3.0, 1);
@@ -4058,7 +4205,7 @@ export default function Mikdash() {
       // — the lamp that was found still burning. West is −x here, and this row
       // runs north to south, which is where the Rabbanan of Menachot 98b stood
       // the Menorah.
-      fl.position.set(lz === 0 ? -0.34 : 0, 19.3, lz - Math.sign(lz) * 0.3);
+      fl.position.set(dx * 0.62, 19.15, lz + dz * 0.62);
       men.add(fl);
       flameTips.push(fl);
     }
@@ -4173,7 +4320,10 @@ export default function Mikdash() {
     // sides of the altar with their heads bent over it (Sukkah 45a).
     const willowMat = new THREE.MeshStandardMaterial({ color: 0x7f9159, roughness: 0.95 });
     const aravah = new THREE.Group();
-    aravah.position.set(AX, TOP, 18.6);
+    // The altar's face moved in from seventeen to sixteen when it was cut to
+    // Middot's thirty-two, and eleven-amah branches leaning on a nine-amah
+    // altar finally do what Sukkah 45a says they did: their heads bend over it.
+    aravah.position.set(AX, TOP, 17.4);
     for (let b = 0; b < 7; b++) {
       const bx = -12 + b * 4;
       const branch = cyl(0.14, 0.3, 11, 5, willowMat, bx, 5.4, 0, aravah);   // eleven amot
@@ -5303,7 +5453,7 @@ export default function Mikdash() {
     // across the courts (near the fifteen steps). Built lazily — a browser
     // holds an AudioContext suspended until the first gesture, so the House is
     // silent until the visitor touches it.
-    const ALTAR_POS = new THREE.Vector3(AX, TOP + 20, 0);
+    const ALTAR_POS = new THREE.Vector3(AX, TOP + ALT_H + 5.55, 0);
     const STEPS_POS = new THREE.Vector3(IC_E + 18, IC_H, 0);
 
     // Brown noise — integrated white noise. Wind and fire share this spectrum;
@@ -5474,9 +5624,10 @@ export default function Mikdash() {
         return Math.max(0, IC_H * (1 - (x - IC_E) / 40));
       // inner court
       if (x > -190 && x < IC_E && z > -IC / 2 && z < IC / 2) return IC_H;
-      // altar east steps
-      if (z > -7 && z < 7 && x > AX + 15 && x < AX + 45)
-        return IC_H + Math.max(0, 13.4 - (x - (AX + 15)) / 2.7 * 1.34);
+      // the altar's ramp — one incline now, not ten steps, and the walker's
+      // floor has to be the same surface the eye is looking at
+      if (z > -8 && z < 8 && x > AX + 16 && x < AX + 48)
+        return IC_H + Math.max(0, ALT_H * (1 - (x - (AX + 16)) / 32));
       // southern monumental stair
       if (x > -76 && x < 76 && z > HALF + 36 && z < HALF + 82)
         return Math.max(LAND_Y, -((z - (HALF + 36)) / 46) * 14);
@@ -6422,7 +6573,7 @@ export default function Mikdash() {
         const r = u.r * (1 - life * 0.55);
         sp.position.set(
           AX + Math.cos(u.a + t * 1.6) * r,
-          TOP + 15.8 + life * 7.5,
+          TOP + ALT_H + 1.35 + life * 7.5,
           Math.sin(u.a + t * 1.6) * r
         );
         const sc = (1 - life * 0.8) * 1.5 + 0.25;
@@ -6435,7 +6586,7 @@ export default function Mikdash() {
         const r = u.r * (1 - life * 0.75);
         sp.position.set(
           AX + Math.cos(u.a + t * 0.8) * r + u.drift * life * 3,
-          TOP + 16.5 + life * 24,
+          TOP + ALT_H + 2.05 + life * 24,
           Math.sin(u.a + t * 0.8) * r
         );
         const sc = (1 - life) * rndCache(u.ph) * 4.1 + 0.5;
