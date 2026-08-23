@@ -43,7 +43,7 @@ const DISCOVERIES = [
   { kind: "wonder", emoji: "🎻", title: "כינור של לויים — The Harp of the Levites", text: "On the fifteen steps between the courts the Levites stood with harps, lyres and cymbals — one step for each Shir HaMa'alot. David's kinor, say Chazal, hung above his bed and played by itself when the north wind moved through it at midnight (Berachot 3b). Touch it and it remembers its song.", hint: "An instrument rests where the singers stand — it still remembers." },
   { kind: "wonder", emoji: "📯", title: "שופר גדול — The Great Shofar", text: "“And it shall be on that day: a great shofar will be sounded, and the lost shall come from Assyria and the outcasts from Egypt, and they will bow to Hashem on the holy mountain in Jerusalem” (Yeshayahu 27:13). This is the shofar of ingathering — the sound before the silence of the Kodesh.", hint: "A ram's horn waits on marble near the southern gate. Dare to sound it." },
   { kind: "wonder", emoji: "🪨", title: "אבן השתייה — The Foundation Stone", text: "Yoma 54b: 'The world was woven outward from the Even HaShetiya' — the stone beneath the Holy of Holies, from which creation was drawn like thread from a spindle. On Yom Kippur the Kohen Gadol placed the incense upon it. Its glow seeps from beneath the western ground: the world's first light, still warm.", hint: "The world began behind the House. Seek warmth in the western ground." },
-  { kind: "wonder", emoji: "🕎", title: "מנורת זהב — Light the Menorah", text: "Shabbat 22b asks: does He need our light? The Ner Ma'aravi that burned beyond its oil was 'testimony to all who enter the world that the Shechinah dwells in Israel.' You have kindled seven flames. The Sfat Emes teaches: every soul is a wick — the fire descends when the vessel is prepared.", hint: "Seven branches of gold stand cold. They wait for you." },
+  { kind: "wonder", emoji: "🕎", title: "מנורת זהב — Light the Menorah", text: "Shabbat 22b asks: does He need our light? The Ner Ma'aravi that burned beyond its oil was 'testimony to all who enter the world that the Shechinah dwells in Israel.' You have kindled seven flames. The Sfat Emes teaches: every soul is a wick — the fire descends when the vessel is prepared. It is standing out in the open court so that you could find it, and that is not where it belongs: the Menorah’s place is inside the Heichal, against the southern wall, opposite the Shulchan (שמות כ״ו:ל״ה). Find all thirty-six and the kohanim carry it in to its place.", hint: "Seven branches of gold stand cold. They wait for you." },
   { kind: "wonder", emoji: "💨", title: "קטורת — The Eleven Spices", text: "Keritot 6a counts eleven spices in the ketoret — including chelbenah, foul-smelling alone, deliberately included: a fast that excludes the sinners of Israel is no fast at all. And the house of Avtinas guarded one secret: ma'aleh ashan, the herb that made the smoke rise in a single straight column, unbent by any wind.", hint: "A small golden table before the House holds eleven fragrances. Wake them." },
   { kind: "wonder", emoji: "⚓", title: "שערי ניקנור — The Doors That Crossed the Sea", text: "Yoma 38a: Nicanor brought two bronze doors from Alexandria. A storm rose; the sailors threw one into the sea — and it surfaced beneath the ship at Akko (some say the sea simply refused to keep it). All the Temple's gates were later plated gold, except Nicanor's: the miracle-bronze gleamed like gold on its own. You have just opened them.", hint: "Bronze that crossed the sea guards the top of the fifteen steps." },
   { kind: "wonder", emoji: "🎺", title: "לבית התקיעה — The Trumpeting Stone", text: "In 1968, archaeologists at the Temple Mount's southwest corner found a fallen parapet stone carved: 'לבית התקיעה להב…' — 'To the place of trumpeting, to procl[aim]…' From that height a kohen sounded the trumpet each Friday at dusk: fields emptied, shops shuttered, and Shabbat descended on Jerusalem. The stone is real — it waits in the Israel Museum, and here, restored to its corner.", hint: "At the southwest height, a stone announces Shabbat." },
@@ -7258,6 +7258,7 @@ export default function Mikdash() {
   // hung on the *transition* to thirty-six, and the first value seen after the
   // saved state loads is taken as the starting point rather than as an event.
   const prevFound = useRef(-1);
+  const pendingCelebrate = useRef(false);
   useEffect(() => {
     if (!storageReady) return;
     const n = found.length, was = prevFound.current;
@@ -7268,10 +7269,34 @@ export default function Mikdash() {
     if (was === 0 && n === 1) track("first-discovery");
     if (n === DISCOVERIES.length && was < n) {
       track("quest-complete");
+      // The card goes up; the celebration is only armed here, and fires when
+      // the screen clears. See below.
+      pendingCelebrate.current = true;
       setFinale(true);
-      apiRef.current.celebrate?.();
     }
   }, [found.length, storageReady]);
+
+  // ── An ending nobody can see did not happen ──
+  //
+  // Everything the finale does, it does out in the House: the tekiah gedolah
+  // held until the breath runs out, every torch on every wall taking at once,
+  // the burst of gold leaf over the courts, and — seven seconds behind them —
+  // the kohanim carrying the Menorah, the Shulchan and the golden altar in
+  // through the doors. All of it used to fire on the thirty-sixth discovery,
+  // which is the same instant two cards go up over the House: the teaching
+  // card for the wonder just found, and the finale card that says *close this
+  // and watch the court*. By the time anybody did, the shofar had finished and
+  // the vessels were already in their places. The card was describing a thing
+  // that had happened behind it.
+  //
+  // So completion only arms it and the screen clearing fires it. Both cards
+  // have to be gone, not only the ending’s: either one alone is enough to
+  // hide the thing it is telling you to look at.
+  useEffect(() => {
+    if (!pendingCelebrate.current || finale || fact !== null) return;
+    pendingCelebrate.current = false;
+    apiRef.current.celebrate?.();
+  }, [finale, fact]);
   // ─── the shape of a whole visit ───
   // Page views say how many came; this says how long they stayed and how deep
   // they got. Sent on pagehide, which fires on a phone being locked or a tab

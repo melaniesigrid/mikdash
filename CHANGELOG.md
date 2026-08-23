@@ -1,5 +1,28 @@
 # Changelog
 
+## v3.25 — "The Ending Waits for You" (0.3.25)
+
+- **The finale played behind the card that was describing it.** Everything the
+  ending does, it does out in the House — the tekiah gedolah held until the
+  breath runs out, every torch on every wall taking at once, the burst of gold
+  leaf over the courts, and seven seconds behind them the kohanim carrying the
+  Menorah, the Shulchan and the golden altar in through the doors. All of it
+  fired on the thirty-sixth discovery, which is the same instant two cards go
+  up over the House: the teaching card for the wonder just found, and the
+  finale card that says *close this and watch the court*. By the time anybody
+  did, the shofar had finished and the vessels were already in their places.
+  The card was telling you to look at something that had happened behind it.
+  Completion arms the celebration now and the screen clearing fires it — both
+  cards, not only the ending’s, because either one alone is enough to hide the
+  thing it is pointing at.
+
+- **And the Menorah says where it is going, at the moment it is lit.** Seven
+  flames come up in the open court and nothing said why the golden Menorah is
+  standing outside, which is a question only the people who finish ever get an
+  answer to. Its card now gives it: the Menorah’s place is inside the Heichal,
+  against the southern wall, opposite the Shulchan (שמות כ״ו:ל״ה); it is out
+  here so it can be found, and the kohanim carry it in when all thirty-six are.
+
 ## v3.24 — "Nothing Stands on Air" (0.3.24)
 
 - **הַכֶּבֶשׁ could not be climbed.** v3.23 said twice — in the code and here —
