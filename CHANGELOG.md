@@ -1,5 +1,22 @@
 # Changelog
 
+## v3.23 — "A Ramp Is Built, Not Laid" (0.3.23)
+
+- **הַכֶּבֶשׁ.** The ramp was drawn as one inclined slab and nothing held it up,
+  so from the north or the south you looked straight under it — thirty-two amot
+  long and nine tall of daylight, with the far side of the court showing through
+  the gap. Middot 3:4 sends them down into the valley of Beit Kerem for the
+  stones of the altar and the stones of the ramp alike, whole stones that iron
+  had never touched: what is under a ramp of built stone is more ramp. So the
+  incline is the surface now and a block of stone carries it — same length, same
+  axis, dropped along the ramp’s own perpendicular rather than straight down,
+  and thick enough that its head ends inside the altar’s tiers and its foot
+  under the court paving. Nothing of it shows but the two flanks, which is
+  precisely the daylight that used to be there.
+  - The walker never believed the hole anyway. `groundHeight` has climbed this
+    as solid ground since the incline replaced the ten steps, so a kohen going
+    up to the fire was already walking on stone that the eye could see through.
+
 ## v3.22 — "Where a Visitor Stops" (0.3.22)
 
 - **הַסּוֹרֵג.** Middot 2:3 puts a lattice ten tefachim high round the sacred

@@ -3400,8 +3400,36 @@ export default function Mikdash() {
     // Middot 3:3's ramp exactly — carried on the east rather than the south,
     // because this House is Yechezkel's and his altar is climbed from the east
     // (Yechezkel 43:17).
-    const kevesh = box(Math.hypot(32, ALT_H) + 1.2, 1.6, 16, white, AX + 32, TOP + ALT_H / 2 - 0.2, 0);
-    kevesh.rotation.z = -Math.atan2(ALT_H, 32);
+    const KEV_RUN = 32, KEV_W = 16, KEV_T = 1.6;
+    const kevAngle = Math.atan2(ALT_H, KEV_RUN);
+    const kevLen = Math.hypot(KEV_RUN, ALT_H) + 1.2;
+    const kevesh = box(kevLen, KEV_T, KEV_W, white, AX + KEV_RUN, TOP + ALT_H / 2 - 0.2, 0);
+    kevesh.rotation.z = -kevAngle;
+    // ── and a ramp is a built mass of stone, not a plank laid on air ──
+    //
+    // Drawn as that one inclined slab it read as a diving board: from the
+    // north or the south you looked straight under it, through a triangle of
+    // daylight thirty-two long and nine tall, and out the other side. The
+    // walker never believed it either — groundHeight already climbs this as
+    // solid ground, so the void was only ever in the eye.
+    //
+    // So the incline stays the surface, and a second block carries it: same
+    // length, same axis, same rotation, dropped along the ramp's own
+    // perpendicular rather than straight down, and thick enough that every
+    // face of it is buried. Nine amot does it — the head ends inside the
+    // altar's tiers, the foot under the court paving, and the only thing that
+    // shows is the two flanks, which is precisely the daylight that used to be
+    // there. The drop is half of both thicknesses less a fifth, and that fifth
+    // is the overlap that keeps a hairline crack from opening along the join.
+    // The fill is a tenth narrower a side than the ramp so their flanks are
+    // never the same plane fighting for the same pixel; up close that reveal
+    // reads as the coping such a ramp would have had anyway.
+    const KEV_FILL_T = 9;
+    const kevDrop = (KEV_T + KEV_FILL_T) / 2 - 0.2;
+    const keveshFill = box(kevLen, KEV_FILL_T, KEV_W - 0.2, marble,
+      AX + KEV_RUN - Math.sin(kevAngle) * kevDrop,
+      TOP + ALT_H / 2 - 0.2 - Math.cos(kevAngle) * kevDrop, 0);
+    keveshFill.rotation.z = -kevAngle;
 
     // ═══════════ THE HOUSE ═══════════
     const T = new THREE.Group();
