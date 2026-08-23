@@ -33,7 +33,7 @@ const STORE_KEY = "mikdash-progress-v3";
 const DISCOVERIES = [
   { kind: "rimon", emoji: "🚪", title: "שער הקדים — The Sealed Eastern Gate", text: "“This gate shall remain shut; it shall not be opened… because Hashem, the G-d of Israel, has entered through it” (Yechezkel 44:2). Tradition binds this to Sha'ar HaRachamim — the Gate of Mercy sealed in Jerusalem's eastern wall, waiting.", hint: "Where mercy waits behind stone, inside the eastern gatehouse." },
   { kind: "rimon", emoji: "🌊", title: "מים חיים — The Living Waters", text: "Yechezkel 47: a trickle from beneath the threshold becomes ankle-deep, knee-deep, then a river no one can cross — sweetening even the Dead Sea. Chazal read it as Torah itself: water that heals wherever it flows, fruit for food and leaves for healing (47:12).", hint: "Follow what begins as a trickle, east across the court." },
-  { kind: "rimon", emoji: "⛰️", title: "הראל — The Altar Called ‘Mountain of G-d’", text: "Yechezkel 43:15 names the hearth 'Har'el' — Mountain of G-d. Uniquely, this altar is climbed by steps facing east (43:17), and must be inaugurated for seven days before the first regular offering rises.", hint: "At the foot of the mountain that burns." },
+  { kind: "rimon", emoji: "⛰️", title: "הראל — The Altar Called ‘Mountain of G-d’", text: "Yechezkel 43:15 names the hearth 'Har'el' — Mountain of G-d. Its ascent faces east rather than south — וּמַעֲלֹתֵהוּ פְּנוֹת קָדִים (43:17) — which is why the climb to it stands on the eastern side here. The pasuk's word is מַעֲלוֹת, steps; the mefarshim read it as the כֶּבֶשׁ, the ramp, because Shemot 20:23 will not have an altar climbed by steps — and the ramp is what you are standing at. Seven days of inauguration before the first regular offering rises (43:25–27).", hint: "At the foot of the mountain that burns." },
   { kind: "rimon", emoji: "📏", title: "קנה המדה — The Measuring Reed", text: "The vision arrives as a blueprint: a man 'whose appearance was like bronze' measures every wall with a reed of six long cubits (40:5). The Vilna Gaon wrote treatises reconstructing the plan — and the Midrash promises: one who studies the Temple's design, it is as if he built it.", hint: "Among the northern columns, something measures you back." },
   { kind: "rimon", emoji: "🧱", title: "שכינה במערב — No Western Gate", text: "Gates open east, north, and south — never west. 'The Shechinah is in the west' (Bava Batra 25a): the wall behind the Holy of Holies stays unbroken. Nothing passes behind the Presence.", hint: "Along the one wall where no gate dares open." },
   { kind: "rimon", emoji: "🔥", title: "אש מן השמים — Built by Fire or by Hands?", text: "Rambam (Hilchot Melachim 11) rules that Mashiach builds the final Temple. Rashi and Midrash Tanchuma teach it descends whole, built of fire, from Heaven. The chassidic masters reconcile them: we build from below, and Heaven completes what our hands begin.", hint: "The highest gold guards the smallest silver." },
@@ -74,6 +74,13 @@ const DISCOVERIES = [
 // Eighteen who answer — twelve kohanim at the stations of the morning avodah
 // and six Levites on the steps. Every line carries its source, like every
 // dimension does.
+// Of the thirty-six, these are the ones that *do* something when they are
+// found — a shofar sounded, doors opened, seven lamps taking. They are the
+// ones worth asking to happen again, and the panel offers a replay only for
+// these. The engine’s performWonder() answers exactly this set; if a wonder
+// is ever given an action, its number belongs here too.
+const ACTED = new Set([9, 10, 12, 13, 14, 15, 26, 29, 31, 35]);
+
 // ═══════════ נְגִינוֹת — melodies ═══════════
 //
 // The fifteen steps are already an instrument: STEP_SCALE tunes them to D
@@ -103,7 +110,7 @@ const DISCOVERIES = [
 //
 // Tempi are the tunes' own, not a house style — the crotchet mark where the
 // score carries one, the speed the thing is actually sung at where it does
-// not. They were all set roughly a fifth too slow when first entered.
+// not. They were all set roughly a fifth too slow when first entered, and the correction left one melody out of step with the rule above: Goldfarb's score is marked 66 and Shalom Aleichem runs here at 78. That is the one deliberate departure, and it is written down here rather than left for somebody to find as a contradiction between a comment and a number.
 // Each melody is one line of data; fixing a note is editing a number.
 const NOTE_HZ = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // Step index → MIDI, matching STEP_SCALE exactly. Used to light the tread a
@@ -275,6 +282,47 @@ const MELODIES = [
             [66,1],[62,1],[71,1],[69,0.5],[67,0.5],[66,1],[64,1],[62,2]],
   },
 ];
+
+// ── מַה שֶׁהַכִּנּוֹר זוֹכֵר — what the kinor remembers ──
+//
+// Berachot 3b hangs David’s harp above his bed, and at midnight the north
+// wind passes through it and it plays by itself. The wonder at its foot says
+// *touch it and it remembers its song* — and what it played was a roll up the
+// strings and a fall back down, which is a flourish and not a song. A harp
+// that remembers nothing is a shape with wire on it.
+//
+// It plays the nigun now: the one melody in this House built only out of the
+// notes the fifteen steps are tuned to, and the harp is strung to the first
+// eight of exactly those. Nothing is arranged and nothing is transposed —
+// every pitch it plays is a string that exists, and that is checked below
+// rather than asserted here.
+//
+// The nigun is five phrases and its rests are where it breathes. Four of the
+// five lie inside the eight strings; the fourth is the answer an octave up,
+// and it climbs to A4, which this harp does not have. So that one phrase is
+// left out and the other four are played in order — which is what a player
+// with eight strings would do, and it matters that the choice is that way
+// round. Truncating at the first unreachable note instead, which is the
+// obvious way to write this, ends the song on a dangling upbeat: the last
+// note the eight strings can give happens to be the first note of the phrase
+// they cannot. Dropping the phrase keeps the nigun’s own closing cadence,
+// C down to D over four beats, and the harp comes home.
+const HARP_MIDI = STEP_MIDI.slice(0, 8);
+const HARP_SONG = (() => {
+  const nigun = MELODIES.find((m) => m.id === "nigun");
+  const phrases = [[]];
+  for (const ev of nigun.notes) {
+    if (ev[0] === 0) phrases.push([]);
+    else phrases[phrases.length - 1].push(ev);
+  }
+  const notes = [];
+  for (const ph of phrases) {
+    if (!ph.length || !ph.every(([midi]) => HARP_MIDI.includes(midi))) continue;
+    if (notes.length) notes.push([0, 1]);        // the breath between two phrases
+    notes.push(...ph);
+  }
+  return { bpm: nigun.bpm, notes };
+})();
 
 // ═══════════ לוּחַ — the calendar ═══════════
 //
@@ -4119,7 +4167,7 @@ export default function Mikdash() {
     }
     // Freygish on D — the same mode the fifteen steps are tuned to, so the harp
     // and the ascent answer each other. The eighth string is the octave.
-    const HARP_TUNING = [146.83, 155.56, 185.0, 196.0, 220.0, 233.08, 261.63, 293.66];
+    const HARP_TUNING = HARP_MIDI.map(NOTE_HZ);
     const stringMat = new THREE.MeshStandardMaterial({ color: 0xfff1c4, metalness: 0.85, roughness: 0.22 });
     stringMat.envMap = envMap; metals.push(stringMat);
     const harpStrings = [];
@@ -5318,11 +5366,12 @@ export default function Mikdash() {
     // The phrase: a roll up the frame fast enough that every string is still
     // sounding under the next, then a fall back over a bass that has not
     // stopped, closing on the open fifth. [string, seconds, force]
-    const HARP_PHRASE = [
+    const HARP_ROLL = [
       [0, 0.00, 0.55], [1, 0.10, 0.60], [2, 0.19, 0.67], [3, 0.28, 0.74],
       [4, 0.37, 0.82], [6, 0.46, 0.90], [7, 0.55, 1.00],
       [4, 0.94, 0.70], [2, 1.18, 0.60], [0, 1.44, 0.85], [4, 1.48, 0.44],
     ];
+    let harpRingsUntil = 0;
     const playHarp = (level = 1) => {
       if (!amb.on) return;
       const ctx = ensureAudio();
@@ -5330,11 +5379,11 @@ export default function Mikdash() {
       const bus = harpBus(ctx);
       const t0 = ctx.currentTime + 0.02;
       const eighth = harpStrings[7].visible;
-      // Below full force this is the wind on the frame, not a hand on it: the
-      // roll alone, no melody after it.
-      const phrase = level < 0.9 ? HARP_PHRASE.slice(0, 7) : HARP_PHRASE;
-      phrase.forEach(([si, dt, vel]) => {
-        const idx = si === 7 && !eighth ? 6 : si;    // seven strings until the eighth is found
+      const pluck = (si, dt, vel) => {
+        // Seven strings until the eighth is found: כנור של מקדש של שבעה נימין,
+        // ושל ימות המשיח שמונה (Arachin 13b). Until then the octave falls back to
+        // the string below it, and the song is audibly missing its top note.
+        const idx = si === 7 && !eighth ? 6 : si;
         const src = ctx.createBufferSource();
         src.buffer = ksString(ctx, HARP_TUNING[idx]);
         const g = ctx.createGain();
@@ -5349,7 +5398,22 @@ export default function Mikdash() {
         src.start(t0 + dt);
         // and the string it came from blurs while it sounds
         setTimeout(() => { harpStrings[idx].userData.amp = Math.min(1, vel * level); }, dt * 1000 + 20);
-      });
+      };
+      // Below full force this is the wind on the frame and not a hand on it,
+      // which is the whole of what Berachot 3b describes: the roll alone, and
+      // no melody after it. A wind can sound a harp; it cannot play one.
+      if (level < 0.9) { HARP_ROLL.slice(0, 7).forEach((r) => pluck(r[0], r[1], r[2])); return; }
+      // A hand on it, and it remembers its song. Not restarted while it is
+      // still sounding — a harp asked twice does not answer twice at once.
+      if (ctx.currentTime < harpRingsUntil) return;
+      const spb = 60 / HARP_SONG.bpm;
+      let at = 0;
+      for (const [midi, beats] of HARP_SONG.notes) {
+        // A longer note is a leaned-on note; that is the only dynamic here.
+        if (midi > 0) pluck(HARP_MIDI.indexOf(midi), at, beats > 1 ? 0.85 : 0.62);
+        at += beats * spb;
+      }
+      harpRingsUntil = ctx.currentTime + at;
     };
     const playTrumpet = () => {
       if (!amb.on) return;
@@ -6116,6 +6180,34 @@ export default function Mikdash() {
       // Every torch on every wall takes at the same moment.
       torchFires.forEach(({ flame }) => { flame.material.opacity = 1; });
     };
+    // ── What a wonder does, once when found and again when asked ──
+    //
+    // These sat inline in the click handler, which meant the only way to see
+    // the seven lamps take or Nicanor’s doors swing was to find them for the
+    // first time — and that can only be done once. `again` is what makes a
+    // replay honest: the two that end in a state rather than in a sound are
+    // put back to the state they started in, so the thing being asked for
+    // actually happens instead of being already over.
+    const performWonder = (id, again = false) => {
+      if (id === 9) { revealEighth(); playHarp(); }
+      if (id === 10) soundTheShofar();
+      if (id === 12) {
+        if (again) flameTips.forEach((f) => { f.material.opacity = 0; });
+        flameTips.forEach((f, i) => setTimeout(() => { f.material.opacity = 0.95; }, i * 180));
+        menLight.intensity = 1.1;
+      }
+      if (id === 13) { ketoretState.active = true; playChime(); }
+      if (id === 14) {
+        if (again) { nicanor.userData.target = 0; setTimeout(() => { nicanor.userData.target = 1; }, 800); }
+        else nicanor.userData.target = 1;
+      }
+      if (id === 15) playTrumpet();
+      if (id === 26) playChime();
+      if (id === 29) playFlute();
+      if (id === 31) playChime();
+      if (id === 35) playShofar();
+    };
+    apiRef.current.replay = (id) => performWonder(id, true);
     apiRef.current.nav = (k, on) => { if (k in nav) nav[k] = on ? 1 : 0; };
     apiRef.current.guideTo = (id) => {
       let obj = null;
@@ -6326,16 +6418,7 @@ export default function Mikdash() {
         rimonById[id].traverse((o) => { if (o.isMesh) o.material = foundGold; });
         if (rimonById[id].userData.ring) rimonById[id].userData.ring.material.color.set(0xffd24a);
       }
-      if (id === 9) { revealEighth(); playHarp(); }
-      if (id === 10) soundTheShofar();
-      if (id === 12) { flameTips.forEach((f, i) => setTimeout(() => { f.material.opacity = 0.95; }, i * 180)); menLight.intensity = 1.1; }
-      if (id === 13) { ketoretState.active = true; playChime(); }
-      if (id === 14) nicanor.userData.target = 1;
-      if (id === 15) playTrumpet();
-      if (id === 26) playChime();
-      if (id === 29) playFlute();
-      if (id === 31) playChime();
-      if (id === 35) playShofar();
+      performWonder(id);
       // every wonder found throws gold dust
       burst(holder.getWorldPosition(new THREE.Vector3()), { count: 30, speed: 15 });
       apiRef.current.openFact?.(id);
@@ -7573,6 +7656,16 @@ export default function Mikdash() {
         <button className="chip" onClick={() => { track("panel", { which: "hints", to: hints ? "close" : "open" }); setHints((h) => !h); setMusic(false); setCal(false); setPeace(false); }} style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
           {hints ? "Hide hints" : "רמזים"}
         </button>
+        {/* Only once the tour is finished. Before that there is nothing to
+            start over from, and a reset button beside a half-found House is
+            an invitation to lose thirty-five of them by mis-tapping. It asks
+            through the ending card, which already carries the one careful
+            sentence about what is and is not taken back. */}
+        {allFound && (
+          <button className="chip" onClick={() => { track("start-over", { from: "menu" }); setFinale(true); setConfirmReset(true); }} title="Hide all thirty-six and raise the House again" style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 12.5, letterSpacing: ".07em", background: "rgba(30,24,12,.85)", color: "#e9d9a8", border: "1px solid rgba(212,164,55,.4)", borderRadius: 999, padding: "8px 16px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+            ↻ מֵחָדָשׁ
+          </button>
+        )}
       </div>
 
       {/* On-screen navigation, for anyone who would rather not drag or scroll */}
@@ -7631,9 +7724,42 @@ export default function Mikdash() {
                     style={{ marginLeft: 8, fontStyle: "normal", fontSize: 11.5, background: "rgba(212,164,55,.18)", color: "#ffd97a", border: "1px solid rgba(212,164,55,.45)", borderRadius: 999, padding: "2px 9px", cursor: "pointer" }}
                   >⌖ show me</button>
                 )}
+                {/* Found is not the same as seen. A wonder that sounds a
+                    shofar or opens a pair of doors did that once, at the
+                    moment it was found, very possibly while the visitor was
+                    looking somewhere else — and it could never be asked for
+                    again. Now it can, and the pillar goes up over it first so
+                    the asking and the watching are the same gesture. */}
+                {done && ACTED.has(i) && (
+                  <button
+                    onClick={() => {
+                      track("replay", { id: i, title: enTitle(d.title) });
+                      apiRef.current.guideTo?.(i);
+                      apiRef.current.replay?.(i);
+                    }}
+                    title="Mark it, and let it happen again"
+                    style={{ marginLeft: 8, fontStyle: "normal", fontSize: 11.5, background: "rgba(212,164,55,.18)", color: "#ffd97a", border: "1px solid rgba(212,164,55,.45)", borderRadius: 999, padding: "2px 9px", cursor: "pointer" }}
+                  >▷ again</button>
+                )}
               </div>
             );
           })}
+          {/* There is nothing left to find, so the list stops being a list of
+              things to do and becomes a way back into what was done. */}
+          {allFound && (
+            <div style={{ marginTop: 13, paddingTop: 12, borderTop: "1px solid rgba(212,164,55,.3)", display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+              <button
+                onClick={() => { track("replay-ending"); apiRef.current.celebrate?.(); }}
+                title="The tekiah gedolah, every torch taking at once, the burst over the courts, and the vessels carried in"
+                style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 11.5, letterSpacing: ".08em", textTransform: "uppercase", background: "rgba(212,164,55,.16)", color: "#ffd97a", border: "1px solid rgba(212,164,55,.45)", borderRadius: 999, padding: "7px 14px", cursor: "pointer" }}
+              >▷ the ending again</button>
+              <button
+                onClick={() => { track("start-over", { from: "list" }); setFinale(true); setConfirmReset(true); }}
+                title="Hide all thirty-six and raise the House again"
+                style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 11.5, letterSpacing: ".08em", textTransform: "uppercase", background: "rgba(212,164,55,.16)", color: "#ffd97a", border: "1px solid rgba(212,164,55,.45)", borderRadius: 999, padding: "7px 14px", cursor: "pointer" }}
+              >↻ start over</button>
+            </div>
+          )}
         </div>
       )}
 

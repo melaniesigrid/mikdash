@@ -1,5 +1,54 @@
 # Changelog
 
+## v3.26 — "What the Kinor Remembers" (0.3.26)
+
+- **הַכִּנּוֹר.** The wonder at the harp’s foot says *touch it and it remembers
+  its song*, and what it played was a roll up the strings and a fall back down.
+  That is a flourish, not a song. It plays the נִגּוּן הַמַּעֲלוֹת now — the one
+  melody here built only out of the notes the fifteen steps are tuned to, and
+  the harp is strung to the first eight of exactly those, so nothing had to be
+  arranged and nothing had to be transposed. Four of the nigun’s five phrases
+  fit inside eight strings; the fourth is the answer an octave up and climbs to
+  A4, which this harp does not have, so that phrase is left out and the other
+  four are played in order — which is what a player with eight strings would
+  do. Twenty-eight notes, and it comes home to D.
+  - **Verified, and one thing found by verifying.** The obvious way to write
+    this is to truncate at the first note the strings cannot reach. That ends
+    the song on a dangling upbeat, because the last note the eight can give is
+    the first note of the phrase they cannot. Dropping the whole phrase instead
+    keeps the nigun’s own closing cadence, C down to D over four beats.
+  - The tuning is now derived from the steps rather than typed beside them —
+    it matched the literal it replaced to five thousandths of a hertz, which is
+    the rounding in the old numbers. And the eighth string still matters: the
+    melody uses it, so until it is found (Arachin 13b — seven strings in the
+    Mikdash, eight in the days of Mashiach) the song is audibly short its top D.
+
+- **Found is not the same as seen.** A wonder that sounds a shofar or swings a
+  pair of bronze doors did that once, at the moment it was found, very possibly
+  while the visitor was looking somewhere else — and there was no way to ask
+  for it again. Every finished wonder that does something now carries ▷ again
+  in the list: the pillar of light goes up over it and the thing happens, so
+  asking and watching are one gesture. The two that end in a state rather than
+  a sound are put back first — the lamps go out so they can be seen taking, the
+  doors close so they can be seen opening — because replaying something already
+  over is not a replay.
+
+- **And a way back to the beginning.** With all thirty-six found there is now
+  ↻ מֵחָדָשׁ on the menu under רמזים, and the same under the list, along with ▷ the
+  ending again for the tekiah gedolah and the vessels. Both restarts ask
+  through the ending card, which already carries the one careful sentence about
+  what is and is not taken back. Neither appears before the tour is finished:
+  a reset button beside a half-found House is an invitation to lose thirty-five
+  wonders to a mis-tap.
+
+- **הַרְאֵל said the altar is climbed by steps.** Three cards away from the one
+  titled *A Ramp, and Not Steps*, and the House builds the ramp. Yechezkel’s
+  word is וּמַעֲלֹתֵהוּ (43:17) and the card was reading it flatly, so the app
+  asserted both things at once. It now says what the pasuk says — that the
+  ascent faces east rather than south, which is why the climb stands where it
+  does here — and then what the mefarshim do with מַעֲלוֹת: they read it as the
+  כֶּבֶשׁ, because Shemot 20:23 will not have an altar climbed by steps.
+
 ## v3.25 — "The Ending Waits for You" (0.3.25)
 
 - **The finale played behind the card that was describing it.** Everything the
