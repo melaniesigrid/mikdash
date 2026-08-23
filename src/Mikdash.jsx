@@ -81,6 +81,59 @@ const DISCOVERIES = [
 // is ever given an action, its number belongs here too.
 const ACTED = new Set([9, 10, 12, 13, 14, 15, 26, 29, 31, 35]);
 
+// ═══════════ מִינִים — what the living things say ═══════════
+//
+// The kohanim and the Levites already answer when they are clicked, through
+// userData.voice, and nothing else outside the walls did — so the camels, the
+// flock and the trees on the approach were scenery you could walk past and
+// learn nothing from. They use the same mechanism, which means each click
+// gives the next line rather than the same one, and a source travels with
+// every line the way it does everywhere else in this House.
+//
+// The natural-history lines are kept to things that are not in dispute — what
+// a hump is made of, how a camel walks, the shape of a sheep's pupil. The
+// pomegranate's famous six hundred and thirteen seeds is not here: it is a
+// lovely saying and counts vary, and this House does not print a number it
+// cannot stand behind.
+const SPECIES_VOICES = {
+  gamal: { name: "גָּמָל", role: "Arrived from Sheva", lines: [
+    { text: "שִׁפְעַת גְּמַלִּים תְּכַסֵּךְ … כֻּלָּם מִשְּׁבָא יָבֹאוּ, זָהָב וּלְבוֹנָה יִשָּׂאוּ — a multitude of camels shall cover you, all of them from Sheva shall come, bearing gold and frankincense. Both halves of that load are already in this House: the gold is on the facade, and the levonah is one of the eleven of the ketoret.", src: "Yeshayahu 60:6 · Keritot 6a" },
+    { text: "The hump is fat, not water — which is why it is on top, where it shades the animal instead of insulating it. A camel carries its water in its blood, and its red cells are oval rather than round, so they keep flowing when it is dry and do not burst when it drinks.", src: "Natural history" },
+    { text: "Tamei, and named in the Torah for the reason it looks kosher: it brings up the cud but does not have a wholly cloven hoof. It is one of the four the pasuk lists by name so that nobody would have to guess.", src: "Vayikra 11:4 · Chullin 59a" },
+    { text: "לְפוּם גַּמְלָא שִׁיחְנָא — according to the camel, so the load. The saying is about people, and the camel is the only one in it that never complains.", src: "Ketubot 67a" },
+    { text: "It paces: both legs on one side swing together, then both on the other. That is why a loaded camel rocks, and why the men walking beside it are not riding it.", src: "Natural history" },
+    { text: "Shabbat 5:1 asks what an animal may go out wearing on Shabbat, and answers for the camel: a halter. What is a garment for the beast is permitted; what is a burden is not — so the question about a camel turns out to be a question about who is resting.", src: "Mishnah Shabbat 5:1" },
+  ] },
+  tzon: { name: "צֹאן", role: "On the last mile of the road", lines: [
+    { text: "They walked here. Devarim 14:24–25 lets you sell the animal and carry the silver if the road is too long, which is worth reading the other way round: unless it was too long, the animal came up on its own feet.", src: "Devarim 14:24–25" },
+    { text: "Two lambs a day, one in the morning and one between the evenings, every day of the year — the tamid. Whatever else was brought, the day opened and closed with these.", src: "Bamidbar 28:3–4 · Tamid 3:7" },
+    { text: "A sheep's pupil is a wide horizontal slot, and it stays level with the ground even when the head tips to graze. It buys a field of view of nearly the whole circle: it can watch behind itself without lifting its head.", src: "Natural history" },
+    { text: "They know faces. Sheep can learn dozens of individual sheep and of people and still recognise them after years apart, which is a strange thing to know about an animal whose name is a byword for not thinking.", src: "Natural history" },
+    { text: "The korban that may not be brought hurried: an animal is checked for a blemish, and the checking is slow. הַכֹּל שׁוֹחֲטִין — anyone may slaughter, and not everyone may decide what is fit.", src: "Chullin 1:1 · Bechorot 6:1" },
+  ] },
+  zayit: { name: "זַיִת", role: "The oil for the light", lines: [
+    { text: "שֶׁמֶן זַיִת זָךְ כָּתִית לַמָּאוֹר — beaten olive oil, pure, for the light. כָּתִית לַמָּאוֹר וְאֵין כָּתִית לַמְּנָחוֹת: the first drop pressed from each olive is for the lamp only. What is burned for light is held to a standard the meal-offering is not.", src: "Shemot 27:20 · Menachot 86a" },
+    { text: "Zechariah is shown a menorah of gold with two olive trees standing over it, one on either side, feeding it without a hand touching them. He asks what they are, twice, and is answered: לֹא בְחַיִל וְלֹא בְכֹחַ כִּי אִם בְּרוּחִי.", src: "Zechariah 4:3–6" },
+    { text: "An olive is almost impossible to kill. Cut it to the ground and it comes back from the stump, and the same root can keep sending up trunks for a thousand years — so a grove is often older than every tree standing in it.", src: "Natural history" },
+    { text: "It is one of the two woods never put on the altar, with the vine. Not because it burns badly — because a land is not stripped of the trees that feed it in order to feed a fire.", src: "Tamid 2:3 · Tamid 29b" },
+  ] },
+  tamar: { name: "תָּמָר", role: "Carved on every gate", lines: [
+    { text: "צַדִּיק כַּתָּמָר יִפְרָח — the righteous flourishes like a date palm. Chazal ask why this tree: because it has no crooked growth and casts no useless shade, and because everything on it is used.", src: "Tehillim 92:13 · Bereishit Rabbah 41:1" },
+    { text: "Yechezkel carves תִּמֹרִים — palms — on the posts of every gate of this House, between the keruvim. You have been walking past them since you came in.", src: "Yechezkel 40:16, 26, 31 · 41:18" },
+    { text: "In 2005 a date seed from the Masada excavations, carbon-dated to around the time this House was standing, was planted and germinated. The tree is alive. They called it Methuselah, and it has since fathered fruit of a variety nobody had eaten for a very long time.", src: "Natural history" },
+  ] },
+  charuv: { name: "חָרוּב", role: "Seventy years", lines: [
+    { text: "Choni saw a man planting a carob and asked how long until it bears. Seventy years. And do you expect to eat from it? I found the world full of carobs planted by my fathers; as they planted for me, I plant for my children.", src: "Ta'anit 23a" },
+    { text: "Rabbi Shimon bar Yochai and his son lived twelve years in a cave, and a carob tree and a spring were created for them at its mouth. The tree that feeds a man who has nothing is the one that took longest to grow.", src: "Shabbat 33b" },
+    { text: "Its seeds are so nearly identical in weight that they were used as the standard for weighing gold, and the word carat is the same word. A tree that keeps an honest measure — אֶבֶן שְׁלֵמָה וָצֶדֶק יִהְיֶה לָּךְ.", src: "Natural history · Devarim 25:15" },
+  ] },
+  shaked: { name: "שָׁקֵד", role: "The tree that is awake", lines: [
+    { text: "מַקֵּל שָׁקֵד אֲנִי רֹאֶה — I see a rod of almond; and the answer is a pun the tree keeps: כִּי שֹׁקֵד אֲנִי עַל דְּבָרִי לַעֲשֹׂתוֹ. The almond is the watchful one because it is the first to wake.", src: "Yirmiyahu 1:11–12" },
+    { text: "Aharon's staff, left overnight in the Ohel Mo'ed, budded and blossomed and bore ripe almonds by morning — all three stages at once, which is exactly what an almond never does and what the sign needed.", src: "Bamidbar 17:23" },
+    { text: "The cups of the Menorah are מְשֻׁקָּדִים — shaped as almond blossoms, four of them on the central shaft and three on each branch. The tree is in the room whether or not one is planted outside it.", src: "Shemot 25:33–34" },
+  ] },
+};
+
 // ═══════════ נְגִינוֹת — melodies ═══════════
 //
 // The fifteen steps are already an instrument: STEP_SCALE tunes them to D
@@ -1196,11 +1249,22 @@ function cloudTex() {
     for (let i = 0; i < 90; i++) {
       // Puffs cluster toward the middle and toward the top, and the ones near
       // the crown are smaller — which is what gives the cauliflower edge.
+      //
+      // That last clause was a comment and not code. `r` was keyed only off
+      // the horizontal mound, so a full-sized puff could sit at the very
+      // crown, run off the top of the canvas, and be cropped by it — and a
+      // crop is a straight line. The alpha then ended flat along the top,
+      // over the flat bottom that is drawn on purpose, with the widest puffs
+      // clipped at the sides for good measure. That is a rectangle, and it is
+      // what the clouds looked like. `rise` shrinks the crown puffs, which
+      // both keeps every puff inside the canvas and finally gives the
+      // cauliflower edge the comment has been promising.
       const u = rnd(-1, 1);
-      const x = w * 0.5 + u * w * 0.40;
+      const x = w * 0.5 + u * w * 0.38;
       const lift = 1 - Math.abs(u) * 0.75;                       // a mound, not a slab
-      const y = base - rnd(0.05, 1.0) * lift * (h * 0.60);
-      const r = rnd(16, 54) * (0.5 + 0.5 * lift);
+      const rise = rnd(0.05, 1.0);                               // 0 at the base, 1 at the crown
+      const y = base - rise * lift * (h * 0.60);
+      const r = rnd(16, 54) * (0.5 + 0.5 * lift) * (1 - 0.55 * rise);
       // Vertical shading: the crown takes the sun, the belly sits in its own
       // shadow. Carried in the texture's luminance so a single sprite tint can
       // still swing the whole thing to gold at dusk.
@@ -1872,6 +1936,12 @@ export default function Mikdash() {
     // the height and move at a third of the apparent speed, which is the only
     // parallax cue a sky has.
     const cMap = cloudTex(), ciMap = cirrusTex();
+    // These two are sprite maps, not tiles. makeCanvas() hands back
+    // RepeatWrapping because nearly everything else here is masonry that has
+    // to tile; on a cloud it wraps the top row of texels into the bottom one
+    // under bilinear filtering and rules a faint line along the sprite.
+    cMap.wrapS = cMap.wrapT = THREE.ClampToEdgeWrapping;
+    ciMap.wrapS = ciMap.wrapT = THREE.ClampToEdgeWrapping;
     const clouds = [];
     for (let layer = 0; layer < 3; layer++) {
       for (let i = 0; i < 6; i++) {
@@ -1895,6 +1965,85 @@ export default function Mikdash() {
       scene.add(s);
       clouds.push(s);
     }
+
+    // ═══════════ מַזָּרוֹת — the constellations ═══════════
+    //
+    // עֹשֶׂה־עָשׁ כְּסִיל וְכִימָה וְחַדְרֵי תֵמָן — He makes Ash, Kesil and Kimah and the
+    // chambers of the south (Iyov 9:9); and הַתְקַשֵּׁר מַעֲדַנּוֹת כִּימָה אוֹ מֹשְׁכוֹת
+    // כְּסִיל תְּפַתֵּחַ — can you bind the chains of Kimah, or loosen the cords of
+    // Kesil (38:31). Berachot 58b is where Shmuel, who said the paths of
+    // heaven were as clear to him as the streets of Nehardea, is asked what
+    // Kimah is; Rashi there has it as a knot of small stars.
+    //
+    // The shader draws a star *field*, which is a hash: a believable sky and
+    // not a recognisable one, and the difference between stars and a night is
+    // whether you can find anything in it. So three named figures are laid
+    // over it in their own shapes. Kimah gets no lines drawn through it,
+    // because it is a cluster and a cluster is not a drawing — which is also
+    // the whole force of the question in Iyov: what holds it together?
+    const starDot = makeCanvas(64, 64, (c2, w2, h2) => {
+      const g2 = c2.createRadialGradient(w2 / 2, h2 / 2, 0, w2 / 2, h2 / 2, w2 / 2);
+      g2.addColorStop(0, "rgba(255,255,255,1)");
+      g2.addColorStop(0.30, "rgba(255,252,240,0.72)");
+      g2.addColorStop(1, "rgba(255,255,255,0)");
+      c2.fillStyle = g2; c2.fillRect(0, 0, w2, h2);
+    });
+    starDot.wrapS = starDot.wrapT = THREE.ClampToEdgeWrapping;
+    // [x, y, magnitude] in the figure's own plane, and the pairs to join.
+    const FIGURES = [
+      { az: 2.42, alt: 0.40, spread: 132,          // כְּסִיל — Kesil, the great figure
+        stars: [[-1.00, 1.60, 1.5], [1.00, 1.75, 1.7], [-0.50, 0.15, 1.4],
+                [0.00, 0.00, 1.5], [0.50, -0.15, 1.4], [0.85, -1.60, 1.2],
+                [-1.05, -1.70, 1.8]],
+        lines: [[0, 2], [1, 4], [2, 3], [3, 4], [4, 5], [2, 6], [0, 1]] },
+      { az: 1.72, alt: 0.66, spread: 52,           // כִּימָה — Kimah, the knot
+        stars: [[0, 0, 1.1], [0.30, 0.14, 0.9], [0.54, 0.02, 1.0], [0.16, -0.24, 0.8],
+                [0.44, -0.32, 0.8], [0.72, -0.13, 0.7], [0.05, 0.32, 0.9]],
+        lines: [] },
+      { az: 5.40, alt: 0.78, spread: 118,          // עַיִשׁ — Ayish, the seven
+        stars: [[-1.40, 0.50, 1.5], [-1.35, -0.12, 1.4], [-0.60, -0.30, 1.3],
+                [-0.35, 0.06, 1.1], [0.28, 0.20, 1.4], [0.88, 0.36, 1.3],
+                [1.52, 0.14, 1.4]],
+        lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [4, 5], [5, 6]] },
+    ];
+    const SKY_R = 1480;
+    const constPos = [], constCol = [], constLine = [];
+    for (const f of FIGURES) {
+      // A local frame on the celestial sphere: look out along the figure's
+      // own direction, then step across it in amot of arc.
+      const fwd = new THREE.Vector3(Math.cos(f.alt) * Math.cos(f.az), Math.sin(f.alt),
+                                    Math.cos(f.alt) * Math.sin(f.az));
+      const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+      const up = new THREE.Vector3().crossVectors(right, fwd).normalize();
+      const at = (sx, sy) => new THREE.Vector3().copy(fwd)
+        .addScaledVector(right, (sx * f.spread) / SKY_R)
+        .addScaledVector(up, (sy * f.spread) / SKY_R).normalize().multiplyScalar(SKY_R);
+      const pts = f.stars.map(([sx, sy]) => at(sx, sy));
+      pts.forEach((v, k) => {
+        constPos.push(v.x, v.y, v.z);
+        // Magnitude carried as brightness, since one Points material has one
+        // size for all of them. A first-magnitude star goes white; the faint
+        // ones of Kimah stay grey, which is why it is hard to count them.
+        const b = Math.min(1, 0.34 + f.stars[k][2] * 0.42);
+        constCol.push(b, b * 0.985, b * 0.93);
+      });
+      for (const [a, b] of f.lines) constLine.push(pts[a].x, pts[a].y, pts[a].z, pts[b].x, pts[b].y, pts[b].z);
+    }
+    const constGeo = new THREE.BufferGeometry();
+    constGeo.setAttribute("position", new THREE.Float32BufferAttribute(constPos, 3));
+    constGeo.setAttribute("color", new THREE.Float32BufferAttribute(constCol, 3));
+    const constStarMat = new THREE.PointsMaterial({
+      map: starDot, size: 15, vertexColors: true, transparent: true, opacity: 0,
+      depthWrite: false, sizeAttenuation: false, fog: false, blending: THREE.AdditiveBlending,
+    });
+    const constLineMat = new THREE.LineBasicMaterial({ color: 0x9fb6e0, transparent: true, opacity: 0, depthWrite: false, fog: false });
+    const constLineGeo = new THREE.BufferGeometry();
+    constLineGeo.setAttribute("position", new THREE.Float32BufferAttribute(constLine, 3));
+    const constGroup = new THREE.Group();
+    constGroup.add(new THREE.Points(constGeo, constStarMat));
+    constGroup.add(new THREE.LineSegments(constLineGeo, constLineMat));
+    constGroup.visible = false;
+    scene.add(constGroup);
 
     // ── אָבָק — dust in the air ───────────────────────────────────────────
     //
@@ -3981,6 +4130,8 @@ export default function Mikdash() {
     // Set east of centre: due south they sat under the on-screen nav pad in
     // the opening framing, which is the one place nothing worth seeing should
     // go. Here they read against open dust with the stairs behind them.
+    // Clicked, they answer — the same way a kohen does, one line per click.
+    const camelGroups = [];
     const CAMELS = [
       { x: 132, z: HALF + 116, ry: -0.55, couched: true },
       { x: 178, z: HALF + 142, ry: -1.2, couched: false },
@@ -3993,7 +4144,9 @@ export default function Mikdash() {
       const cm = makeCamel(c.couched);
       cm.position.set(c.x, LAND_Y, c.z);
       cm.rotation.y = c.ry;
+      cm.userData.voice = SPECIES_VOICES.gamal;
       scene.add(cm);
+      camelGroups.push(cm);
     }
 
     // The scene clock, stamped once a frame by the loop below. Declared up
@@ -4049,6 +4202,7 @@ export default function Mikdash() {
       tail.scale.set(0.8, 1.25, 0.8);
       tail.position.set(-1.55, 2.10, 0); sheepProto.add(tail);
     }
+    const specimens = [];
     const SHEEP = 18;
     const sheepInst = [];
     for (const merged of mergeByMaterial(sheepProto).children) {
@@ -4078,36 +4232,134 @@ export default function Mikdash() {
         // animal so the flock never dips its heads together.
         gph: rnd(0, 6.28), grate: rnd(0.10, 0.22),
         wob: rnd(0, 6.28),
+        // How far through its own walk cycle, and which way it turns its head
+        // off the road when it stops to eat.
+        stride: rnd(0, 6.28), graze: 0, head: rnd(-0.9, 0.9),
       });
     }
+    // ── Nothing on four feet goes inside ──
+    //
+    // The plaza and everything standing on it is built ground: the courts, the
+    // stairs, the House. An animal that wanders onto it has walked into the
+    // Mikdash on its own feet, and that is not a thing that happens — the ones
+    // that come in for a korban are brought in, by a person, through a gate.
+    // Every animal here is held to this, and it is a clamp and not a hope.
+    //
+    // It is a wider box than the buildings, because an animal is not a point:
+    // the plaza is C + 78 across and this is its edge plus a body length.
+    const OUTDOORS = HALF + 46;
+    const outdoors = (x, z) => Math.abs(x) > OUTDOORS || Math.abs(z) > OUTDOORS;
+
     const sheepM = new THREE.Matrix4(), sheepQ = new THREE.Quaternion();
     const sheepE = new THREE.Euler(), sheepP = new THREE.Vector3(), sheepS = new THREE.Vector3(1, 1, 1);
     const stepSheep = (dt2) => {
       const span = FLOCK_START - FLOCK_END;
       // Called once at build time, before the loop has stamped a clock.
       const tt = nowT || 0;
+      // ── First where every animal is, then what the flock does about it ──
       for (let i = 0; i < SHEEP; i++) {
         const sh = sheep[i];
-        // Grazing: nose down, and while the nose is down the feet stop. One
-        // number does both, which is also true of sheep.
-        const graze = Math.max(0, Math.sin(sh.gph + tt * sh.grate));
-        sh.along -= sh.sp * dt2 * (1 - graze * 0.92);
-        if (sh.along < 0) sh.along += span;
+        // Grazing, eased in and out. max(0, sin) started and stopped a sheep
+        // dead between one frame and the next, which is the single most
+        // unnatural thing an animal can do — it reads as a dropped frame, not
+        // as a decision. Same wave, put through a smoothstep: the head goes
+        // down over about a second and the feet slow with it.
+        const w0 = Math.sin(sh.gph + tt * sh.grate);
+        sh.graze = w0 <= 0 ? 0 : w0 * w0 * (3 - 2 * w0);
+        const walk = 1 - sh.graze;
+        sh.along -= sh.sp * dt2 * walk;
+        // The stride advances with ground covered rather than with the clock,
+        // so a standing animal stops bobbing instead of jogging on the spot.
+        sh.stride += sh.sp * dt2 * walk * 1.15;
+        if (sh.along < 0) { sh.along += span; sh.lane = rnd(-70, 26); sh.head = rnd(-0.9, 0.9); }
+      }
+      // ── Not through one another ──
+      // Eighteen animals is three hundred and twenty-four comparisons, which
+      // costs nothing, and without it they walked straight through each other:
+      // the other half of what looked wrong. The push is sideways only and
+      // gentle, because a flock closes up nose to tail and never overlaps
+      // shoulder to shoulder.
+      for (let i = 0; i < SHEEP; i++) {
+        for (let j = i + 1; j < SHEEP; j++) {
+          const a = sheep[i], b = sheep[j];
+          const dx = a.lane - b.lane, dz = a.along - b.along;
+          if (Math.abs(dx) > 4.5 || Math.abs(dz) > 4.5) continue;
+          const d = Math.hypot(dx, dz) || 0.0001;
+          const push = (4.5 - d) * 0.25;
+          a.lane += (dx / d) * push; b.lane -= (dx / d) * push;
+        }
+      }
+      for (let i = 0; i < SHEEP; i++) {
+        const sh = sheep[i];
         const z = FLOCK_END + sh.along;
         // The road is not straight and neither is a flock on it.
-        const x = sh.lane + Math.sin(z * 0.012 + sh.wob) * 9;
-        sheepP.set(x, LAND_Y, z);
-        // Facing up the road, nose pitched into the grass, and the small
-        // side-to-side roll of a walking quadruped.
-        sheepE.set(0, -Math.PI / 2 + Math.cos(z * 0.012 + sh.wob) * 0.12,
-                   graze * 0.42 + Math.sin(tt * 3.1 + sh.wob) * 0.03 * (1 - graze));
+        let x = sh.lane + Math.sin(z * 0.012 + sh.wob) * 9;
+        if (!outdoors(x, z)) x = x < 0 ? -OUTDOORS - 1 : OUTDOORS + 1;
+        // A walk is a rise and fall over the shoulders, twice a stride, and
+        // it is most of what tells an eye that legs are being used at all.
+        const gait = Math.sin(sh.stride) * 0.09 * (1 - sh.graze);
+        sheepP.set(x, LAND_Y + Math.abs(gait), z);
+        // Facing up the road — but a grazing sheep turns off it. That is the
+        // tell: a flock at rest points every which way and a flock walking
+        // points one way, and this one always pointed one way.
+        const yaw = -Math.PI / 2 + Math.cos(z * 0.012 + sh.wob) * 0.12 + sh.graze * sh.head;
+        // And it dips its front end rather than folding in half. The old
+        // pitch was 0.42 radians, twenty-four degrees of whole rigid animal,
+        // which is a seesaw. This is a nod, and the rest is done by the yaw
+        // and by standing still — which is what actually reads as grazing.
+        sheepE.set(0, yaw, sh.graze * 0.15 + gait * 0.35);
         sheepQ.setFromEuler(sheepE);
+        // Loops are the other thing that looked wrong: an animal reaching the
+        // bottom of the road was teleported to the top of it in one frame, in
+        // full view. It fades out over the last twelve amot and back in over
+        // the first, which at this distance reads as haze.
+        const edge = Math.min(sh.along, span - sh.along);
+        const fade = Math.min(1, Math.max(0, edge / 12));
+        sheepS.setScalar(fade * fade * (3 - 2 * fade));
         sheepM.compose(sheepP, sheepQ, sheepS);
         for (const im of sheepInst) im.setMatrixAt(i, sheepM);
       }
       for (const im of sheepInst) im.instanceMatrix.needsUpdate = true;
     };
     stepSheep(0);
+    // The whole flock is two instanced meshes, so the voice goes on the mesh
+    // and any animal in it answers for all of them — which is the right
+    // granularity anyway: nothing here is about one sheep.
+    for (const im of sheepInst) im.userData.voice = SPECIES_VOICES.tzon;
+
+    // ── עֵצִים עַל הַדֶּרֶךְ — four trees a visitor walks past ──
+    //
+    // The grove is merged down to one geometry per material, which is what
+    // makes a thousand trees affordable and also means there is no such thing
+    // there as *a* tree to click. So four are planted outside the merge, on
+    // the western side of the southern approach: far enough off the road that
+    // the flock does not walk through them, and outside plantable()'s
+    // precinct box, which is Devarim 16:21 — לֹא תִטַּע לְךָ אֲשֵׁרָה כָּל עֵץ אֵצֶל
+    // מִזְבַּח ה'. Nothing is planted inside, here or anywhere.
+    const SPECIMENS = [
+      ["zayit", -172, HALF + 155, 1.15, "zayit"],
+      ["tamar", -216, HALF + 132, 1.0, "tamar"],
+      ["charuv", -262, HALF + 170, 1.1, "charuv"],
+      ["shaked", -206, HALF + 196, 1.0, "shaked"],
+    ];
+    for (const [kind, sx, sz, sc, voice] of SPECIMENS) {
+      if (!plantable(sx, sz) || !outdoors(sx, sz)) continue;   // both rules, or it does not go in
+      const t = TREES[kind](sc);
+      t.position.set(sx, LAND_Y, sz);
+      t.rotation.y = rnd(0, 6.283);
+      t.userData.voice = SPECIES_VOICES[voice];
+      scene.add(t);
+      specimens.push(t);
+    }
+    // Everything alive outside the walls answers now: the caravan, the flock and
+    // the four trees. This has to sit *here* and not up beside the other
+    // clickables.push calls — all three of these are declared further down the
+    // closure than that, so pushing them there is a dead-zone ReferenceError at
+    // load, which a bundler will not tell you about because it is not a syntax
+    // error. Small groups, so the click raycast stays cheap; the grove itself is
+    // deliberately left out, because one merged canopy the size of the map would
+    // be tested triangle by triangle on every tap.
+    clickables.push(...camelGroups, ...sheepInst, ...specimens);
 
     // ═══════════ כִּנּוֹר — the harp of the Levites ═══════════
     //
@@ -6557,6 +6809,14 @@ export default function Mikdash() {
       // after sunset, so it outlives the sun deliberately: it is still at a
       // third of full when the direct light has been gone for ten degrees.
       const skyAmt = sstep(-0.22, 0.14, sunY);
+      // The named figures rise and set on the same curve as the shader's own
+      // star field, squared so they stay out of a blue sky rather than
+      // ghosting over one all through dusk.
+      const starAmt = (1 - skyAmt) * (1 - skyAmt);
+      constGroup.visible = starAmt > 0.02;
+      constStarMat.opacity = starAmt;
+      // The join lines are a reading aid, not a thing in the sky: barely there.
+      constLineMat.opacity = starAmt * 0.17;
       hemi.intensity = 0.25 + 0.40 * skyAmt;
       hemiA.copy(dayHemiSky).lerp(duskHemiSky, low * low * dayAmt);
       hemi.color.copy(hemiA).lerp(nightHemiSky, 1 - skyAmt);

@@ -1,5 +1,66 @@
 # Changelog
 
+## v3.27 — "Nothing Walks In On Its Own Feet" (0.3.27)
+
+- **הַצֹּאן.** The flock slid. Four separate things were wrong and all of them
+  were the same mistake — motion written as a formula rather than as an animal.
+  Grazing was `max(0, sin)`, which starts and stops a sheep dead between one
+  frame and the next; it is eased now, so the head goes down over about a
+  second and the feet slow with it. The nose-down was 0.42 radians of whole
+  rigid animal, a twenty-four degree seesaw; it is a nod now, and the grazing
+  is carried instead by the animal turning off the road and standing still,
+  which is what actually reads. There was no gait at all, so eighteen sheep
+  slid along like counters — there is a rise and fall over the shoulders now,
+  advanced by ground covered rather than by the clock, so a stopped animal
+  stops bobbing instead of jogging on the spot. And they walked through each
+  other; eighteen animals is 324 comparisons, which costs nothing.
+  - **And they teleported.** A sheep reaching the bottom of the road was put
+    back at the top of it in one frame, in full view. It fades out over the
+    last twelve amot and back in over the first, and picks a new lane on the
+    way round so it is not recognisably the same animal returning.
+
+- **Nothing on four feet goes inside.** The ones that come in for a korban are
+  brought in, by a person, through a gate; nothing wanders in. That is a clamp
+  now rather than an accident of where the road was drawn — one keep-out box,
+  the plaza's own edge plus a body length, that every animal is held to. All
+  five placed animals were checked against it, and the flock was simulated over
+  a full loop of the road at its worst case: widest lane, full separation push,
+  full wobble. Closest approach, twenty amot clear.
+
+- **The clouds were square, and the comment said why.** *The ones near the crown
+  are smaller — which is what gives the cauliflower edge*, said the code, and
+  then keyed the puff radius only off the horizontal mound. So a full-sized
+  puff could sit at the very crown, run off the top of the canvas and be cropped
+  by it — and a crop is a straight line. Flat top from the bug, flat bottom on
+  purpose, widest puffs clipped at the sides: a rectangle. Crown puffs shrink
+  now, which keeps every puff inside the canvas and finally draws the edge the
+  comment was promising. The sprite maps are also clamped rather than tiled —
+  makeCanvas hands back RepeatWrapping because nearly everything else here is
+  masonry, and on a cloud that wraps the top row of texels into the bottom one.
+
+- **מַזָּרוֹת — the constellations.** עֹשֶׂה־עָשׁ כְּסִיל וְכִימָה (Iyov 9:9), and
+  הַתְקַשֵּׁר מַעֲדַנּוֹת כִּימָה אוֹ מֹשְׁכוֹת כְּסִיל תְּפַתֵּחַ (38:31). The shader draws a star
+  *field*, which is a hash: a believable sky and not a recognisable one, and the
+  difference between stars and a night is whether you can find anything in it.
+  Three named figures are laid over it in their own shapes and rise and set on
+  the same curve as the rest. Kimah has no lines drawn through it, because it is
+  a cluster and a cluster is not a drawing — which is most of the force of the
+  question in Iyov: what is it that holds it together?
+
+- **The living things answer.** The kohanim and the Levites already did, and
+  everything outside the walls was scenery you could walk past and learn nothing
+  from. The caravan, the flock, and four trees planted on the approach outside
+  the merge now use the same mechanism, so each click gives the next line and a
+  source travels with every one: the camel on Yeshayahu 60:6 and on why its hump
+  is fat rather than water and why a loaded camel rocks as it walks; the flock on
+  Devarim 14:24 and on the horizontal slot of a sheep's pupil; the olive, the
+  date, the carob — Choni and the seventy years — and the almond that is awake.
+  - The pomegranate's six hundred and thirteen seeds is deliberately not among
+    them. It is a lovely saying, counts vary, and this House does not print a
+    number it cannot stand behind.
+  - The four are planted outside `plantable()`, which is Devarim 16:21, and
+    outside the animal box as well — both rules, or the tree does not go in.
+
 ## v3.26 — "What the Kinor Remembers" (0.3.26)
 
 - **הַכִּנּוֹר.** The wonder at the harp’s foot says *touch it and it remembers
