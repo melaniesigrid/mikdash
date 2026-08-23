@@ -1,5 +1,62 @@
 # Changelog
 
+## v3.24 — "Nothing Stands on Air" (0.3.24)
+
+- **הַכֶּבֶשׁ could not be climbed.** v3.23 said twice — in the code and here —
+  that `groundHeight` had been carrying a walker up the incline ever since the
+  ten steps came out, so the hole under the ramp was only ever in the eye. It
+  had not. The ramp's test sat *below* the inner court's, and the ramp stands
+  inside the inner court, so the flat floor of the azarah answered first and
+  the ramp's own line never ran once. Anybody going up to the fire walked the
+  paving straight through nine amot of stone until the altar stopped him. The
+  ramp is asked first now, and the ascent at the foot of the wonder that says
+  climb it by a ramp and not by steps is a thing you can actually climb.
+
+- **And the surface a foot lands on is the surface the eye sees.** The walk
+  plane was the ideal incline — the thirty-two by sixteen Middot 3:3 gives —
+  while the stone laid along it is a slab of real thickness measured on its own
+  perpendicular, with its centre dropped a further fifth of an amah to seat it.
+  The face is 0.63 amot above the line, so the feet sank that far into the deck
+  the whole way up. `KEV_SURF` is that offset, derived beside the slab out of
+  the slab's own numbers rather than typed in, so the walked surface and the
+  built surface cannot drift apart again. At the foot it leaves a lip of two
+  thirds of an amah: that is the ramp's buried foot showing through the paving,
+  which the eye already sees, and a fifth of what a walker is allowed to step
+  up.
+
+- **הַמַּדְרֵגוֹת.** Every flight in the House was its treads and nothing else.
+  The fifteen between the courts, the southern pilgrim stair and the eastern —
+  thirty-eight slabs in all, hanging one above another with daylight between
+  them and the ground, so that from anywhere but straight on a stair read as a
+  fire escape. Each tread now carries a block of stone from the paving up to
+  its own underside, running from that tread’s face to the face of the one
+  above it; the blocks meet on those planes exactly, so there is nothing to
+  overlap and nothing left open. The mass is read off the treads rather than
+  given, so the fifteen — which narrow from seventy amot to thirty-six as they
+  climb — get a mass that narrows with them, and the southern flight’s deep
+  every-third tread gets a deeper block, which is what tells you it is a
+  landing.
+
+- **כִּפִּין עַל גַּבֵּי כִּפִּין.** Parah 3:6 builds the causeway to Har HaMishcha as
+  arches upon arches, an arch above each pier, against a grave hidden in the
+  ground below — and what stood here was the drawing of that rather than the
+  building: six thin hoops of stone slung between six thin piers, with the road
+  floating over the top and daylight through every spandrel. An arcade is a
+  wall that has been pierced, not a row of rings. The spandrels are filled, as
+  one wall with an opening cut in it — the semicircle traced over the crown and
+  squared off under the road — so the opening is a true curve and not a
+  staircase of boxes; the ring rides half an amah proud of it as an archivolt.
+  The piers went from six amot deep to twelve, because a viaduct fourteen
+  across cannot stand on piers six deep, and to nine wide, which makes the
+  clear span between two of them exactly the arch’s twenty-one. There is a
+  seventh pier now, so the last arch comes down on something, and a parapet on
+  the far side too.
+  - Still open, and a decision rather than a bug: the causeway begins and ends
+    in the air. Its western end stops seventy-five amot short of the eastern
+    wall, and its eastern end stops eleven amot above Har HaMishcha, because
+    the mound’s crown sits below the deck. Landing it means either raising the
+    mound or bringing the road down to it.
+
 ## v3.23 — "A Ramp Is Built, Not Laid" (0.3.23)
 
 - **הַכֶּבֶשׁ.** The ramp was drawn as one inclined slab and nothing held it up,

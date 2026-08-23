@@ -2081,6 +2081,47 @@ export default function Mikdash() {
       return m;
     };
 
+    // ── A stair is a mass of masonry with treads on it ──
+    //
+    // Every flight in this House was drawn as its treads and nothing else, so
+    // from any angle but straight on you saw twelve or fifteen slabs hanging
+    // one above another with daylight between them and the ground. This puts
+    // the mass back: under each tread a block from the foundation up to its
+    // underside, running along the flight from that tread’s own down-flight
+    // face to the face of the tread above it. Consecutive blocks meet on that
+    // plane exactly — nothing overlaps, so no two faces fight for a pixel, and
+    // nothing is left open, so there is no seam to see daylight through.
+    //
+    // Only `axis`, the horizontal axis the flight marches along, has to be
+    // said. Which way is down-flight, how deep each block is and how wide are
+    // all read off the treads themselves, so a flight that narrows as it rises
+    // — the fifteen do, seventy amot down to thirty-six — gets a mass that
+    // narrows with it.
+    const underfill = (treads, ground, axis, mat) => {
+      const cross = axis === "x" ? "z" : "x";
+      const span = (m, a) => (a === "x" ? m.geometry.parameters.width : m.geometry.parameters.depth);
+      const up = [...treads].sort((a, b) => a.position.y - b.position.y);
+      // down-flight is whichever way the lowest tread lies from the highest
+      const dir = Math.sign(up[0].position[axis] - up[up.length - 1].position[axis]) || 1;
+      const face = (m) => m.position[axis] + (dir * span(m, axis)) / 2;
+      // sunk a little into the paving, so the mass and the ground do not meet
+      // on one plane either
+      const foot = ground - 0.6;
+      for (let i = 0; i < up.length; i++) {
+        const t = up[i];
+        const top = t.position.y - t.geometry.parameters.height / 2 + 0.1;
+        if (top <= ground) continue;              // this tread is already on the ground
+        const back = i + 1 < up.length ? face(up[i + 1]) : face(t) - dir * span(t, axis);
+        const run = Math.abs(face(t) - back), mid = (face(t) + back) / 2;
+        // an amah-eighth of nosing each side, which is also what keeps the
+        // tread’s flanks and the mass’s flanks off one plane
+        const w = span(t, cross) - 0.24, h = top - foot;
+        box(axis === "x" ? run : w, h, axis === "x" ? w : run, mat,
+          axis === "x" ? mid : t.position.x, foot + h / 2,
+          axis === "x" ? t.position.z : mid, t.parent);
+      }
+    };
+
     // ═══════════ Land + platform ═══════════
     // 26 repeats over a 3200-amah disc puts one tile every ~123 amot. At the
     // old 10 the drawn grain was being magnified twelve-fold, so dust read as
@@ -2755,12 +2796,19 @@ export default function Mikdash() {
     plaza.receiveShadow = true;
 
     // Monumental stairs (south + east)
+    const southTreads = [], eastTreads = [];
     for (let s = 0; s < 12; s++) {
       const deep = s % 3 === 0 ? 6 : 3.4;
-      box(150, 1.25, deep, marble, 0, LAND_Y + 13 - s * 1.2, HALF + 40 + s * 3.4);
+      southTreads.push(box(150, 1.25, deep, marble, 0, LAND_Y + 13 - s * 1.2, HALF + 40 + s * 3.4));
     }
     for (let s = 0; s < 12; s++)
-      box(4.5, 1.25, 110, marble, HALF + 40 + s * 3.4, LAND_Y + 13 - s * 1.2, 0);
+      eastTreads.push(box(4.5, 1.25, 110, marble, HALF + 40 + s * 3.4, LAND_Y + 13 - s * 1.2, 0));
+    // Both of these come down onto the land, not onto the plaza. Every third
+    // southern tread is six deep against the others’ three and two fifths, so
+    // the blocks under them come out uneven — which is right: they are reading
+    // the flight, not a rule.
+    underfill(southTreads, LAND_Y, "z", marble);
+    underfill(eastTreads, LAND_Y, "x", marble);
 
     // ═══════════ Outer walls ═══════════
     const WALL_H = 16, WALL_T = 6, GATE_W = 25;
@@ -3203,6 +3251,9 @@ export default function Mikdash() {
       st.userData.step = s;            // the lowest step is the lowest note
       stepMeshes.push(st);
     }
+    // These come down onto the plaza. Plain marble, not the tuned clones: the
+    // mass under a step has no note and must not flash when the step sounds.
+    underfill(stepMeshes, 0, "x", marble);
     const par = (w, d, x, z) => {
       box(w, 2.8, d, white, x, IC_H + 1.4, z);
     };
@@ -3405,13 +3456,19 @@ export default function Mikdash() {
     const kevLen = Math.hypot(KEV_RUN, ALT_H) + 1.2;
     const kevesh = box(kevLen, KEV_T, KEV_W, white, AX + KEV_RUN, TOP + ALT_H / 2 - 0.2, 0);
     kevesh.rotation.z = -kevAngle;
+    // How far the stone a foot lands on stands above the ideal incline: half
+    // the slab's thickness taken on the vertical rather than on its own
+    // perpendicular, less the 0.2 its centre was dropped. It lives here, next
+    // to the numbers it is made of, and groundHeight() adds it — so the walked
+    // surface and the seen surface can only ever be the same plane.
+    const KEV_SURF = (KEV_T / 2) / Math.cos(kevAngle) - 0.2;
     // ── and a ramp is a built mass of stone, not a plank laid on air ──
     //
     // Drawn as that one inclined slab it read as a diving board: from the
     // north or the south you looked straight under it, through a triangle of
     // daylight thirty-two long and nine tall, and out the other side. The
-    // walker never believed it either — groundHeight already climbs this as
-    // solid ground, so the void was only ever in the eye.
+    // walker walks on it and not through it — groundHeight climbs this
+    // incline as solid ground, so the void is only ever in the eye.
     //
     // So the incline stays the surface, and a second block carries it: same
     // length, same axis, same rotation, dropped along the ramp's own
@@ -4466,16 +4523,56 @@ export default function Mikdash() {
     // 34 · פרה אדומה — burned on Har HaMishcha, reached by a causeway of arches
     // upon arches, an arch above each pier, against a grave in the depths
     // (Parah 3:6; Bamidbar 19).
+    // כִּפִּין עַל גַּבֵּי כִּפִּין — arches upon arches. What stood here was the
+    // drawing of that and not the building: six thin hoops of stone hung
+    // between six thin piers, the deck floating over the top of them, and
+    // daylight through every spandrel and out the far side. An arcade is a
+    // wall that has been pierced, not a row of rings.
+    //
+    // Three things follow. The piers carry the deck’s own width less an amah
+    // of cornice each side, because a viaduct fourteen amot across cannot
+    // stand on piers six deep. There is one more pier than there were, so the
+    // last arch comes down on something instead of flying. And the spandrel is
+    // filled — as one wall with an opening cut in it, which needs no stepping
+    // and no approximation: the outline is the semicircle traced over the top
+    // and squared off at the soffit, extruded to the pier’s depth. The ring
+    // then rides half an amah proud of that wall, as an archivolt.
     const CWAY_Z = -74, CWAY_Y = LAND_Y + 21;
-    for (let a2 = 0; a2 < 6; a2++) {
-      const px = 330 + a2 * 30;
-      box(6, 21, 6, mega, px, LAND_Y + 10.5, CWAY_Z);        // pier, up to the deck
+    const CWAY_D = 12, CWAY_R = 10.5;      // barrel depth; the arch’s intrados
+    const soffit = CWAY_Y - 1.5;           // the underside of the road
+    for (let a2 = 0; a2 < 7; a2++) {
+      // Nine wide, so the clear span between two piers is exactly the arch’s
+      // twenty-one and the ring springs off the pier face rather than off air.
+      const px = 335 + a2 * 30;
+      box(9, 21, CWAY_D, mega, px, LAND_Y + 10.5, CWAY_Z);   // pier, up to the deck
+      if (a2 === 6) continue;                                // the seventh only lands the sixth arch
+      const cx = px + 15, cy = LAND_Y + 6.5;
       const arch = new THREE.Mesh(new THREE.TorusGeometry(12, 1.5, 6, 14, Math.PI), mega);
-      arch.position.set(px + 15, LAND_Y + 6.5, CWAY_Z);      // an arch above each pier
+      arch.position.set(cx, cy, CWAY_Z);                     // an arch above each pier
+      arch.scale.z = (CWAY_D + 1) / 3;                       // the tube is three across; make it the barrel
+      arch.castShadow = arch.receiveShadow = true;
       scene.add(arch);
+      const sp = new THREE.Shape();
+      sp.moveTo(-CWAY_R, 0);
+      sp.absarc(0, 0, CWAY_R, Math.PI, 0, true);             // over the crown, springing to springing
+      sp.lineTo(CWAY_R, soffit + 0.3 - cy);                  // 0.3 up into the deck, so no two faces meet on a plane
+      sp.lineTo(-CWAY_R, soffit + 0.3 - cy);
+      const spGeo = new THREE.ExtrudeGeometry(sp, { depth: CWAY_D, bevelEnabled: false, curveSegments: 24 });
+      // Extrusion lays its UVs out in world units, and over an ashlar map cut
+      // for a 2×2 repeat that would put a course every half amah. Twenty is
+      // roughly the face the piers beside it are already wearing.
+      const uv = spGeo.attributes.uv;
+      for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) / 20, uv.getY(k) / 20);
+      const spandrel = new THREE.Mesh(spGeo, mega);
+      spandrel.position.set(cx, cy, CWAY_Z - CWAY_D / 2);
+      spandrel.castShadow = spandrel.receiveShadow = true;
+      scene.add(spandrel);
     }
     box(200, 3, 14, marble, 425, CWAY_Y, CWAY_Z);
-    for (let r2 = -6; r2 <= 6; r2++) box(4, 2.4, 1.2, white, 425 + r2 * 15, CWAY_Y + 2.7, CWAY_Z + 7);
+    // A parapet on one side of a bridge is a parapet nobody would walk beside.
+    for (const side of [-1, 1])
+      for (let r2 = -6; r2 <= 6; r2++)
+        box(4, 2.4, 1.2, white, 425 + r2 * 15, CWAY_Y + 2.7, CWAY_Z + side * 7);
     const mound = new THREE.Mesh(new THREE.SphereGeometry(70, 14, 9), new THREE.MeshStandardMaterial({ color: 0xa89769, roughness: 1 }));
     mound.scale.y = 0.22;
     mound.position.set(560, LAND_Y - 5, CWAY_Z);
@@ -5650,12 +5747,30 @@ export default function Mikdash() {
       // eastern inner-court steps: ramp from court edge down to the azarah floor
       if (z > -35 && z < 35 && x > IC_E && x < IC_E + 40)
         return Math.max(0, IC_H * (1 - (x - IC_E) / 40));
+      // ── the altar's ramp — one incline now, not ten steps, and the
+      // walker's floor has to be the same surface the eye is looking at ──
+      //
+      // It has to be asked before the inner court and not after. The ramp
+      // stands inside the court, so the court's flat IC_H answered first and
+      // this line never ran once: the ascent was drawn, the wonder at its foot
+      // said climb it, and walk mode kept everybody on the paving right up to
+      // the altar wall.
+      //
+      // And what it returns is the visible face, not the ideal incline. The
+      // slab is KEV_T thick measured on its own perpendicular and its centre
+      // was dropped another 0.2, so the stone the eye sees lies KEV_SURF above
+      // the line thirty-two-by-nine describes; without it the feet sank a
+      // little over half an amah into the deck the whole way up. A plane
+      // parallel to the incline is the same climb held at a fixed height, so
+      // the offset is one number, constant along the run.
+      //
+      // At the foot that leaves a KEV_SURF lip above the paving, which is the
+      // ramp's own buried foot showing — two thirds of an amah, far under what
+      // a walker is allowed to climb, and the same lip the eye already sees.
+      if (z > -8 && z < 8 && x > AX + 16 && x < AX + 48)
+        return IC_H + KEV_SURF + Math.max(0, ALT_H * (1 - (x - (AX + 16)) / 32));
       // inner court
       if (x > -190 && x < IC_E && z > -IC / 2 && z < IC / 2) return IC_H;
-      // the altar's ramp — one incline now, not ten steps, and the walker's
-      // floor has to be the same surface the eye is looking at
-      if (z > -8 && z < 8 && x > AX + 16 && x < AX + 48)
-        return IC_H + Math.max(0, ALT_H * (1 - (x - (AX + 16)) / 32));
       // southern monumental stair
       if (x > -76 && x < 76 && z > HALF + 36 && z < HALF + 82)
         return Math.max(LAND_Y, -((z - (HALF + 36)) / 46) * 14);
