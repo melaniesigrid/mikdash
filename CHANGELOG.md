@@ -1,5 +1,56 @@
 # Changelog
 
+## v3.30 — "From Somewhere, To Somewhere" (0.3.30)
+
+- **The causeway led nowhere, from nowhere.** Its western end stopped thirty-six
+  amot short of the plaza and nineteen and a half above the valley floor; its
+  eastern end stopped in the air eleven amot over the crown of Har HaMishcha.
+  Two hundred amot of road with nothing at either end. Flagged in v3.24 as a
+  decision rather than a bug, which it was — and it was also just wrong.
+  - **West:** an eighth bay, so the deck reaches the plaza's own edge, and it
+    lands on an abutment — a solid block from the valley floor to the underside
+    of the road, set against the outside of the plaza's retaining skirt, which
+    is what a bridge stands on where it meets the ground it came from. The road
+    is eight and a half amot above the Mount it leaves, so there are twelve
+    steps down onto the plaza, and they are solid, under the same underfill()
+    rule every other flight here has been held to since v3.24.
+  - **East:** Middot 2:4 says how high the hill has to be, and gets there from
+    the other direction — every wall of the courts was high except the eastern
+    one, כדי שיהא הכהן השורף את הפרה עומד בהר המשחה ומתכוין ורואה בפתחו של היכל,
+    so that the kohen burning the parah, standing on Har HaMishcha, could look
+    through the eastern gate and see the doorway of the Heichal as he sprinkled.
+    A man on that hill has to see over a sixteen-amah wall, and its crown sat
+    three and a half amot *below* the plaza. It stands three and a half above the
+    wall now. The road runs into its western flank fourteen amot before the deck
+    ends, the last pier is inside the hill, and the heifer is placed off the
+    hillside's own equation rather than off a number that goes stale the moment
+    the hill is raised.
+
+- **הָבָה נָגִילָה, and the tune is a courtyard song.** A fifth melody, and the
+  first one here that is traditional rather than composed or national: a nigun
+  of the Sadigura chassidim, written down by Avraham Zvi Idelsohn in 1918 while
+  he was collecting the music of the yishuv, first recorded in 1922, and public
+  domain. Its words are a line of Hallel — נָגִילָה וְנִשְׂמְחָה, Tehillim 118:24 —
+  which is the Hallel the Levites sang in this court. The most famous Jewish
+  melody in the world turns out to have come from here.
+  - **And it needed no arranging.** Notated in a G-minor key signature, it
+    sounds in D Ahava Rabbah — the mode the fifteen steps are tuned to — and
+    every one of its hundred and thirty-eight notes is one of the fifteen. Not
+    one falls to the nearest tread: the whole tune lights the ascent exactly.
+    Read off the engraved score, repeats written out, twenty-five bars of 4/4
+    with every bar checked to total four.
+  - The score carries five tempo marks and a closing fermata, and the player has
+    one number. It takes the last of the five, 132, and the accelerando that is
+    the whole character of the tune is the one thing not reproduced — written
+    down in the file rather than hidden, because it is a real loss.
+
+- **The Nigun of Ascent was too slow.** 108 was a walking pulse for a thing that
+  is danced; 140 is the pace it is actually clapped at, and it is the one tempo
+  here answerable to nothing but the ear, since it is the one melody with no
+  score to be faithful to. It carries the harp with it — HARP_SONG takes the
+  nigun's own bpm rather than a number of its own — so the kinor comes down from
+  twenty-three seconds to eighteen, which it wanted anyway.
+
 ## v3.29 — "It Is Inside Now" (0.3.29)
 
 - **The Menorah could not be repeated, and asking dimmed the House.** Two of

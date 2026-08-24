@@ -179,8 +179,15 @@ const MELODIES = [
     // Tempo. Every one of these was set a fifth under the speed the tune is
     // actually sung at, and four songs in a row at a funeral pace is what
     // "the songs play too slow" meant. A nigun of ascent is danced, not
-    // mourned: 108 is a walking-up pulse.
-    bpm: 108,
+    // mourned — and 108 was still only a walking pulse. 140 is the pace it is
+    // actually clapped at. It is also the one tempo in this array that answers
+    // to nothing but the ear: the other three are borrowed and have a score to
+    // be faithful to, and this one was written for this House.
+    //
+    // It carries the harp with it, because HARP_SONG takes the nigun's own bpm
+    // rather than a number of its own — twenty-three seconds of kinor down to
+    // eighteen, which the harp wanted anyway.
+    bpm: 140,
     blurb: "Wordless, and composed for this House rather than borrowed. It is built only from the fifteen notes the steps are tuned to — D Ahava Rabbah, the mode of the ba'al tefillah — and it climbs, because a Song of Ascent should.",
     source: "Mode: Ahava Rabbah · the steps: Middot 2:5; Sukkah 51b",
     // Rises the full two octaves of the ascent, then settles home.
@@ -194,6 +201,51 @@ const MELODIES = [
             [55,1],[57,1],[58,1],[57,1],[55,3],[0,1],
             [62,1],[63,1],[66,1],[67,1],[69,2],[67,1],[66,1],[63,2],[62,2],[0,1],
             [60,1],[58,1],[57,1],[55,1],[54,1],[51,1],[50,4]],
+  },
+  {
+    id: "hava",
+    heb: "הָבָה נָגִילָה",
+    title: "Hava Nagila",
+    verified: true,
+    // The score carries five tempo marks — 108, 114, 120, 126, 132 — and a
+    // fermata that drops to 54 at the end. The player has one number, so this
+    // is the last of the five, the one the dance actually lands on, and the
+    // accelerando that is the whole character of the tune is the one thing here
+    // that is not reproduced. Said plainly rather than hidden: it is a real
+    // loss, and it is the price of a single-tempo player.
+    bpm: 132,
+    blurb: "The tune is not Israeli by origin and is older than the state: a nigun of the Sadigura chassidim, written down by Avraham Zvi Idelsohn in 1918 while he was collecting the music of the yishuv, and first recorded in 1922. Its words are a line of Hallel — נָגִילָה וְנִשְׂמְחָה, from Tehillim 118:24 — which is the Hallel the Levites sang in this court, so the most famous Jewish melody in the world turns out to be a courtyard song. And it needs no arranging to be played here: notated in a G-minor key signature, it sounds in D Ahava Rabbah, and every one of its notes is one of the fifteen steps.",
+    source: "Melody: Sadigura chassidic nigun, written down by A. Z. Idelsohn, 1918 · first recording 1922 — public domain · Words: after Tehillim 118:24 · Notes read off the engraved score in the Wikipedia article, 4/4, repeats written out.",
+    lyrics: { stanzas: [
+      { from: 0, to: 32,
+        he: "הָבָה נָגִילָה, הָבָה נָגִילָה,\nהָבָה נָגִילָה וְנִשְׂמְחָה.",
+        tl: "Hava nagila, hava nagila, hava nagila venismecha.",
+        en: "Come, let us rejoice — let us rejoice and be glad." },
+      { from: 32, to: 64,
+        he: "הָבָה נְרַנְּנָה, הָבָה נְרַנְּנָה,\nהָבָה נְרַנְּנָה וְנִשְׂמְחָה.",
+        tl: "Hava neranena, hava neranena, hava neranena venismecha.",
+        en: "Come, let us sing — let us sing and be glad." },
+      { from: 64, to: 88,
+        he: "עוּרוּ, עוּרוּ אַחִים!\nעוּרוּ אַחִים בְּלֵב שָׂמֵחַ.",
+        tl: "Uru, uru achim! Uru achim b'lev same'ach.",
+        en: "Awake, awake, brothers — awake, brothers, with a joyful heart." },
+      { from: 88, to: 100,
+        he: "עוּרוּ אַחִים בְּלֵב שָׂמֵחַ.",
+        tl: "Uru achim b'lev same'ach.",
+        en: "Awake, brothers, with a joyful heart." },
+    ] },
+    // Both strains twice, as the volta marks have them, then the third strain
+    // and its two one-bar answers twice each, then the coda.
+    notes: [[62,1],[62,1.5],[66,0.5],[63,0.5],[62,0.5],[66,1],[66,1.5],[69,0.5],[67,0.5],[66,0.5],[67,1],[67,1.5],[70,0.5],[69,0.5],[67,0.5],[66,1],[63,0.25],[62,0.25],[63,0.5],[62,2],
+            [62,1],[62,1.5],[66,0.5],[63,0.5],[62,0.5],[66,1],[66,1.5],[69,0.5],[67,0.5],[66,0.5],[67,1],[67,1.5],[70,0.5],[69,0.5],[67,0.5],[66,1],[63,0.25],[62,0.25],[63,0.5],[62,2],
+            [66,0.5],[66,1],[63,0.5],[62,0.5],[62,0.5],[62,1],[63,0.5],[63,1],[62,0.5],[60,0.5],[60,0.5],[60,1],[60,1],[63,0.75],[62,0.25],[60,0.5],[60,0.5],[67,1],[66,1],[63,0.25],[62,0.25],[63,0.5],[62,2],
+            [66,0.5],[66,1],[63,0.5],[62,0.5],[62,0.5],[62,1],[63,0.5],[63,1],[62,0.5],[60,0.5],[60,0.5],[60,1],[60,1],[63,0.75],[62,0.25],[60,0.5],[60,0.5],[67,1],[66,1],[63,0.25],[62,0.25],[63,0.5],[62,2],
+            [67,2],[67,2],[67,1],[67,1],[67,1],[67,1],
+            [67,0.5],[67,0.5],[70,0.75],[69,0.25],[67,0.5],[70,0.5],[69,0.5],[67,0.5],
+            [67,0.5],[67,0.5],[70,0.75],[69,0.25],[67,0.5],[70,0.5],[69,0.5],[67,0.5],
+            [69,0.5],[69,0.5],[72,0.75],[70,0.25],[69,0.5],[72,0.5],[70,0.5],[69,0.5],
+            [69,0.5],[69,0.5],[72,0.75],[70,0.25],[69,0.5],[72,0.5],[70,0.5],[69,0.5],
+            [69,0.5],[69,0.5],[74,1],[62,0.5],[62,0.5],[74,1],[0,0.5],[62,0.5],[62,0.5],[62,0.5],[70,0.5],[69,0.5],[67,0.5],[66,0.5],[67,3],[0,1]],
   },
   {
     id: "hatikvah",
@@ -4870,12 +4922,12 @@ export default function Mikdash() {
     const CWAY_Z = -74, CWAY_Y = LAND_Y + 21;
     const CWAY_D = 12, CWAY_R = 10.5;      // barrel depth; the arch’s intrados
     const soffit = CWAY_Y - 1.5;           // the underside of the road
-    for (let a2 = 0; a2 < 7; a2++) {
+    for (let a2 = 0; a2 < 8; a2++) {
       // Nine wide, so the clear span between two piers is exactly the arch’s
       // twenty-one and the ring springs off the pier face rather than off air.
-      const px = 335 + a2 * 30;
+      const px = 305 + a2 * 30;
       box(9, 21, CWAY_D, mega, px, LAND_Y + 10.5, CWAY_Z);   // pier, up to the deck
-      if (a2 === 6) continue;                                // the seventh only lands the sixth arch
+      if (a2 === 7) continue;                                // the eighth only lands the seventh arch
       const cx = px + 15, cy = LAND_Y + 6.5;
       const arch = new THREE.Mesh(new THREE.TorusGeometry(12, 1.5, 6, 14, Math.PI), mega);
       arch.position.set(cx, cy, CWAY_Z);                     // an arch above each pier
@@ -4898,14 +4950,61 @@ export default function Mikdash() {
       spandrel.castShadow = spandrel.receiveShadow = true;
       scene.add(spandrel);
     }
-    box(200, 3, 14, marble, 425, CWAY_Y, CWAY_Z);
+    // ── A causeway has to come from somewhere and go somewhere ──
+    //
+    // This one did neither. Its western end stopped thirty-six amot short of
+    // the plaza and nineteen and a half above the valley floor, and its
+    // eastern end stopped in the air eleven amot over the crown of Har
+    // HaMishcha. Two hundred amot of road with nothing at either end of it: a
+    // viaduct to nowhere, from nowhere.
+    //
+    // West: the deck runs to the plaza's own edge now and lands on an
+    // abutment — a solid block from the valley floor to the underside of the
+    // road, set against the outside of the plaza's retaining skirt, which is
+    // what a bridge stands on where it meets the ground it came from.
+    box(236, 3, 14, marble, 407, CWAY_Y, CWAY_Z);
+    box(11.5, 19.5, CWAY_D, mega, 294.75, LAND_Y + 9.75, CWAY_Z);
+    // And the road is eight and a half amot above the Mount it leaves, so
+    // there are steps down onto the plaza. Twelve of them, and they are solid
+    // — underfill() is the same rule every other flight in this House is held
+    // to since v3.24: a tread is the top of a mass of stone, not a slab in air.
+    const CW_TOP = CWAY_Y + 1.5, CW_STEPS = 12, CW_RISE = CW_TOP / CW_STEPS, CW_RUN = 2.4;
+    const cwayTreads = [];
+    for (let st = 0; st < CW_STEPS; st++) {
+      const top = CW_RISE * (st + 1);
+      cwayTreads.push(box(CW_RUN, CW_RISE + 0.2, 14, marble,
+        289 - CW_RUN * (CW_STEPS - st - 0.5), top - (CW_RISE + 0.2) / 2, CWAY_Z));
+    }
+    underfill(cwayTreads, 0, "x", marble);
     // A parapet on one side of a bridge is a parapet nobody would walk beside.
+    // Carried west with the deck; it stops where the hillside closes over the
+    // road, because past that there is no edge left to fall off.
     for (const side of [-1, 1])
-      for (let r2 = -6; r2 <= 6; r2++)
+      for (let r2 = -9; r2 <= 6; r2++)
         box(4, 2.4, 1.2, white, 425 + r2 * 15, CWAY_Y + 2.7, CWAY_Z + side * 7);
-    const mound = new THREE.Mesh(new THREE.SphereGeometry(70, 14, 9), new THREE.MeshStandardMaterial({ color: 0xa89769, roughness: 1 }));
-    mound.scale.y = 0.22;
-    mound.position.set(560, LAND_Y - 5, CWAY_Z);
+    // East: Har HaMishcha, which was a low swelling in the ground whose crown
+    // sat three and a half amot *below* the plaza — so the road arrived eleven
+    // amot above the hill it was built to reach, and the heifer stood on a
+    // hummock rather than on a mountain.
+    //
+    // Middot 2:4 says how high it has to be, and does it from the other
+    // direction: every wall of the courts was high except the eastern one,
+    // כדי שיהא הכהן השורף את הפרה עומד בהר המשחה ומתכוין ורואה בפתחו של היכל
+    // בשעת זריקת הדם — so that the kohen burning the parah, standing on Har
+    // HaMishcha, could look through the eastern gate and see the doorway of
+    // the Heichal at the moment he sprinkled the blood. A man on this hill has
+    // to be able to see over a sixteen-amah wall. Its crown stands three and a
+    // half amot above the top of that wall now, and the road runs into its
+    // western flank fourteen amot before the deck ends.
+    const MISHCHA = { x: 560, r: 70, squash: 0.55, base: LAND_Y - 5 };
+    // How high the hillside stands at a given distance out from the crown —
+    // so that anything meant to sit on this hill is placed off the hill's own
+    // numbers rather than off a guess that goes stale the moment it is raised.
+    const mishchaY = (dx) => MISHCHA.base + MISHCHA.r * MISHCHA.squash
+      * Math.sqrt(Math.max(0, 1 - (dx / MISHCHA.r) * (dx / MISHCHA.r)));
+    const mound = new THREE.Mesh(new THREE.SphereGeometry(MISHCHA.r, 14, 9), new THREE.MeshStandardMaterial({ color: 0xa89769, roughness: 1 }));
+    mound.scale.y = MISHCHA.squash;
+    mound.position.set(MISHCHA.x, MISHCHA.base, CWAY_Z);
     mound.receiveShadow = true;
     scene.add(mound);
     // ── שׁוֹר — an ox, built once and used twice ──
@@ -5047,7 +5146,9 @@ export default function Mikdash() {
     const redMuzzle = new THREE.MeshStandardMaterial({ color: 0x521a0b, roughness: 0.94 });
     const parahOx = makeOx({ hide: redHide, muzzle: redMuzzle });
     const parah = parahOx.group;
-    parah.position.set(536, LAND_Y + 9, CWAY_Z);
+    // Standing on the hillside, half an amah into it, wherever the hillside
+    // now is. Raising the hill used to leave her buried in it.
+    parah.position.set(536, mishchaY(536 - MISHCHA.x) - 0.5, CWAY_Z);
     parah.rotation.y = -2.3;
     parah.scale.set(1.8, 1.8, 1.8);   // she has to read as a heifer from the Mount
     parah.userData = { id: 34 };
