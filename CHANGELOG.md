@@ -1,5 +1,40 @@
 # Changelog
 
+## v3.33 — "The Rains Never Put It Out" (0.3.33)
+
+- **גֶּשֶׁם.** This House said three separate things about rain and it had never
+  once rained in it. Avot 5:5 counts among the ten miracles לֹא כִבּוּ גְשָׁמִים אֵשׁ
+  שֶׁל עֲצֵי הַמַּעֲרָכָה — the rains never put out the fire of the wood of the
+  arrangement. Shemini Atzeret in the לוּחַ says rain is asked for from today. The
+  golden vine is described as a thing no rain ever fed. A miracle about rain is
+  not much of a miracle in a place where the weather never turns.
+  - It rains now, and only in the season it is asked for: from Shemini Atzeret
+    to the first day of Pesach, which is exactly the span of מַשִּׁיב הָרוּחַ וּמוֹרִיד
+    הַגֶּשֶׁם. Checked at both ends — dry on Hoshana Rabbah, wet from the day after;
+    wet on erev Pesach, dry from the fifteenth. A bit over a third of the days
+    in that span, and *which* days is a fact about the date rather than about
+    the visit, the same rule the meteor showers keep: a wet afternoon in Kislev
+    is wet again when you come back to it.
+  - **And nothing in it touches the altar.** The fire is not dimmed, not
+    flickered, not guarded by a special case — it simply goes on burning while
+    the rain falls through the courts, and the visitor is the one who has to
+    notice. The first squall says the mishnah once and then leaves you to it.
+
+- **הַשּׁוּעָל — and the fox walks.** Its card has said *here the fox walks outside
+  the walls* since the day it was built, and the fox has stood perfectly still
+  the whole time — with references to its own tail, head and heading sitting in
+  userData, dead, kept by somebody who plainly meant to move it and never did.
+  It trots the southern approach now and turns at each end, swinging through
+  facing you on the way round, which is the half-second of a fox that has heard
+  something. East of the flock's lanes so it never walks through the sheep,
+  short of the caravan, and forty-four amot outside the keep-out box every
+  animal here is held to: a fox in the courts would be the ruin, and the ruin is
+  what Rabbi Akiva was laughing at, not standing in.
+  - A ring follows what it marks now, rather than the spot the thing was built
+    on. Only the fox moves, but that is the rule and not a patch for him —
+    otherwise finding him would have meant walking to a gold circle sitting in
+    the dust a hundred amot behind a fox.
+
 ## v3.32 — "It Rises As The Sun Sets" (0.3.32)
 
 - **The moon was drawn in the wrong place all month.** Its phase came from the

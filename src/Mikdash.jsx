@@ -2657,6 +2657,49 @@ export default function Mikdash() {
     const SUN_DAY = new THREE.Vector3(0.55, 0.6, -0.42).normalize();
     const SUN_NIGHT = new THREE.Vector3(-0.72, -0.28, 0.3).normalize();
     const SKY_AXIS = new THREE.Vector3().crossVectors(SUN_DAY, SUN_NIGHT).normalize();
+
+    // ── גֶּשֶׁם — rain, and the fire that does not go out ──
+    //
+    // This House says three separate things about rain and it had never once
+    // rained here. Avot 5:5 counts among the ten miracles לֹא כִבּוּ גְשָׁמִים אֵשׁ
+    // שֶׁל עֲצֵי הַמַּעֲרָכָה — the rains never put out the fire of the wood of the
+    // arrangement. Shemini Atzeret in the לוּחַ says rain is asked for from
+    // today. The golden vine is described as a thing no rain ever fed. A
+    // miracle about rain is not much of a miracle in a place where the
+    // weather never turns.
+    //
+    // So it rains, and only in the season it is asked for: from Shemini
+    // Atzeret to the first day of Pesach, which is exactly the span of
+    // מַשִּׁיב הָרוּחַ וּמוֹרִיד הַגֶּשֶׁם. Which days is decided by the date and not by
+    // the visit — the same rule the meteor showers keep — so a wet afternoon
+    // in Kislev is wet again when you come back to it.
+    //
+    // And nothing here touches the altar. That is the whole point of building
+    // it: the fire is not dimmed, not flickered, not guarded by a special
+    // case. It simply goes on burning in the rain, and the visitor is the one
+    // who has to notice.
+    const rainSeason = (m, d) =>
+      (m >= 8 && m <= 13) || (m === 7 && d >= 22) || (m === 1 && d < 15);
+    const hash01 = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+    const raining = rainSeason(todayHeb.month, todayHeb.day) && hash01(todayRD) < 0.38;
+    const RAIN_N = 1100, RAIN_SPAN = 240, RAIN_TOP = 170;
+    const rainPos = new Float32Array(RAIN_N * 6);
+    const rainFall = new Float32Array(RAIN_N);
+    for (let i = 0; i < RAIN_N; i++) {
+      const j = i * 6, x = rnd(-RAIN_SPAN, RAIN_SPAN), z = rnd(-RAIN_SPAN, RAIN_SPAN);
+      const y = rnd(LAND_Y, RAIN_TOP), len = rnd(2.4, 5.2);
+      rainPos[j] = x; rainPos[j + 1] = y + len; rainPos[j + 2] = z;
+      rainPos[j + 3] = x; rainPos[j + 4] = y; rainPos[j + 5] = z;
+      rainFall[i] = rnd(120, 175);
+    }
+    const rainGeo = new THREE.BufferGeometry();
+    rainGeo.setAttribute("position", new THREE.BufferAttribute(rainPos, 3));
+    const rainMat = new THREE.LineBasicMaterial({ color: 0xc2d6e6, transparent: true, opacity: 0, depthWrite: false });
+    const rainDrops = new THREE.LineSegments(rainGeo, rainMat);
+    rainDrops.frustumCulled = false;                 // it is always around the camera
+    rainDrops.visible = raining;
+    scene.add(rainDrops);
+    let rainSaid = false;
     const almondInFlower = todayHeb.month === 11 || todayHeb.month === 12 || todayHeb.month === 13;
     // And how busy the sky is tonight. Nobody is told; the ones who notice are
     // right, and the ones who come back on the twelfth of August find something
@@ -4242,7 +4285,21 @@ export default function Mikdash() {
     for (let l = 0; l < 4; l++) cyl(0.35, 0.4, 2.4, 6, foxFur, -1.6 + (l % 2) * 3.4, 1.2, l < 2 ? -1 : 1, fox);
     fox.position.set(70, LAND_Y, HALF + 90);
     fox.rotation.y = -0.7;
-    fox.userData = { id: 8, tail, head: fh, snout, face: -0.7, home: new THREE.Vector3(70, LAND_Y, HALF + 90) };
+    // ── "Here the fox walks outside the walls" ──
+    //
+    // Its own card has said that since it was built, and the fox has stood
+    // perfectly still the whole time — with references to its own tail, head
+    // and heading kept in userData by somebody who plainly meant to move it
+    // and never did. They were dead until now.
+    //
+    // It trots the line of the southern approach and turns at each end. East
+    // of x = 96 so it never walks through the flock, whose lanes reach 81 with
+    // the road wobble on; short of 198 so it never reaches the caravan. And on
+    // z = HALF + 90, which is forty-four amot outside the keep-out box every
+    // animal here is held to — a fox in the courts would be the ruin, and the
+    // ruin is the thing Rabbi Akiva was laughing at, not standing in.
+    fox.userData = { id: 8, tail, head: fh, snout, face: 0, walk: 0,
+      home: new THREE.Vector3(70, LAND_Y, HALF + 90), a: 96, b: 198 };
     scene.add(fox);
     clickables.push(fox);
 
@@ -5576,6 +5633,7 @@ export default function Mikdash() {
     // wonders are architecture and cannot float, so the ring is laid at their
     // feet instead — same promise, same colour, sized to whatever it marks.
     const halos = [];
+    const haloAt = new THREE.Vector3();
     const addHalo = (obj, radius, yOff = 0.6) => {
       const ring = new THREE.Mesh(
         new THREE.TorusGeometry(radius, Math.max(0.13, radius * 0.04), 8, 30),
@@ -5585,7 +5643,7 @@ export default function Mikdash() {
       const wp = obj.getWorldPosition(new THREE.Vector3());
       ring.position.set(wp.x, wp.y + yOff, wp.z);
       scene.add(ring);
-      halos.push({ ring, id: obj.userData.id, base: ring.position.y });
+      halos.push({ ring, id: obj.userData.id, base: ring.position.y, obj });
     };
     addHalo(fox, 8, 0.4);
     addHalo(harp, 7, -2.2);
@@ -7469,6 +7527,13 @@ export default function Mikdash() {
         const isNext = h.id === nxt;
         h.ring.rotation.z = t * 0.6 + i;
         h.ring.position.y = h.base + Math.sin(t * 1.5 + i) * 0.5;
+        // A wonder that moves takes its ring with it. Only the fox does, but
+        // following the object is the rule rather than a special case for it —
+        // the ring was pinned to the spot the thing was built on, which for a
+        // fox that now walks would have left a gold circle sitting in the dust
+        // a hundred amot behind him.
+        h.obj.getWorldPosition(haloAt);
+        h.ring.position.x = haloAt.x; h.ring.position.z = haloAt.z;
         const pulse = isNext ? 1 + Math.sin(t * 4) * 0.07 : 1;
         h.ring.scale.set(pulse, pulse, pulse);
         h.ring.material.opacity = isNext ? 0.8 : 0.3;
@@ -7549,6 +7614,48 @@ export default function Mikdash() {
         playHarp(0.4);
       }
 
+      // ── The fox walks ──
+      {
+        const fu = fox.userData, span = fu.b - fu.a;
+        // 0..2: out along the run and back again, at a fox's trot.
+        fu.walk = (fu.walk + (dt * 8.5) / span) % 2;
+        const out = fu.walk < 1;
+        fox.position.x = fu.a + (out ? fu.walk : 2 - fu.walk) * span;
+        // Turned, not snapped. It swings through facing you, which is the
+        // half-second of a fox that has heard something.
+        const want = out ? 0 : Math.PI;
+        fu.face += (want - fu.face) * Math.min(1, dt * 2.6);
+        fox.rotation.y = fu.face;
+        // A trot is carried in the shoulders; the brush answers a beat late.
+        fox.position.y = LAND_Y + Math.abs(Math.sin(t * 7.5)) * 0.22;
+        fu.tail.rotation.y = Math.sin(t * 5.2) * 0.34;
+        fu.head.position.y = 3.6 + Math.sin(t * 7.5 + 0.9) * 0.1;
+      }
+
+      // ── The rain falls, and the altar does not care ──
+      // Recycled around the camera rather than around the origin, so walking
+      // out to the causeway does not walk out from under the weather.
+      if (raining) {
+        const cx = camera.position.x, cz = camera.position.z;
+        for (let i = 0; i < RAIN_N; i++) {
+          const j = i * 6, d = rainFall[i] * dt;
+          rainPos[j + 1] -= d; rainPos[j + 4] -= d;
+          if (rainPos[j + 4] < LAND_Y - 6) {
+            const len = rainPos[j + 1] - rainPos[j + 4];
+            const nx = cx + rnd(-RAIN_SPAN, RAIN_SPAN), nz = cz + rnd(-RAIN_SPAN, RAIN_SPAN);
+            rainPos[j] = nx; rainPos[j + 2] = nz; rainPos[j + 3] = nx; rainPos[j + 5] = nz;
+            rainPos[j + 4] = RAIN_TOP; rainPos[j + 1] = RAIN_TOP + len;
+          }
+        }
+        rainGeo.attributes.position.needsUpdate = true;
+        // Heavier-looking by day than by night, because rain is seen against
+        // the light behind it and at night there is not much.
+        rainMat.opacity = lerp(0.36, 0.16, e2);
+        if (!rainSaid && t > 7) {
+          rainSaid = true;
+          apiRef.current.toast?.("גֶּשֶׁם — לֹא כִבּוּ גְשָׁמִים אֵשׁ שֶׁל עֲצֵי הַמַּעֲרָכָה: the rains never put out the fire of the wood of the arrangement (אבות ה׳:ה׳). Look at the altar.");
+        }
+      }
       flameTips.forEach((f, i) => {
         if (f.material.opacity > 0) {
           const fs = 1 + Math.sin(t * 10 + i * 2) * 0.22;
