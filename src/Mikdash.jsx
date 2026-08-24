@@ -3169,41 +3169,65 @@ export default function Mikdash() {
       flames.push({ uniforms: f.uniforms, mesh: f.mesh, ts, rot });
       return f;
     };
+    // ── How big the fire is, in one place ──
+    //
     // Every one of these was a constant tied to the old fourteen-and-a-half
-    // amah altar. They are the same numbers relative to the hearth, so the fire
-    // sits on the wood exactly as it did — on an altar that is now the height
-    // the mishnah gives.
-    addFlame(4.9, 14.5, { solid: true, blue: 0.2 }, { y: ALT_H + 6.95, order: 1, ts: 1.1, rot: 0.72 });
-    addFlame(4.6, 16.0, { blue: 0.55 }, { y: ALT_H + 8.15, order: 2, ts: 1.25, rot: -0.55, intensity: 1.5 });
-    addFlame(6.3, 18.5, { solid: true, orange: true, alphaScale: 0.52 }, { y: ALT_H + 9.05, order: 2, ts: 0.85, rot: 0.31, intensity: 1.15 });
-    addFlame(7.3, 20.0, { solid: true, orange: true, alphaScale: 0.36 }, { y: ALT_H + 9.75, order: 2, ts: 1.45, rot: -0.23, intensity: 0.95 });
-    addFlame(8.2, 21.5, { blue: 0.16 }, { y: ALT_H + 10.35, order: 3, ts: 1.0, rot: 0.4 });
+    // amah altar, and each cone also carried its own hand-set y so that its
+    // base would sit just inside the hearth where the wood hides it. Twelve
+    // numbers, six of them saying the same thing in six different ways — so
+    // changing the size of the fire meant editing all twelve and getting one
+    // wrong. The base is derived now: a cone of any height is hung so its
+    // bottom rim sits four tenths of an amah under the top course. `lift`
+    // keeps the two offsets that were deliberate — the glow shell rides a
+    // little high, and the blue heart rides higher still to clear the logs.
+    //
+    // And it is bigger, which is the point. This fire is what the court is
+    // for, and against a nine-amah altar on a ten-amah platform seen from the
+    // seven hundred amot the opening shot stands at, it was reading as a
+    // campfire. Wider by a bit over a quarter and taller by a third — which
+    // puts the broadest shell at twenty-one amot across on a hearth the
+    // mishnah gives as twenty-four (Middot 3:1). So it still burns *on* the
+    // hearth: clear of the kohanim's walkway round the edge, and clear of the
+    // horns at the corners. A fire that overhung either would be a bigger
+    // fire than the altar can hold.
+    const HEARTH_Y = ALT_H - 0.4;            // where a flame's bottom rim sits
+    const FIRE_W = 1.28, FIRE_T = 1.35;
+    const flame = (r, h, opts, o) => addFlame(r * FIRE_W, h * FIRE_T,
+      opts, { ...o, y: HEARTH_Y + (h * FIRE_T) / 2 + (o.lift || 0) });
+    flame(4.9, 14.5, { solid: true, blue: 0.2 }, { lift: 0.1, order: 1, ts: 1.1, rot: 0.72 });
+    flame(4.6, 16.0, { blue: 0.55 }, { lift: 0.55, order: 2, ts: 1.25, rot: -0.55, intensity: 1.5 });
+    flame(6.3, 18.5, { solid: true, orange: true, alphaScale: 0.52 }, { lift: 0.2, order: 2, ts: 0.85, rot: 0.31, intensity: 1.15 });
+    flame(7.3, 20.0, { solid: true, orange: true, alphaScale: 0.36 }, { lift: 0.15, order: 2, ts: 1.45, rot: -0.23, intensity: 0.95 });
+    flame(8.2, 21.5, { blue: 0.16 }, { order: 3, ts: 1.0, rot: 0.4 });
     // drawn last: additive tongues painted over the heart would add white to
     // it and the blue would be gone by night
-    addFlame(2.1, 16.5, { segments: 16, solid: true, blue: 1, heartOnly: true, alphaScale: 0.88 },
-             { y: ALT_H + 8.55, order: 5, ts: 1.6, rot: -0.95, intensity: 1.3 });
+    flame(2.1, 16.5, { segments: 16, solid: true, blue: 1, heartOnly: true, alphaScale: 0.88 },
+          { lift: 0.7, order: 5, ts: 1.6, rot: -0.95, intensity: 1.3 });
 
+    // Ninety-six off a bed half again as wide, because the fire under them is.
     const fireParticles = [];
-    for (let i = 0; i < 54; i++) {
+    for (let i = 0; i < 96; i++) {
       const m = new THREE.SpriteMaterial({ map: fireTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
       const sp = new THREE.Sprite(m);
-      sp.userData = { ph: rnd(0, 1), sp: rnd(0.3, 0.68), a: rnd(0, 6.28), r: rnd(0.5, 4.6), drift: rnd(-0.7, 0.7) };
+      sp.userData = { ph: rnd(0, 1), sp: rnd(0.26, 0.64), a: rnd(0, 6.28), r: rnd(0.6, 6.2), drift: rnd(-0.8, 0.8) };
       scene.add(sp);
       fireParticles.push(sp);
     }
     // sparks off the blue heart: short-lived, low, and cooler than the embers
     const blueTex = blueSpriteTex();
     const blueSparks = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 24; i++) {
       const m = new THREE.SpriteMaterial({ map: blueTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
       const sp = new THREE.Sprite(m);
-      sp.userData = { ph: rnd(0, 1), sp: rnd(0.7, 1.35), a: rnd(0, 6.28), r: rnd(0.3, 2.1) };
+      sp.userData = { ph: rnd(0, 1), sp: rnd(0.7, 1.35), a: rnd(0, 6.28), r: rnd(0.35, 2.7) };
       scene.add(sp);
       blueSparks.push(sp);
     }
 
+    // Forty-eight, because they have two hundred and fifty amot of column to
+    // cover now instead of fifty-eight.
     const smokeParticles = [];
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 48; i++) {
       const m = new THREE.SpriteMaterial({ map: smokeTex, depthWrite: false, transparent: true });
       const sp = new THREE.Sprite(m);
       sp.userData = { ph: rnd(0, 1), sp: rnd(0.1, 0.18), sway: rnd(2, 5), off: rnd(0, 6.28) };
@@ -3235,8 +3259,14 @@ export default function Mikdash() {
     };
 
     // warm light: physical decay so it doesn't wash the gold facade into a "sun"
-    const fireLight = new THREE.PointLight(0xff8c33, 1.0, 130, 2);
-    fireLight.position.set(AX, TOP + ALT_H + 10.55, 0);
+    // A hundred and thirty amot fell two short. The altar's axis is at x = -8
+    // and the Heichal's east wall at -140, which is a hundred and thirty-two
+    // apart — so the one warm thing in this court at night lit the court, and
+    // stopped two amot before the gold it is facing. The platform in front of
+    // it was lit and the House behind was black. Two hundred reaches, with
+    // sixty-eight to spare, and the fire becomes what lights the House.
+    const fireLight = new THREE.PointLight(0xff8c33, 1.0, 200, 2);
+    fireLight.position.set(AX, TOP + ALT_H + 13.5, 0);
     scene.add(fireLight);
     // the heart throws its own colour onto the hearth stones
     const fireBlueLight = new THREE.PointLight(0x3f7dff, 0.7, 62, 2);
@@ -7077,19 +7107,42 @@ export default function Mikdash() {
         );
         const sc = (1 - life) * rndCache(u.ph) * 4.1 + 0.5;
         sp.scale.set(sc, sc * 1.35, 1);
+        // An ember cools on the way up: yellow-white where it leaves the
+        // flame, orange, then the dull red it goes out at. One flat sprite
+        // colour the whole way was why the sparks read as glitter over the
+        // altar instead of as things that had just been on fire.
+        const cool = life * life;
+        sp.material.color.setRGB(1, 0.88 - cool * 0.54, 0.56 - cool * 0.5);
         sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.2, 0.78, e2);
       });
+      // ── וְלֹא נִצְּחָה הָרוּחַ אֶת עַמּוּד הֶעָשָׁן ──
+      //
+      // Avot 5:5 counts it among the ten miracles done in the House: the
+      // rains never put out the fire of the wood of the ma'aracha, and the
+      // wind never overcame the pillar of smoke. What was here was a sway
+      // that grew with height — which is precisely what a wind does to a
+      // column of smoke, and precisely what the mishnah says did not happen
+      // in this court. It also read as a wisp, fifty-eight amot of it, gone
+      // before it cleared the roof of the House.
+      //
+      // So it is a pillar: two hundred and fifty amot straight up, standing
+      // over the House and visible from the opening view. It is not rigid —
+      // the curl is internal, a slow turn about the axis that averages to
+      // nothing, so the column breathes without ever being pushed off
+      // vertical. Nothing here is a wind, because nothing here may be.
       smokeParticles.forEach((sp) => {
         const u = sp.userData;
         const life = ((t * u.sp + u.ph) % 1);
-        sp.position.set(
-          AX + Math.sin(t * 0.6 + u.off) * u.sway * life,
-          TOP + 33 + life * 58,
-          Math.cos(t * 0.5 + u.off) * u.sway * life
-        );
-        const sc = 4 + life * 16;
+        const curl = Math.sin(t * 0.45 + u.off) * 1.7 + Math.sin(t * 0.21 + u.off * 2.3) * 1.2;
+        const spread = 0.35 + life * 0.55;
+        sp.position.set(AX + curl * spread, TOP + 40 + life * 250, curl * 0.72 * spread);
+        const sc = 9 + life * 42;
         sp.scale.set(sc, sc, 1);
-        sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.42, 0.16, e2);
+        // Lit from underneath where it leaves the fire and grey by the top,
+        // because the fire is the only light on it and it does not reach far.
+        const glow = Math.max(0, 1 - life * 3.4);
+        sp.material.color.setRGB(1, 0.60 + 0.33 * (1 - glow), 0.32 + 0.59 * (1 - glow));
+        sp.material.opacity = Math.sin(life * Math.PI) * lerp(0.40, 0.15, e2) * (1 - life * 0.28);
       });
       for (let i = 0; i < dustPool.length; i++) {
         const sp = dustPool[i];

@@ -1,5 +1,50 @@
 # Changelog
 
+## v3.28 — "The Wind Never Overcame It" (0.3.28)
+
+- **אֵשׁ הַמַּעֲרָכָה.** The fire is what this court is *for*, and against a
+  nine-amah altar on a ten-amah platform, seen from the seven hundred amot the
+  opening shot stands at, it was reading as a campfire. Wider by a bit over a
+  quarter, taller by a third. The six shells are hung off one derived base now
+  instead of twelve hand-set numbers, six of which were saying the same thing
+  six different ways — so the size of the fire is two constants, and a cone of
+  any height still lands with its bottom rim four tenths of an amah under the
+  top course where the wood hides it.
+  - **It still burns on the hearth, and that is checked.** The vertex shader
+    pushes the surface sideways as it rises while the cone narrows, so the
+    widest point is the base: ten and a half amot from the axis. The mishnah
+    gives the hearth as twenty-four (Middot 3:1), which leaves an amah and a
+    half to the kohanim's walkway and three to the horns. The tallest tongue,
+    tip-stretch included, reaches fifty-three — twenty-three below the roof of
+    the Heichal, because a fire on the altar that overtopped the House would be
+    a different claim than the one this House is making.
+  - Ninety-six embers off a bed half again as wide, and an ember cools on the
+    way up now — yellow-white where it leaves the flame, orange, then the dull
+    red it goes out at. One flat sprite colour was why the sparks read as
+    glitter over the altar rather than as things that had just been on fire.
+
+- **וְלֹא נִצְּחָה הָרוּחַ אֶת עַמּוּד הֶעָשָׁן.** Avot 5:5 counts it among the ten
+  miracles done in the House: the rains never put out the fire of the wood of
+  the ma'aracha, and the wind never overcame the pillar of smoke. What was here
+  was a sway that grew with height — which is exactly what a wind does to a
+  column of smoke, and exactly what the mishnah says did not happen in this
+  court. It was also fifty-eight amot of wisp, gone before it cleared the roof.
+  It is a pillar now: two hundred and fifty amot straight up, standing over the
+  House and visible from the opening view. Not rigid — the curl is internal, a
+  slow turn about the axis that averages to nothing, so the column breathes
+  without ever being pushed off vertical. Nothing in it is a wind, because
+  nothing in it may be.
+  - And it is lit from underneath: warm where it leaves the fire, grey by the
+    top, because the fire is the only light on it and it does not reach far.
+
+- **The fire lights the House.** Its point light carried a hundred and thirty
+  amot of reach. The altar's axis is at x = −8 and the Heichal's east wall at
+  −140: a hundred and thirty-two apart. So the one warm thing in the court at
+  night lit the court, lit the platform in front of the House, and stopped two
+  amot short of the gold it is facing — which is why the facade went black
+  after dark while everything around it glowed. Two hundred reaches it, with
+  sixty-eight to spare.
+
 ## v3.27 — "Nothing Walks In On Its Own Feet" (0.3.27)
 
 - **הַצֹּאן.** The flock slid. Four separate things were wrong and all of them
