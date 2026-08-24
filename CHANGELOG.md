@@ -1,5 +1,45 @@
 # Changelog
 
+## v3.32 — "It Rises As The Sun Sets" (0.3.32)
+
+- **The moon was drawn in the wrong place all month.** Its phase came from the
+  date and its position came from the night slider, so the two were free to say
+  different things — a full disc sitting beside the sun, a dark one riding high
+  at midnight. But a phase is not a decoration on top of a position: it *is* the
+  position. The angle between sun and moon is what lights the moon, and that
+  angle runs one full turn a month. There is a single number now, the same
+  elongation that already fed the phase, and it turns the sun's own direction
+  into the moon's. Checked across the month: the illumination implied by the
+  geometry equals the drawn phase exactly, on every day.
+  - **Two things fall out that nobody had to write.** On the fifteenth the moon
+    stands opposite the sun, so on the first night of Pesach and of Sukkot the
+    full moon comes up over the Mount of Olives as the sun goes down behind the
+    House — which is *why* those festivals are on the fifteenth. And on the
+    third of the month the crescent sits just above the sunset, low in the last
+    of the light, exactly where the witnesses had to catch it before they could
+    run to Jerusalem and say so (Rosh Hashanah 23b–24a).
+  - The sign of the rotation is the whole point and it was wrong first: the moon
+    runs eastward against the sun and therefore sets *later*, so it sits behind
+    the sun on this arc. Turned the other way the arithmetic is just as tidy and
+    the young crescent comes up *below* the sunset — the one place it can never
+    be seen, and the one place a court would never have accepted a witness who
+    claimed it. Caught by checking the month rather than by looking at it.
+
+- **לְבֵית הַתְּקִיעָה — and the stone finally sounds.** Its own card in this House has
+  always said a kohen sounded the trumpet from that corner every Friday at dusk,
+  and the stone made no sound at all unless somebody walked up and clicked it:
+  the House carried the claim and did not keep it. Now the light going out of
+  the sky on a Friday is what sounds it, which is the order those two things
+  happened in. Six blasts, on Shabbat 35b's own count — the first to stop the
+  people working in the fields, the second to shut the city and the shops, the
+  third to light the lamp; then תּוֹקֵעַ וּמֵרִיעַ וְתוֹקֵעַ וְשׁוֹבֵת, a tekiah, a teruah
+  as the nine short notes it is, a tekiah, and he rests.
+  - Once a visit, and the flag is only spent when the blasts actually sounded —
+    with the sound off there is no trumpeter, so it waits for a Friday dusk
+    somebody can hear. The stone still answers a click with its own fanfare, so
+    hearing it again is something you choose rather than something that happens
+    at you every time the night button is pressed.
+
 ## v3.31 — "One Mode At A Time" (0.3.31)
 
 - **שְׁטַיְגֶ'ר — the four modes, playable.** A melody is a thing somebody wrote; a

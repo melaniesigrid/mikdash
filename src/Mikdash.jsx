@@ -2619,6 +2619,44 @@ export default function Mikdash() {
     // period, 29.530594 days.
     const moonAge = todayHeb.day - 1;
     const moonK = (1 - Math.cos((2 * Math.PI * moonAge) / 29.530594)) / 2;
+    // ── And where it stands, which is not a free choice ──
+    //
+    // The phase of the moon is not a decoration on top of its position: it IS
+    // its position. The angle between the sun and the moon as seen from here
+    // is what lights the moon, and that angle runs a full turn once a month.
+    // At the molad the two are together — the moon is up in the daytime and
+    // invisible. At the middle of the month they are opposite, and the moon
+    // rises exactly as the sun sets.
+    //
+    // This House was drawing the phase from the date and the *place* from the
+    // night slider, so the two could say different things: a full disc sitting
+    // beside the sun, a dark one riding high at midnight. They agree now,
+    // because there is only one number left — the same elongation that goes
+    // into moonK above turns the sun's own direction into the moon's.
+    //
+    // Two things fall out of that and neither had to be written. On the
+    // fifteenth the moon stands opposite the sun, so on the first night of
+    // Pesach and of Sukkot the full moon comes up over the Mount of Olives as
+    // the sun goes down behind the House — which is why those festivals are on
+    // the fifteenth. And on Rosh Chodesh the moon is twelve degrees off the
+    // sun: a thin crescent, low, in the last of the light, exactly where the
+    // witnesses had to catch it before they could run to Jerusalem and say so
+    // (Rosh Hashanah 23b–24a).
+    const moonAngle = (2 * Math.PI * moonAge) / 29.530594;
+    // The sun swings between two fixed directions, so its whole path lies in
+    // one plane; the normal to that plane is the axis this sky turns on, and
+    // the moon rides the same circle.
+    //
+    // Backwards along that circle, not forwards, and the sign is the whole
+    // point rather than a detail. The moon runs eastward against the sun, so it
+    // sets *later* than the sun does — which on this arc means it sits behind
+    // the sun, nearer the daylight end. Turned the other way the arithmetic is
+    // just as tidy and a three-day-old crescent comes up below the sunset
+    // instead of above it, which is the one place it can never be seen and the
+    // one place a court would never have accepted a witness who claimed it.
+    const SUN_DAY = new THREE.Vector3(0.55, 0.6, -0.42).normalize();
+    const SUN_NIGHT = new THREE.Vector3(-0.72, -0.28, 0.3).normalize();
+    const SKY_AXIS = new THREE.Vector3().crossVectors(SUN_DAY, SUN_NIGHT).normalize();
     const almondInFlower = todayHeb.month === 11 || todayHeb.month === 12 || todayHeb.month === 13;
     // And how busy the sky is tonight. Nobody is told; the ones who notice are
     // right, and the ones who come back on the twelfth of August find something
@@ -5871,22 +5909,51 @@ export default function Mikdash() {
       }
       harpRingsUntil = ctx.currentTime + at;
     };
+    const blast = (ctx, f, t0, dur, vol = 0.2) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter();
+      fl.type = "lowpass"; fl.frequency.value = 1700; fl.Q.value = 2;
+      o.type = "sawtooth"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol, t0 + 0.04);
+      g.gain.setValueAtTime(vol, t0 + dur * 0.7);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(fl); fl.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.05);
+    };
     const playTrumpet = () => {
       if (!amb.on) return;
       const ctx = ensureAudio();
       if (!ctx) return;
-      [[392, 0, 0.5], [523.25, 0.45, 0.9], [392, 1.3, 0.35], [523.25, 1.6, 1.3]].forEach(([f, dt, dur]) => {
-        const t0 = ctx.currentTime + dt;
-        const o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter();
-        fl.type = "lowpass"; fl.frequency.value = 1700; fl.Q.value = 2;
-        o.type = "sawtooth"; o.frequency.value = f;
-        g.gain.setValueAtTime(0.0001, t0);
-        g.gain.exponentialRampToValueAtTime(0.2, t0 + 0.04);
-        g.gain.setValueAtTime(0.2, t0 + dur * 0.7);
-        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-        o.connect(fl); fl.connect(g); g.connect(ctx.destination);
-        o.start(t0); o.stop(t0 + dur + 0.05);
-      });
+      [[392, 0, 0.5], [523.25, 0.45, 0.9], [392, 1.3, 0.35], [523.25, 1.6, 1.3]]
+        .forEach(([f, dt, dur]) => blast(ctx, f, ctx.currentTime + dt, dur));
+    };
+    // ── שֵׁשׁ תְּקִיעוֹת תּוֹקְעִין עֶרֶב שַׁבָּת ──
+    //
+    // Shabbat 35b counts them and says what each one is for. The first to
+    // stop the people working in the fields; the second to shut the city and
+    // the shops; the third to light the lamp. Then תּוֹקֵעַ וּמֵרִיעַ וְתוֹקֵעַ
+    // וְשׁוֹבֵת — a tekiah, a teruah, a tekiah, and he rests.
+    //
+    // The stone that says so is real. לבית התקיעה להב[דיל] — to the place of
+    // trumpeting, to procl[aim] — found face down at the foot of the
+    // southwest corner in 1968, where it had fallen from the parapet, and
+    // standing at that corner here. Its own card in this House says a kohen
+    // sounded it every Friday at dusk, and until now it made no sound at all
+    // unless somebody walked up and clicked it: the House carried the claim
+    // and did not keep it. Now the light going out of the sky on a Friday is
+    // what sounds it, which is the order those two things happened in.
+    apiRef.current.shabbatBlasts = () => {
+      if (!amb.on) return false;
+      const ctx = ensureAudio();
+      if (!ctx) return false;
+      const t0 = ctx.currentTime + 0.2;
+      // Three signals, far enough apart that a city has time to answer each.
+      for (let i = 0; i < 3; i++) blast(ctx, 523.25, t0 + i * 2.4, 1.5, 0.22);
+      // Then tekiah, teruah, tekiah — the teruah as the nine short notes it is.
+      blast(ctx, 587.33, t0 + 7.4, 1.1);
+      for (let i = 0; i < 9; i++) blast(ctx, 587.33, t0 + 8.85 + i * 0.115, 0.09, 0.17);
+      blast(ctx, 587.33, t0 + 10.15, 2.2);
+      return true;
     };
     const playChime = () => {
       if (!amb.on) return;
@@ -6998,7 +7065,7 @@ export default function Mikdash() {
       skyUniforms.uNight.value = e2;
       const sunDir = new THREE.Vector3(lerp(0.55, -0.72, e2), lerp(0.6, -0.28, e2), lerp(-0.42, 0.3, e2)).normalize();
       skyUniforms.uSunDir.value.copy(sunDir);
-      const moonDir = new THREE.Vector3(lerp(-0.9, -0.5, e2), lerp(-0.2, 0.55, e2), lerp(0.2, 0.45, e2)).normalize();
+      const moonDir = sunDir.clone().applyAxisAngle(SKY_AXIS, -moonAngle);
       skyUniforms.uMoonDir.value.copy(moonDir);
       skyUniforms.uMoonK.value = moonK;
       // ── The ground light follows the sun's height, not the clock ──
@@ -7646,6 +7713,24 @@ export default function Mikdash() {
     };
   }, [showToast]);
   useEffect(() => { apiRef.current.setNight?.(night); }, [night]);
+  // ── The man on the southwest corner ──
+  //
+  // Six blasts, and only on a Friday, and only as the light goes: Shabbat 35b
+  // (see shabbatBlasts). Once a visit — the stone can still be clicked for its
+  // own fanfare, so hearing it again is a thing you can choose rather than a
+  // thing that happens at you every time the night button is pressed.
+  //
+  // The flag is set only when the blasts actually sounded. With the sound off
+  // there is no trumpeter and nothing is spent, so it waits for a Friday dusk
+  // that somebody can hear.
+  const blewShabbat = useRef(false);
+  useEffect(() => {
+    if (!night || blewShabbat.current) return;
+    if (((today.rd % 7) + 7) % 7 !== 5) return;      // nextShabbat() fixes it: 5 is Friday
+    if (!apiRef.current.shabbatBlasts?.()) return;
+    blewShabbat.current = true;
+    showToast("לְבֵית הַתְּקִיעָה — six blasts off the southwest corner: the first to stop the people in the fields, the second to shut the city and the shops, the third to light the lamp. Then tekiah, teruah, tekiah, and he rests (שבת ל״ה:).");
+  }, [night, today.rd, showToast]);
   // Skip the mount call when sound is already on: building the bed here would
   // generate the noise buffer during first paint and open an AudioContext the
   // browser then refuses to start. The first gesture builds it instead.
