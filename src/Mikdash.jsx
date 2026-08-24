@@ -6470,15 +6470,38 @@ export default function Mikdash() {
     // replay honest: the two that end in a state rather than in a sound are
     // put back to the state they started in, so the thing being asked for
     // actually happens instead of being already over.
+    // Two of these wonders are כְּלֵי הַהֵיכָל, and when the thirty-sixth is found
+    // they are carried in: hidden, taken out of `clickables`, and in the
+    // Menorah's case its light is moved inside the House and turned up, because
+    // from then on what reaches the court is the glow under the doors.
+    //
+    // So a replay of either one, after that has happened, was asking for
+    // something that is no longer in the court. The Menorah's was worse than
+    // useless: it relit seven lamps nobody can see, and set menLight back down
+    // to the 1.1 it burns at when it is standing outside — which dimmed the
+    // Heichal doorway and left it dim. What a replay does now is the only
+    // thing anybody standing in this court ever saw of those lamps.
+    let menSwell = 0;
     const performWonder = (id, again = false) => {
       if (id === 9) { revealEighth(); playHarp(); }
       if (id === 10) soundTheShofar();
       if (id === 12) {
-        if (again) flameTips.forEach((f) => { f.material.opacity = 0; });
-        flameTips.forEach((f, i) => setTimeout(() => { f.material.opacity = 0.95; }, i * 180));
-        menLight.intensity = 1.1;
+        if (hach.in) {
+          menSwell = 1;
+          apiRef.current.toast?.("הַמְּנוֹרָה בַּהֵיכָל — the Menorah is inside now, against the southern wall opposite the Shulchan (שמות כ״ו:ל״ה). What reaches the court is the light under the doors.");
+        } else {
+          if (again) flameTips.forEach((f) => { f.material.opacity = 0; });
+          flameTips.forEach((f, i) => setTimeout(() => { f.material.opacity = 0.95; }, i * 180));
+          menLight.intensity = 1.1;
+        }
       }
-      if (id === 13) { ketoretState.active = true; playChime(); }
+      if (id === 13) {
+        ketoretState.active = true; playChime();
+        // The ketoret's own altar goes in with the Menorah. The chime still
+        // sounds wherever it is, so a replay is never silent — but the column
+        // of smoke it is asking to see is behind the parochet now.
+        if (hach.in && again) apiRef.current.toast?.("מִזְבַּח הַזָּהָב בַּהֵיכָל — the golden altar is inside, between the Shulchan and the Menorah (שמות ל׳:ו׳). The ketoret rises where only the kohen who offers it stands.");
+      }
       if (id === 14) {
         if (again) { nicanor.userData.target = 0; setTimeout(() => { nicanor.userData.target = 1; }, 800); }
         else nicanor.userData.target = 1;
@@ -7291,6 +7314,14 @@ export default function Mikdash() {
           f.scale.set(1.9 * fs, 3.0 * fs, 1);
         }
       });
+      // Asked to show the Menorah again once it is inside, the doorway takes
+      // and settles. It settles back to whichever level is true — 1.7 with the
+      // lamps in the Heichal, 1.1 with them standing in the court — so the
+      // swell can never leave the light somewhere it should not be.
+      if (menSwell > 0) {
+        menSwell = Math.max(0, menSwell - dt * 0.55);
+        menLight.intensity = (hach.in ? 1.7 : 1.1) + menSwell * 1.6;
+      }
       shetiya.material.emissiveIntensity = lerp(0.6, 1.05, e2) + Math.sin(t * 1.4) * 0.22;
 
       const nu = nicanor.userData;

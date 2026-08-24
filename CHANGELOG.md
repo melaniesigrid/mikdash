@@ -1,5 +1,28 @@
 # Changelog
 
+## v3.29 — "It Is Inside Now" (0.3.29)
+
+- **The Menorah could not be repeated, and asking dimmed the House.** Two of
+  the thirty-six are כְּלֵי הַהֵיכָל, and when the thirty-sixth is found the kohanim
+  carry them in: the vessel is hidden, taken out of `clickables`, and in the
+  Menorah's case its light is moved inside the House and turned up, because from
+  then on what reaches the court is the glow under the doors. v3.26 gave every
+  wonder that does something a ▷ again, and for this one it asked for a thing
+  that is no longer in the court. Three ways it failed at once: `guideTo` scans
+  `clickables`, so there was no beacon; the relight ran on a mesh whose visible
+  is false, so seven lamps took where nobody could see them; and it set menLight
+  back to the 1.1 it burns at while standing *outside*, which dimmed the Heichal
+  doorway from 1.7 and left it dim. Asking to see the Menorah again made the
+  House darker.
+  - What it does now is the only thing anybody standing in this court ever saw
+    of those lamps: the doorway takes and settles. And it settles back to
+    whichever level is true — 1.7 with the lamps inside, 1.1 with them out here
+    — so a replay can no longer leave the light somewhere it should not be.
+  - The golden altar of the ketoret goes in with it. Its chime sounds wherever
+    it is, so that replay was never silent, but the column of smoke it is asking
+    to show is behind the parochet. Both now say where the vessel has gone, and
+    where it stands in the Heichal.
+
 ## v3.28 — "The Wind Never Overcame It" (0.3.28)
 
 - **אֵשׁ הַמַּעֲרָכָה.** The fire is what this court is *for*, and against a
