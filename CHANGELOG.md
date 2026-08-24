@@ -1,5 +1,58 @@
 # Changelog
 
+## v3.31 — "One Mode At A Time" (0.3.31)
+
+- **שְׁטַיְגֶ'ר — the four modes, playable.** A melody is a thing somebody wrote; a
+  mode is the room it was written in. Ahava Rabbah, Mi Sheberach, Adonai Malach
+  and Magen Avot, each written on D as the steps are and played up and back so
+  the ear catches the interval it is named for. The reason they belong in this
+  House and not in a footnote is Arachin 13b: כִּנּוֹר שֶׁל מִקְדָּשׁ שֶׁל שִׁבְעָה נִימִין —
+  the kinor of the Mikdash had seven strings, that of the days of Mashiach
+  eight, and that of the World to Come ten, עֲלֵי עָשׂוֹר (Tehillim 92:4). Seven
+  strings do not give a chromatic scale. They give one mode at a time, which is
+  what a mode *is* — the ancient instrument and the modal tradition are one fact
+  seen from two sides. The harp in the court is strung to the first eight of the
+  fifteen steps and its eighth is a wonder you have to find; the tenth is not
+  built, because the World to Come is not built.
+  - Ahava Rabbah lands on a tread for all fifteen of its notes — it *is* the
+    steps, in order. The other three do not, and are lit by nearest tread; Mi
+    Sheberach only manages seven of fifteen, because a raised fourth is not
+    among the things this ascent can play.
+  - Unlike every melody in the file these are stated outright rather than read
+    off a score, and that is not a lapse: a scale is not a composition and
+    nobody owns one.
+
+- **שִׁיר שֶׁל יוֹם — what was sung in this court today.** The oldest song here is
+  not a melody anybody has, and it is not in doubt either. Tamid 7:4 names the
+  psalm the Levites sang over the daily offering on each day of the week, and
+  Rosh Hashanah 31a says why each belongs to its day: six of the seven follow
+  the six days of Creation in order, and the seventh does not belong to a day of
+  Creation at all. The לוּחַ now names the one for the day you are standing in,
+  with its opening words and the gemara's reason. The tune is lost; the text and
+  the reason never were, and that is the part nobody has to reconstruct.
+
+- **The ten songs, and where the first one ends.** Three of them are written in
+  the Torah the way nothing else is — אָרִיחַ עַל גַּבֵּי לְבֵנָה, brick over half-brick,
+  the lines set on the page in the shape of something built: the Song of the
+  Sea, the Song of Devorah, Ha'azinu. A song laid out like masonry. And Shirat
+  HaYam ends where the visitor is standing: מְכוֹן לְשִׁבְתְּךָ פָּעַלְתָּ ה', מִקְדָּשׁ ה'
+  כּוֹנְנוּ יָדֶיךָ. They sang it at the water and it was already about this House.
+
+- **עוֹבַדְיָה הַגֵּר — the oldest notation there is, and it is not played here.**
+  The three melodies Obadiah the Proselyte set down in Beneventan neumes — מִי עַל
+  הַר חוֹרֵב, בָּרוּךְ הַגֶּבֶר, וָאֵדַע מַה — are the earliest notated Jewish music known:
+  a Norman convert from Oppido, writing in his own hand in Fustat around 1102,
+  found in the Cairo Geniza (Cambridge T‑S K5.41). They are נֻסַּח אֶרֶץ יִשְׂרָאֵל,
+  the tradition of the Land itself, written a generation after the First Crusade
+  and since largely absorbed by the rites that came in with later olim. The
+  panel now says all of that, and says why they are absent: the neumes carry no
+  staff, so they fix the shape of a phrase and not its pitches — the clef letter
+  ד has been read as D, as F and as C, and the recordings differ from each other
+  accordingly. The standard pitch transcription is Israel Adler's, from 1966,
+  and it is his reading rather than the manuscript's. Every melody here was read
+  note for note off an engraved score and says so. Guessing at these and
+  printing the same word over them is the one thing this panel exists not to do.
+
 ## v3.30 — "From Somewhere, To Somewhere" (0.3.30)
 
 - **The causeway led nowhere, from nowhere.** Its western end stopped thirty-six

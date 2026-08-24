@@ -170,6 +170,77 @@ const NOTE_HZ = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // note is standing on.
 const STEP_MIDI = [50, 51, 54, 55, 57, 58, 60, 62, 63, 66, 67, 69, 70, 72, 74];
 
+// ═══════════ שְׁטַיְגֶ'ר — the modes themselves ═══════════
+//
+// A melody is a thing somebody wrote. A mode is the room it was written in,
+// and the reason the modes belong in this House rather than in a footnote is
+// Arachin 13b: כִּנּוֹר שֶׁל מִקְדָּשׁ שֶׁל שִׁבְעָה נִימִין — the kinor of the Mikdash had
+// seven strings, that of the days of Mashiach eight, and that of the World to
+// Come ten, עֲלֵי עָשׂוֹר (Tehillim 92:4). Seven strings do not give a chromatic
+// scale. They give one mode at a time — which is what a mode is, and it is
+// why the ancient instrument and the modal tradition are one fact seen from
+// two sides. The harp in the court here is strung to the first eight of the
+// fifteen steps and its eighth is a wonder you have to find; the tenth string
+// is not built, because the World to Come is not built.
+//
+// Unlike every melody in this file these are stated outright instead of read
+// off a score, and that is not a lapse: a scale is not a composition and
+// nobody owns one. Each is written on D because the steps are, and played up
+// and back down so the ear catches the interval it is named for.
+const modeScale = (deg) => {
+  const up = deg.map((d) => 50 + d);
+  const out = up.map((m) => [m, 1]);
+  out.push([62, 2]);                                  // the octave, held
+  for (let i = up.length - 1; i >= 1; i--) out.push([up[i], 1]);
+  out.push([up[0], 3]);                               // home, and held longer
+  return out;
+};
+// ═══════════ שִׁיר שֶׁל יוֹם — what was sung over the tamid ═══════════
+//
+// The oldest song in this House is not a melody anybody has, and it is not in
+// doubt either: Tamid 7:4 names the psalm the Levites sang over the daily
+// offering on each day of the week, and Rosh Hashanah 31a says why each one
+// belongs to its day. Six of the seven are about the six days of Creation, in
+// order, and the seventh is not about a day of Creation at all.
+//
+// So the House can tell you what was sung *today*. The tune is gone; the text
+// and the reason are not, and that is the part nobody has to reconstruct.
+const SHIR_YOM = [
+  { ps: 24, he: "לַה' הָאָרֶץ וּמְלוֹאָהּ", en: "The earth is Hashem's, and everything in it",
+    why: "for the first day, on which He acquired and gave possession and was sole ruler in His world." },
+  { ps: 48, he: "גָּדוֹל ה' וּמְהֻלָּל מְאֹד", en: "Great is Hashem and much praised",
+    why: "for the second day, on which He divided His works and reigned over them." },
+  { ps: 82, he: "אֱלֹקִים נִצָּב בַּעֲדַת אֵל", en: "G-d stands in the assembly of judges",
+    why: "for the third day, on which the earth appeared by His wisdom and made a place for the judge and the judged." },
+  { ps: 94, he: "אֵל־נְקָמוֹת ה'", en: "G-d of retribution, Hashem",
+    why: "for the fourth day, on which He made the sun and the moon, and will yet call to account those who serve them." },
+  { ps: 81, he: "הַרְנִינוּ לֵאלֹקִים עוּזֵּנוּ", en: "Sing out to G-d our strength",
+    why: "for the fifth day, on which He made the birds and the fish to praise His name." },
+  { ps: 93, he: "ה' מָלָךְ גֵּאוּת לָבֵשׁ", en: "Hashem reigns, clothed in majesty",
+    why: "for the sixth day, on which He finished His work and ruled over all of it." },
+  { ps: 92, he: "מִזְמוֹר שִׁיר לְיוֹם הַשַּׁבָּת", en: "A psalm, a song, for the day of Shabbat",
+    why: "for the seventh — and not for a day of Creation, but for the day that is entirely Shabbat, the rest of the world to come." },
+];
+
+const MODES = [
+  { id: "mode-ahava", heb: "אַהֲבָה רַבָּה", title: "Ahava Rabbah", bpm: 126,
+    tell: "the augmented second — D, E♭, F♯",
+    note: "The mode of the ba'al tefillah, and the one the fifteen steps are tuned to: this scale is the first eight treads, in order. Its second degree sits a semitone above the tonic and its third a tone and a half above that, and that gap is the sound most people mean when they say a tune sounds Jewish.",
+    deg: [0, 1, 4, 5, 7, 8, 10] },
+  { id: "mode-misheberach", heb: "מִי שֶׁבֵּרַךְ", title: "Mi Sheberach", bpm: 126,
+    tell: "the raised fourth over a minor third",
+    note: "Av HaRachamim — the mode of asking. A minor third says one thing and a raised fourth pulling up to the fifth says another, and holding both at once is what makes a plea sound like a plea rather than a complaint.",
+    deg: [0, 2, 3, 6, 7, 9, 10] },
+  { id: "mode-adoshem", heb: "ה' מָלָךְ", title: "Adonai Malach", bpm: 126,
+    tell: "a major third under a flattened seventh",
+    note: "Kabbalat Shabbat. Major at the bottom of the scale and not at the top, which is exactly why it sounds like a declaration with somewhere still to go.",
+    deg: [0, 2, 4, 5, 7, 8, 10] },
+  { id: "mode-magen", heb: "מָגֵן אָבוֹת", title: "Magen Avot", bpm: 126,
+    tell: "natural minor, and nothing hidden in it",
+    note: "The plainest of the four and the most used, and the one people are surprised to hear called a mode at all. Most of what is sung in a shul on an ordinary Shabbat is in it.",
+    deg: [0, 2, 3, 5, 7, 8, 10] },
+].map((m) => ({ ...m, notes: modeScale(m.deg) }));
+
 const MELODIES = [
   {
     id: "nigun",
@@ -834,6 +905,8 @@ const LEVI_VOICES = [
     { text: "עַל־נַהֲרוֹת בָּבֶל שָׁם יָשַׁבְנוּ גַּם־בָּכִינוּ — by the rivers of Babylon we sat and wept, and hung our lyres on the willows, because they asked us there for the songs of Zion. These are those instruments. They are back.", src: "Tehillim 137:1–3" },
   ] },
   { name: "שיר של יום", role: "The song of the day", lines: [
+    { text: "Ten songs are counted from the beginning of the world to the end of it, and three of them are written in the Torah the way we write nothing else — אָרִיחַ עַל גַּבֵּי לְבֵנָה, brick over half-brick, the lines set out on the page in the shape of something built: the Song of the Sea, the Song of Devorah, and Ha'azinu. A song is laid out like masonry.", src: "Mechilta, Beshalach · Shirata 1 · Megillah 16b · Rambam, Hil. Sefer Torah 8:4" },
+    { text: "And the Song of the Sea ends where you are standing: מְכוֹן לְשִׁבְתְּךָ פָּעַלְתָּ ה', מִקְדָּשׁ ה' כּוֹנְנוּ יָדֶיךָ — the place of Your dwelling, the Sanctuary Your hands established. They sang it at the water and it was already about this House.", src: "Shemot 15:17" },
     { text: "Every day has its psalm, sung over the wine libation, and the trumpets sound between its parts while all Israel bows. Today is not the same song as yesterday.", src: "Tamid 7:3–4" },
     { text: "Sunday, לַה' הָאָרֶץ וּמְלוֹאָהּ. Monday, גָּדוֹל ה' וּמְהֻלָּל מְאֹד. Tuesday, אֱלֹקִים נִצָּב בַּעֲדַת אֵל. Wednesday, אֵל־נְקָמוֹת ה'. Thursday, הַרְנִינוּ לֵאלֹקִים עוּזֵּנוּ. Friday, ה' מָלָךְ גֵּאוּת לָבֵשׁ. And Shabbat, מִזְמוֹר שִׁיר לְיוֹם הַשַּׁבָּת — for the day that is entirely Shabbat.", src: "Tamid 7:4 · Tehillim 24, 48, 82, 94, 81, 93, 92" },
     { text: "The song is sung in three parts, and at each break the trumpets sound and everybody in the court bows. Nobody sings through the bowing and nobody bows through the song.", src: "Tamid 7:3" },
@@ -8300,6 +8373,50 @@ export default function Mikdash() {
               )}
             </div>
           ))}
+
+          {/* ── The modes ── */}
+          <div style={{ borderTop: "2px solid rgba(150,120,50,.36)", marginTop: 15, paddingTop: 13 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 14.5, color: "#4a3a18" }}>שְׁטַיְגֶ'ר · the modes</div>
+            <div style={{ fontSize: 11.5, lineHeight: 1.58, color: "#6d5c30", margin: "6px 0 4px" }}>
+              A melody is a thing somebody wrote; a mode is the room it was written in. Arachin 13b gives the kinor of the Mikdash seven strings, that of the days of Mashiach eight, and that of the World to Come ten — עֲלֵי עָשׂוֹר (Tehillim 92:4). Seven strings do not give a chromatic scale: they give one mode at a time, which is why the ancient instrument and the modal tradition are one fact seen from two sides. Each is written on D, as the steps are, and played up and back so you can hear the interval it is named for.
+            </div>
+            {MODES.map((md) => (
+              <div key={md.id} style={{ borderTop: "1px solid rgba(150,120,50,.18)", padding: "10px 0 11px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <button
+                    onClick={() => {
+                      if (nowPlaying === md.id) { apiRef.current.stopMelody?.(); setNowPlaying(null); setActiveNote(null); setSongBeat(-1); return; }
+                      const ok = apiRef.current.playMelody?.(md, (m, b) => { setActiveNote(m); setSongBeat(b); },
+                        () => { setNowPlaying(null); setActiveNote(null); setSongBeat(-1); });
+                      if (ok) { setNowPlaying(md.id); track("mode", { id: md.id }); }
+                      else showToast("קוֹל — turn the sound on first, and the steps will answer.");
+                    }}
+                    style={{ flex: "0 0 auto", width: 28, height: 28, borderRadius: 999, cursor: "pointer",
+                      background: nowPlaying === md.id ? "#4a3a18" : "rgba(74,58,24,.12)", color: nowPlaying === md.id ? "#f5e9c8" : "#4a3a18",
+                      border: "1px solid rgba(150,120,50,.4)", fontSize: 11, lineHeight: 1 }}
+                    aria-label={nowPlaying === md.id ? "Stop" : "Play " + md.title}>
+                    {nowPlaying === md.id ? "■" : "▶"}
+                  </button>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 13.5 }}>{md.heb} · {md.title}</div>
+                    <div style={{ fontSize: 11, color: "#8a7440", fontStyle: "italic" }}>{md.tell}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: 11.5, lineHeight: 1.52, color: "#5b4c26", marginTop: 6 }}>{md.note}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── And the oldest notation there is, which is not played here ── */}
+          <div style={{ borderTop: "2px solid rgba(150,120,50,.36)", marginTop: 15, paddingTop: 13 }}>
+            <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 700, fontSize: 14.5, color: "#4a3a18" }}>עוֹבַדְיָה הַגֵּר · what is not here</div>
+            <div style={{ fontSize: 11.5, lineHeight: 1.58, color: "#6d5c30", marginTop: 6 }}>
+              The three melodies Obadiah the Proselyte set down in Beneventan neumes — מִי עַל הַר חוֹרֵב, בָּרוּךְ הַגֶּבֶר and וָאֵדַע מַה — are the oldest notated Jewish music known. A Norman convert from Oppido, he wrote them in his own hand in Fustat around 1102, and they surfaced in the Cairo Geniza (Cambridge T‑S K5.41). They are נֻסַּח אֶרֶץ יִשְׂרָאֵל: the tradition of the Land itself, written a generation after the First Crusade, and since largely absorbed by the rites that came in with later olim.
+            </div>
+            <div style={{ fontSize: 11.5, lineHeight: 1.58, color: "#6d5c30", marginTop: 8 }}>
+              They are not played here, and that is a decision rather than an omission. The neumes carry no staff, so they fix the shape of a phrase and not its pitches — the clef letter ד has been read as D, as F and as C, and the recorded performances differ from each other accordingly. The standard pitch transcription is Israel Adler's, from 1966, and it is his reading rather than the manuscript's. Every melody above was read note for note off an engraved score and says so; guessing at these and printing the same word over them is the one thing this panel exists not to do.
+            </div>
+          </div>
         </div>
       )}
 
@@ -8357,6 +8474,22 @@ export default function Mikdash() {
             <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 25, fontWeight: 700, color: "#4a3a18", lineHeight: 1.35 }}>{today.he}</div>
             <div style={{ fontSize: 12.5, color: "#8a7440", fontStyle: "italic", marginTop: 2 }}>{today.greg}</div>
           </div>
+
+          {/* The one thing in this panel that was certainly sung in this court,
+              on this day of the week, over the morning offering. nextShabbat()
+              already fixes the convention: 0 is Sunday, 6 is Shabbat. */}
+          {(() => {
+            const sy = SHIR_YOM[((today.rd % 7) + 7) % 7];
+            return (
+              <div style={{ marginTop: 11, padding: "11px 13px", borderRadius: 12, background: "rgba(255,252,244,.72)", border: "1px solid rgba(150,120,50,.26)" }}>
+                <div style={{ fontSize: 10.5, letterSpacing: ".16em", textTransform: "uppercase", color: "#8a7440" }}>שִׁיר שֶׁל יוֹם · sung over the tamid</div>
+                <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontSize: 17, fontWeight: 700, color: "#4a3a18", marginTop: 4, direction: "rtl" }}>{sy.he}</div>
+                <div style={{ fontSize: 12.5, fontStyle: "italic", color: "#6d5c30", marginTop: 2 }}>{sy.en} — Tehillim {sy.ps}</div>
+                <div style={{ fontSize: 12, lineHeight: 1.55, color: "#5b4c26", marginTop: 6 }}>The Levites sang it {sy.why}</div>
+                <div style={{ fontSize: 10.5, letterSpacing: ".05em", color: "#9a8552", marginTop: 6 }}>תמיד ז׳:ד׳ · ראש השנה ל״א.</div>
+              </div>
+            );
+          })()}
 
           {/* A chag is gold and a season is not. The gold card is for the day
               itself; a month that colours the year gets the same words in a
