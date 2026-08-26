@@ -5790,6 +5790,7 @@ export default function Mikdash() {
       on: true, built: false, buf: null,
       master: null, wind: null, windF: null, fire: null, fireGain: null,
       songBus: null, song: null, songAt: 0, crackAt: 0, camelAt: 0,
+      rainF: null, rain: null, stepBus: null, stepEcho: null,
     };
 
     // Held on the window in the capture phase so nothing on the page can eat
@@ -6253,9 +6254,13 @@ export default function Mikdash() {
       amb.master.gain.value = amb.on ? 1 : 0;
       amb.master.connect(ctx.destination);
 
-      const loop = (dest) => {
+      // The rate argument is for the rain: brown noise is weighted so far
+      // down the spectrum that a highpass over it at speed 1 leaves almost
+      // nothing behind, and a shower is mostly hiss.
+      const loop = (dest, rate = 1) => {
         const s = ctx.createBufferSource();
-        s.buffer = amb.buf; s.loop = true; s.connect(dest); s.start();
+        s.buffer = amb.buf; s.loop = true; s.playbackRate.value = rate;
+        s.connect(dest); s.start();
         return s;
       };
 
@@ -6273,6 +6278,40 @@ export default function Mikdash() {
       fireF.connect(amb.fireGain); amb.fireGain.connect(amb.master);
       loop(fireF);
 
+      // rain: the same buffer heard from underneath. Played fast so its grain
+      // lands where a shower's does, and highpassed so none of the wind's
+      // weight comes with it — the two are one noise and have to be told
+      // apart by their band, exactly as the wind and the hearth already are.
+      amb.rainF = ctx.createBiquadFilter();
+      amb.rainF.type = "highpass"; amb.rainF.frequency.value = 900; amb.rainF.Q.value = 0.7;
+      amb.rain = ctx.createGain(); amb.rain.gain.value = 0;
+      amb.rainF.connect(amb.rain); amb.rain.connect(amb.master);
+      loop(amb.rainF, 3.1);
+
+      // footfalls, and the courts answering them.
+      //
+      // One damped delay at 0.13s was the first try and it measured as two
+      // audible arrivals — a slapback, the sound of a canyon rather than of a
+      // court. Three, at the distances the walls of this azarah actually
+      // stand: 187 by 135 amot (Middot 5:1), so a near wall returns in about
+      // 0.097s, the next in 0.163 and the far one in 0.241, taking half a
+      // metre to the amah and 343 metres a second. Six arrivals instead of
+      // two, off three walls instead of one, and no single echo to count.
+      //
+      // How much of it is heard is set per surface at the moment the foot
+      // lands, so the plain stays dry and the colonnade rings.
+      amb.stepBus = ctx.createGain(); amb.stepBus.gain.value = 1;
+      amb.stepBus.connect(amb.master);
+      amb.stepEcho = ctx.createGain(); amb.stepEcho.gain.value = 0;
+      amb.stepEcho.connect(amb.master);
+      [0.097, 0.163, 0.241].forEach((sec) => {
+        const sdl = ctx.createDelay(1), sfb = ctx.createGain(), sdamp = ctx.createBiquadFilter();
+        sdl.delayTime.value = sec; sfb.gain.value = 0.22;
+        sdamp.type = "lowpass"; sdamp.frequency.value = 2400;
+        sdl.connect(sdamp); sdamp.connect(sfb); sfb.connect(sdl);
+        amb.stepBus.connect(sdl); sdl.connect(amb.stepEcho);
+      });
+
       // song: softened and set back — a short feedback delay reads as the
       // distance of stone courts between the singer and the ear
       amb.songBus = ctx.createBiquadFilter();
@@ -6283,6 +6322,125 @@ export default function Mikdash() {
       dl.connect(fb); fb.connect(dl);
       amb.songBus.connect(amb.song); amb.songBus.connect(dl); dl.connect(amb.song);
       amb.song.connect(amb.master);
+    };
+
+    // ═══════════ Footfalls ═══════════
+    //
+    // Walk mode has been silent since the day it was built. A visitor crosses
+    // ninety amot of polished azarah, climbs the fifteen, and steps off the
+    // paving into the dust of the plain — four surfaces, and all four of them
+    // sound identically like nothing. The floor is the one thing in a
+    // first-person walk that the body expects to be able to hear.
+    //
+    // Built the way the crackle and the camel are: the shared brown-noise
+    // buffer, played fast and squeezed through a resonant band. What tells a
+    // heel on marble from a heel in dust is where that band sits, how fast it
+    // dies, and — this being the part that was got wrong first — how much of
+    // the weight underneath it comes with it. A lowpassed copy is the body
+    // landing, and it seemed obvious that it should be the same on every
+    // floor, being a fact about the walker. It is not: what the ear uses to
+    // tell hard ground from soft is precisely the balance between the ring on
+    // top and the thump beneath, so that balance belongs to the surface. See
+    // the table.
+    //
+    // The shoe and the weight need separate gains, and the first version of
+    // this table did not know that. One gain per surface with the weight taken
+    // as a fixed fraction of it produced the opposite of the intention: marble
+    // carried the largest gain of the five, so it had the loudest *weight* of
+    // the five, and its bright band sat underneath its own thump at a ratio of
+    // 1.6 to 1. Dust, with the smallest gain, came out shoe-forward at 2.3 to
+    // 1. The hardest floor in the House was its dullest sound and the softest
+    // was its brightest, which is exactly backwards and is not something the
+    // eye can catch in a parameter table.
+    //
+    // So the ratio between the two layers *is* the surface. A heel on marble
+    // is nearly all click; a foot in dust is nearly all thump. These gains
+    // were solved rather than guessed: each layer was rendered alone at gain
+    // 1.0 through an OfflineAudioContext — which needs no audio device, so it
+    // can be measured where it cannot be played — and the gains are the ones
+    // that hit a chosen shoe-to-weight ratio, 3:1 on marble down to 0.45:1 in
+    // the dust, at a peak near 0.11 on every surface. No floor is louder than
+    // another; they are only different.
+    //
+    // Averaged over sixteen realisations, and that is not a detail. Brown
+    // noise is a random walk, so what any one render measures is a draw and
+    // not a property — the pass before this one had a step at 1.3x measuring
+    // quieter than the same step at 1.0x, which is how the sampling error
+    // announced itself. The weight layer is the noisiest of the three, a
+    // lowpass at ninety-odd hertz being close to reading the walk itself.
+    //
+    //   band  where the shoe rings      shoe  how much of that there is
+    //   rate  how fine the grain reads  thud  the weight under it
+    //   body  where the weight sits     echo  how much of the courts' return
+    const STEP = {
+      marble: { band: 2500, q: 3.4, decay: 0.075, rate: 3.8, body: 190, shoe: 0.94, thud: 0.17, echo: 0.45 },
+      stoa:   { band: 2200, q: 3.0, decay: 0.085, rate: 3.4, body: 175, shoe: 0.83, thud: 0.21, echo: 0.60 },
+      stone:  { band: 1500, q: 2.2, decay: 0.105, rate: 2.8, body: 150, shoe: 0.53, thud: 0.30, echo: 0.42 },
+      paving: { band: 1150, q: 1.8, decay: 0.115, rate: 2.4, body: 135, shoe: 0.38, thud: 0.40, echo: 0.26 },
+      dust:   { band: 520,  q: 0.9, decay: 0.160, rate: 1.5, body: 95,  shoe: 0.17, thud: 0.72, echo: 0.04 },
+    };
+    // foot is 0 or 1. Two feet are not one sound played twice: the second is
+    // a little off the first in pitch and in weight, and that difference is
+    // most of what tells an ear it is hearing somebody walk and not a loop.
+    const footfall = (kind, foot, run, wet) => {
+      const ctx = audioCtx;
+      if (!ctx || !amb.built || !amb.on) return;
+      const s = STEP[kind] || STEP.dust;
+      const t0 = ctx.currentTime;
+      const skew = foot ? 1.07 : 0.93;
+      // A multiplier now, not a level: the level lives per layer in the table.
+      const lvl = (run ? 1.3 : 1) * (0.88 + Math.random() * 0.24);
+      const dec = s.decay * (run ? 0.82 : 1);
+      amb.stepEcho.gain.setTargetAtTime(s.echo, t0, 0.05);
+
+      const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      src.buffer = amb.buf;
+      src.playbackRate.value = s.rate * skew * (0.94 + Math.random() * 0.12);
+      f.type = "bandpass"; f.frequency.value = s.band * skew; f.Q.value = s.q;
+      g.gain.setValueAtTime(s.shoe * lvl, t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dec);
+      src.connect(f); f.connect(g); g.connect(amb.stepBus);
+      src.start(t0, Math.random() * 5, dec + 0.06); src.stop(t0 + dec + 0.06);
+
+      // The weight, under the shoe. Slow, lowpassed, and over before the ring
+      // of the surface is: a body lands once and the stone rings after it.
+      // Loudest in the dust and quietest on the marble, which is the whole
+      // difference between stepping on something hard and stepping into
+      // something soft.
+      const b = ctx.createBufferSource(), bf = ctx.createBiquadFilter(), bg = ctx.createGain();
+      b.buffer = amb.buf; b.playbackRate.value = 0.9;
+      bf.type = "lowpass"; bf.frequency.value = s.body * skew; bf.Q.value = 1.1;
+      bg.gain.setValueAtTime(s.thud * lvl, t0);
+      bg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.085);
+      b.connect(bf); bf.connect(bg); bg.connect(amb.stepBus);
+      b.start(t0, Math.random() * 5, 0.14); b.stop(t0 + 0.15);
+
+      // Water standing on the stone, and only where the rain reaches it: the
+      // Royal Stoa is the one roof in this precinct, so a step under it stays
+      // dry while the court outside it is spattering.
+      //
+      // A highpass over brown noise looked like it would come out faint and it
+      // came out at six to eight times the step it was garnishing — played at
+      // 8.5x the buffer has plenty above 3600 Hz. Tied to the surface's own
+      // shoe gain at 0.12 of it, which lands the spatter at a little under
+      // half the step on stone and a fifth of it in the dust, where wet ground
+      // is mud and does not spatter much.
+      if (wet) {
+        const w = ctx.createBufferSource(), wf = ctx.createBiquadFilter(), wg = ctx.createGain();
+        w.buffer = amb.buf; w.playbackRate.value = 7.5 + Math.random() * 2;
+        wf.type = "highpass"; wf.frequency.value = 3600;
+        // The water answers a moment after the shoe — and the source has to
+        // wait with it. Scheduling the gain at t0+0.004 while starting the
+        // buffer at t0 leaves four milliseconds where the param is still at
+        // its default of 1.0, and that sliver was the loudest thing in the
+        // step: measured, the wet footfall peaked three and a half times the
+        // dry one instead of a fifth above it.
+        const wt = t0 + 0.004;
+        wg.gain.setValueAtTime(s.shoe * 0.12 * lvl, wt);
+        wg.gain.exponentialRampToValueAtTime(0.0001, wt + 0.056);
+        w.connect(wf); wf.connect(wg); wg.connect(amb.stepBus);
+        w.start(wt, Math.random() * 5, 0.09); w.stop(wt + 0.09);
+      }
     };
 
     // Freygish (Ahava Raba) on D, two octaves — the mode the harp already
@@ -6324,6 +6482,16 @@ export default function Mikdash() {
       const alt = clamp01((p.y - 10) / 240);
       amb.windF.frequency.value = 250 + gust * 400;
       glide(amb.wind, (0.05 + alt * 0.09) * (0.75 + 0.45 * nightAmt) * gust, dt);
+
+      // ── The rain, heard ──
+      // Eleven hundred lines of water have been falling in total silence
+      // since the day they were built. Two things move it. It is louder in a
+      // gust, because a squall is wind and water arriving together and not
+      // one laid over the other. And it drops away under the Royal Stoa —
+      // the only roof in the precinct, and so the only place in it where rain
+      // is a thing you stand and watch rather than a thing you stand in.
+      const sheltered = surfaceAt(p.x, p.z) === "stoa" && p.y < 2.4 + COL_H + 2.2;
+      glide(amb.rain, raining ? 0.085 * (0.72 + 0.5 * gust) * (sheltered ? 0.35 : 1) : 0, dt);
 
       const fireAmt = clamp01(1 - (p.distanceTo(ALTAR_POS) - 24) / 130);
       glide(amb.fireGain, 0.19 * fireAmt, dt);
@@ -6428,6 +6596,22 @@ export default function Mikdash() {
       if (Math.abs(x) < HALF + 38 && Math.abs(z) < HALF + 38) return 0;
       return LAND_Y;
     };
+    // What the foot is standing on. The same tests groundHeight() makes and
+    // in the same order, asked for the material instead of the height —
+    // deliberately a copy rather than one pass returning both, because the
+    // height is read every frame for the camera and the surface only on the
+    // frames a foot actually lands. Change one and change the other: a walker
+    // who hears marble while standing on the ramp is the bug this shape has.
+    const surfaceAt = (x, z) => {
+      if (z > -35 && z < 35 && x > IC_E && x < IC_E + 40) return "stone";      // the eastern steps
+      if (z > -8 && z < 8 && x > AX + 16 && x < AX + 48) return "stone";       // the kevesh
+      if (x > -190 && x < IC_E && z > -IC / 2 && z < IC / 2) return "marble";  // the azarah
+      if (x > -76 && x < 76 && z > HALF + 36 && z < HALF + 82) return "stone";
+      if (z > -56 && z < 56 && x > HALF + 36 && x < HALF + 82) return "stone";
+      if (Math.abs(x) < STOA_L / 2 && z > HALF - 58 - STOA_W / 2 && z < HALF - 58 + STOA_W / 2) return "stoa";
+      if (Math.abs(x) < HALF + 38 && Math.abs(z) < HALF + 38) return "paving";
+      return "dust";
+    };
     const resolveCollisions = (pos) => {
       const R = 1.4;
       for (const c2 of colliders) {
@@ -6502,6 +6686,7 @@ export default function Mikdash() {
       keys: {},
       touchLook: null, touchMove: null,
       moveVec: { f: 0, s: 0 },
+      stride: 0,   // footfalls since the visit began; its fraction is the bob
     };
     const EYE = 3.4;
     // On-screen navigation. Held buttons set a flag and the render loop moves
@@ -7346,10 +7531,14 @@ export default function Mikdash() {
         f += nav.u - nav.d;                       // the on-screen arrows walk
         player.yaw += (nav.r - nav.l) * dt * 1.9; // and turn
         const mag = Math.hypot(f, s);
+        const run = !!(k.ShiftLeft || k.ShiftRight);
+        let moved = 0, strode = false;
         if (mag > 0.01) {
-          const speed = (k.ShiftLeft || k.ShiftRight ? 42 : 22) * dt / Math.max(1, mag);
+          const pace = run ? 42 : 22;
+          const speed = pace * dt / Math.max(1, mag);
           const fwd = new THREE.Vector3(Math.cos(player.yaw), 0, Math.sin(player.yaw));
           const right = new THREE.Vector3(-Math.sin(player.yaw), 0, Math.cos(player.yaw));
+          const px = player.pos.x, pz = player.pos.z;
           const next = player.pos.clone()
             .addScaledVector(fwd, f * speed)
             .addScaledVector(right, s * speed);
@@ -7359,11 +7548,38 @@ export default function Mikdash() {
             player.pos.x = next.x; player.pos.z = next.z;
           }
           resolveCollisions(player.pos);
+          moved = Math.hypot(player.pos.x - px, player.pos.z - pz);
+          // ── the gait ──
+          //
+          // Cadence goes as the square root of speed and not with it: a
+          // swinging leg is a pendulum, a pendulum's rate is set by its
+          // length, and so running is mostly a longer stride and only a
+          // little more of them. Clocked straight off the speed instead, a
+          // run comes out as a sewing machine — which is the usual reason
+          // footsteps in a walk mode sound wrong without anybody being able
+          // to say what is wrong with them.
+          //
+          // The bob is the same number and not a second one. The head is at
+          // its lowest as the foot lands, so one phase drives the sound and
+          // the camera together; a step heard anywhere else on the bob reads
+          // as audio dubbed over a walk rather than as somebody walking.
+          //
+          // And only when the ground actually went past underneath. Pressed
+          // into a wall a visitor is holding W, which is not the same thing.
+          if (moved > speed * 0.2) {
+            strode = true;
+            const was = player.stride;
+            player.stride += dt * 0.43 * Math.sqrt(pace);
+            if (Math.floor(player.stride) !== Math.floor(was)) {
+              const kind = surfaceAt(player.pos.x, player.pos.z);
+              footfall(kind, Math.floor(player.stride) & 1, run, raining && kind !== "stoa");
+            }
+          }
         }
         const gy = groundHeight(player.pos.x, player.pos.z) + EYE;
         player.pos.y += (gy - player.pos.y) * Math.min(1, dt * 10);
-        // gentle head-bob while moving
-        if (mag > 0.01) player.pos.y += Math.sin(t * 9) * 0.08;
+        // The head drops as each foot lands — the phase that sounded it.
+        if (strode) player.pos.y -= Math.cos(player.stride * Math.PI * 2) * 0.08;
       } else {
         // orbit mode: the same arrows swing and tilt, and the keyboard joins in
         const k = player.keys;

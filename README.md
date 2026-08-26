@@ -51,7 +51,7 @@ computed on the visitor's machine at load. The entire experience ships as one
 | **Runtime dependencies** | 3 — `react`, `react-dom`, `three`. That's the whole list. |
 | **Source** | 5,003 lines in one component, [`src/Mikdash.jsx`](src/Mikdash.jsx) |
 | **Art assets shipped** | **0** — 14 canvas texture generators, 14 derived normal maps, 10 derived roughness maps, 2 GLSL shaders |
-| **Audio files shipped** | **0** — 6 synthesized instruments, a 3-layer ambient bed, and 4 melodies as note data |
+| **Audio files shipped** | **0** — 6 synthesized instruments, a 4-layer ambient bed, 5 surfaces of footstep, and 4 melodies as note data |
 | **Bundle** | 810 KB raw / **229 KB gzipped**, single chunk, no CSS file |
 | **Findable content** | 36 sourced teachings across 40 cited primary sources |
 | **Planting** | 7 tree species, 108 in the grove + 18 on the river banks, none inside the courts (Devarim 16:21) |

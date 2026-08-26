@@ -1,5 +1,97 @@
 # Changelog
 
+## v3.35 — "The Floor Says Which Floor It Is" (0.3.35)
+
+- **Footsteps.** A visitor in walk mode crossed ninety amot of polished azarah,
+  climbed the fifteen, and stepped off the paving into the dust of the plain,
+  and all four surfaces sounded identically like nothing. The floor is the one
+  thing in a first-person walk that the body expects to be able to hear, and it
+  was the last silent thing in a House where the fire crackles, the camels
+  grumble and the wind follows the trees.
+  - Five surfaces, told apart by band and by decay rather than by five
+    different recordings — there are no recordings here. It is the same
+    brown-noise buffer the crackle and the camel are built from, played fast
+    and squeezed through a resonant band: bright, tight and short on the
+    azarah's marble; lower and longer on the monumental stairs and the kevesh;
+    duller again on the plaza flagstone; wide, soft and slow in the dust
+    outside the walls.
+  - **The floors came out in the wrong order, and it took measuring to see
+    it.** Under the first version of the table the ring on top and the thump
+    underneath shared one gain per surface — the weight being a fact about the
+    walker rather than about the ground. Marble carried the largest gain, and
+    so it carried the loudest *thump*, and its bright band sat underneath its
+    own weight at 1.6 to 1; dust, with the smallest gain, came out
+    click-forward at 2.3 to 1. The hardest floor in the House was its dullest
+    sound and the softest was its brightest. Nothing about a table of numbers
+    shows that, and nobody was going to hear it and know why.
+  - So the two layers have their own gains now, and the ratio between them
+    *is* the surface: three to one on the marble, down to 0.45 to one in the
+    dust. The numbers were solved and not chosen — each layer rendered alone
+    at unity through an `OfflineAudioContext`, which needs no audio device and
+    so can be measured in a place where it cannot be played, then the gains
+    set to hit the intended ratio at a peak near 0.10 on every surface. What
+    it measures now: peaks between 0.093 and 0.110 across all five, so no
+    floor is louder than another, and a brightness that falls monotonically
+    from 1381 Hz on marble through 997 on the stairs and 689 on the paving to
+    308 in the dust.
+  - **Averaged over sixteen renders, and that turned out to matter.** Brown
+    noise is a random walk, so any single render measures a draw and not a
+    property. The pass before the averaging had a step at 1.3× measuring
+    *quieter* than the same step at 1.0×, which is how the sampling error
+    announced itself; every conclusion from that pass had to be thrown away
+    and taken again.
+  - **And the courts answer — off three walls, not one.** A single damped
+    delay at 0.13s was the first try and it measured as two audible arrivals:
+    a slapback, which is the sound of a canyon and not of a court. It is three
+    now, at the distances the walls of this azarah actually stand — 187 by 135
+    amot (Middot 5:1), so a near wall returns in about 0.097s, the next in
+    0.163 and the far one in 0.241, taking half a metre to the amah and 343
+    metres a second. Six arrivals off three walls, a tail just under a second,
+    and no single echo left for the ear to count.
+  - How much of that return is heard is a property of where you are standing:
+    strongest under the Royal Stoa's roof, plainly in the azarah, faintly on
+    the plaza, and at four percent out on the plain — where there is nothing
+    for a footstep to come back off, and where hearing the same slap would
+    have made the whole precinct sound like a room.
+  - **`surfaceAt()` is `groundHeight()` asked a different question.** The same
+    ordered tests in the same order, returning the material instead of the
+    height. Kept as a second copy on purpose: the height is read every frame
+    for the camera, the surface only on the frames a foot lands. The risk of
+    two copies is that they disagree, so they were checked against each other
+    over 314,721 points of the precinct at one-and-a-half-amah spacing — every
+    surface the walker can reach, and no disagreement.
+  - **The gait, and why the bob is the same number.** Cadence goes as the
+    square root of speed and not with it: a swinging leg is a pendulum, a
+    pendulum's rate is set by its length, and running is therefore mostly a
+    longer stride and only a little more of them. Two steps a second at a
+    walk, two and eight at a run. Clocked straight off the speed instead —
+    which is the usual way it is done — a run comes out as a sewing machine.
+    And the head-bob, which used to be its own sine on the clock, is now the
+    fractional part of that same stride: the head is at its lowest exactly as
+    the foot lands, because a step heard anywhere else on the bob reads as
+    audio dubbed over a walk. A visitor pressed into a wall stops making both,
+    since holding W against stone is not walking.
+
+- **The rain, heard.** Eleven hundred lines of water have been falling in
+  total silence since v3.33 built them. It is the same noise buffer again,
+  played fast and highpassed — wind, hearth and shower are one spectrum here
+  and are told apart only by their band. Louder in a gust, because a squall is
+  wind and water arriving together rather than one laid over the other.
+  - **And it drops away under the Royal Stoa**, which is the only roof in this
+    precinct and therefore the only place in it where rain is a thing you
+    stand and watch instead of a thing you stand in. A step taken under that
+    roof stays dry, too: the wet spatter on a footfall is decided by whether
+    the sky can actually reach the stone being stood on.
+  - **The spatter was the loudest thing in the House for four milliseconds.**
+    Its envelope was scheduled at `t0 + 0.004` — the water answering a moment
+    after the shoe — while its source started at `t0`. An `AudioParam` holds
+    its default until the first scheduled point, and the default is 1.0, so
+    those four milliseconds played at full scale: a wet footfall measured
+    three and a half times the peak of a dry one instead of sitting a third
+    under it. The source waits with the envelope now. It is invisible in a
+    diff, inaudible as an intention, and obvious the moment anything renders
+    the graph and looks at the numbers.
+
 ## v3.34 — "Nobody Could Get In" (0.3.34)
 
 - **The House has been a blank page since v3.32, and nothing said so.** The

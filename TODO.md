@@ -141,8 +141,16 @@ preferences.
       built the way the fire crackle is — the shared brown-noise buffer through
       a low resonant bandpass — with the pitch fall of an animal running out of
       breath. Rarely enough that hearing one twice in a minute is bad luck.
-- [ ] **Footsteps in walk mode.** Different on marble, on paving, on dust — the
-      surface is already known from `groundHeight()`.
+- [x] **Footsteps in walk mode.** Five surfaces — azarah marble, the stoa's
+      roofed paving, the stairs and the kevesh, the plaza flagstone, the dust
+      outside — told apart by band and decay off the shared noise buffer, with
+      a per-surface tail of the courts' own return. `surfaceAt()` is
+      `groundHeight()`'s test list asked for the material instead of the
+      height, and the two were checked against each other over 314,721 points
+      of the precinct rather than trusted to stay in step.
+- [x] **The rain can be heard**, and it goes quiet under the Royal Stoa's roof,
+      which is the only one here. Wet footfalls anywhere the sky reaches the
+      stone; dry ones under that roof.
 - [x] **Wind bed follows the trees.** `gustAt()` is the JS twin of the shader's
       two sines, sampled at the camera and rectified for the ear.
 - [x] **Distance-attenuate the fifteen steps.** Inverse-square in the tail,
