@@ -155,6 +155,13 @@ preferences.
 - [ ] **`harp-test.html`, `elev.mjs`, `steps-elevation.svg`** are committed dev
       scratch. Decide: delete, or move under a `tools/` directory and gitignore
       the output.
+- [ ] **A test that the House opens.** v3.34 was a blank page for two versions
+      — a TDZ read in a dependency array, legal JavaScript that throws, so the
+      build stayed green and the deploy succeeded on a screen with nothing on
+      it. One headless mount asserting a single `<canvas>` exists, in the same
+      Action that deploys, is the cheapest test in this repo and the only one
+      that would have caught it. Every other check here guards a claim about
+      the Mikdash; none of them guards the front door.
 - [ ] **A debug-camera guard.** A harp inspection rig shipped as the opening
       shot in `ff3a997` and reached production. `orbit` now spreads from `HOME`
       so they cannot diverge, but a cheap assertion — opening radius must exceed

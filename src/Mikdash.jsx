@@ -7820,24 +7820,6 @@ export default function Mikdash() {
     };
   }, [showToast]);
   useEffect(() => { apiRef.current.setNight?.(night); }, [night]);
-  // ── The man on the southwest corner ──
-  //
-  // Six blasts, and only on a Friday, and only as the light goes: Shabbat 35b
-  // (see shabbatBlasts). Once a visit — the stone can still be clicked for its
-  // own fanfare, so hearing it again is a thing you can choose rather than a
-  // thing that happens at you every time the night button is pressed.
-  //
-  // The flag is set only when the blasts actually sounded. With the sound off
-  // there is no trumpeter and nothing is spent, so it waits for a Friday dusk
-  // that somebody can hear.
-  const blewShabbat = useRef(false);
-  useEffect(() => {
-    if (!night || blewShabbat.current) return;
-    if (((today.rd % 7) + 7) % 7 !== 5) return;      // nextShabbat() fixes it: 5 is Friday
-    if (!apiRef.current.shabbatBlasts?.()) return;
-    blewShabbat.current = true;
-    showToast("לְבֵית הַתְּקִיעָה — six blasts off the southwest corner: the first to stop the people in the fields, the second to shut the city and the shops, the third to light the lamp. Then tekiah, teruah, tekiah, and he rests (שבת ל״ה:).");
-  }, [night, today.rd, showToast]);
   // Skip the mount call when sound is already on: building the bed here would
   // generate the noise buffer during first paint and open an AudioContext the
   // browser then refuses to start. The first gesture builds it instead.
@@ -7912,6 +7894,31 @@ export default function Mikdash() {
       },
     };
   }, [israel]);
+
+  // ── The man on the southwest corner ──
+  //
+  // Below `today`, and it has to be. A dependency array is evaluated during
+  // render, not when the effect runs, so this hook reading `today.rd` from
+  // above the const that defines it threw a TDZ ReferenceError out of the
+  // render itself — which took the whole House down with it, every visit,
+  // for two versions. Do not move it back up beside the other effects.
+  //
+  // Six blasts, and only on a Friday, and only as the light goes: Shabbat 35b
+  // (see shabbatBlasts). Once a visit — the stone can still be clicked for its
+  // own fanfare, so hearing it again is a thing you can choose rather than a
+  // thing that happens at you every time the night button is pressed.
+  //
+  // The flag is set only when the blasts actually sounded. With the sound off
+  // there is no trumpeter and nothing is spent, so it waits for a Friday dusk
+  // that somebody can hear.
+  const blewShabbat = useRef(false);
+  useEffect(() => {
+    if (!night || blewShabbat.current) return;
+    if (((today.rd % 7) + 7) % 7 !== 5) return;      // nextShabbat() fixes it: 5 is Friday
+    if (!apiRef.current.shabbatBlasts?.()) return;
+    blewShabbat.current = true;
+    showToast("לְבֵית הַתְּקִיעָה — six blasts off the southwest corner: the first to stop the people in the fields, the second to shut the city and the shops, the third to light the lamp. Then tekiah, teruah, tekiah, and he rests (שבת ל״ה:).");
+  }, [night, today.rd, showToast]);
 
   // A Hebrew birthday in a given year. Three things go wrong and each has an
   // answer, and all three of them need to know whether the year of birth was

@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.34 — "Nobody Could Get In" (0.3.34)
+
+- **The House has been a blank page since v3.32, and nothing said so.** The
+  לְבֵית הַתְּקִיעָה blasts came with an effect that reads `today.rd`, and it was
+  written beside the other effects — some fifty lines above the
+  `const today = useMemo(…)` that defines it. **A dependency array is
+  evaluated during render, not when the effect runs.** So every mount reached
+  a `const` still in its temporal dead zone, threw
+  `ReferenceError: Cannot access 'today' before initialization` out of the
+  render itself, and React unmounted the tree: no canvas, no card, no toast,
+  an empty `#root` and a white screen. Two versions, and every visit in them.
+  - Moved below the memo, with a comment saying why it stands there and not to
+    move it back. That is the whole fix; it is one hook in the wrong place.
+  - **What actually failed is that nothing checks that the House opens.**
+    Vite compiles a TDZ read without a word — it is legal JavaScript that
+    happens to throw — the build is green, the bundle is the usual size, and
+    the deploy succeeds. This House has an audit of its own halacha and a
+    hundred-year check on its calendar, and no test that the front door works.
+    A headless mount that asserts one `<canvas>` exists would have caught it
+    in the second it was written, and it is on the list now.
+
 ## v3.33 — "The Rains Never Put It Out" (0.3.33)
 
 - **גֶּשֶׁם.** This House said three separate things about rain and it had never
